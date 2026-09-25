@@ -1,0 +1,41 @@
+:root {
+  /* Color Palette - Dark Futuristic Aesthetic */
+  --bg-deep: #050505;
+  --bg-surface: #0a0a0c;
+  --bg-card: #0c0c0e;
+  --bg-card-hover: #141417;
+  --bg-elevated: #1a1a1f;
+
+  /* Accents */
+  --accent-cyan: #67e8f9;
+  --accent-cyan-dim: rgba(103, 232, 249, 0.15);
+  --accent-cyan-glow: rgba(103, 232, 249, 0.35);
+  --accent-purple: #a78bfa;
+  --accent-purple-dim: rgba(167, 139, 250, 0.15);
+  --accent-purple-glow: rgba(167, 139, 250, 0.35);
+  --accent-lime: #d8f56a;
+  --accent-lime-dim: rgba(216, 245, 106, 0.15);
+
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #050505;
+
+  /* Borders & Lines */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.16);
+  --border-focus: rgba(103, 232, 249, 0.5);
+
+  /* Layout & Spacing */
+  --max-width: 1240px;
+  --section-padding-y: 120px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
