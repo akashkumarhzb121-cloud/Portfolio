@@ -142,7 +142,7 @@ export default function SystemOverview() {
             </p>
           </div>
           <div className="hidden md:block text-right font-mono text-[10px] text-gray-500">
-            <div>LOC: HAZARIBAGH, IN</div>
+            <div>LOC: JAIPUR, IN</div>
             <div>UPTIME: 99.9%</div>
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function SystemOverview() {
 
               <div className="mt-6 pt-6 border-t border-white/5 flex gap-4 font-mono text-xs text-gray-500">
                 <div>&gt; EXP_LEVEL: PRODUCTION READY</div>
-                <div>&gt; PROJECT_COUNT: 15+</div>
+                <div>&gt; PROJECT_COUNT: 10+</div>
               </div>
             </div>
           </TerminalCard>
@@ -315,7 +315,7 @@ export default function SystemOverview() {
                 target="_blank"
                 rel="noopener noreferrer"
                 download="AKASH_KUMAR_RESUME.pdf"
-                className="flex-1 bg-white text-black h-12 flex items-center justify-center font-bold font-mono text-xs uppercase hover:bg-blue-500 hover:text-white transition-colors cursor-pointer"
+                className="flex-1 bg-white !text-black h-12 flex items-center justify-center font-bold font-mono text-xs uppercase hover:bg-blue-500 hover:text-white transition-colors cursor-pointer"
               >
                 Init_Download [CV]
               </a>

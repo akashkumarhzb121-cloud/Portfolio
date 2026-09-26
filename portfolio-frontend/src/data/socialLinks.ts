@@ -3,32 +3,32 @@ import type { SocialLink } from "@/types/portfolio";
 export const socialLinks: SocialLink[] = [
   {
     label: "GitHub",
-    href: "https://github.com/akashkumar",
+    href: "https://github.com/akashkumarhzb121-cloud",
     iconName: "github",
-    username: "@akashkumar"
+    username: "@akashkumarhzb121-cloud"
   },
   {
     label: "LinkedIn",
-    href: "https://linkedin.com/in/akashkumar",
+    href: "https://www.linkedin.com/in/akash-kumar-488074309",
     iconName: "linkedin",
-    username: "in/akashkumar"
+    username: "@akash-kumar-488074309"
   },
   {
     label: "Instagram",
-    href: "https://instagram.com/akashkumar",
+    href: "https://www.instagram.com/iam.akash.sharma",
     iconName: "instagram",
-    username: "@akashkumar"
+    username: "@iam.akash.sharma"
   },
   {
     label: "X (Twitter)",
-    href: "https://x.com/akashkumar",
+    href: "https://x.com/_akash_121_",
     iconName: "twitter",
-    username: "@akashkumar"
+    username: "@_akash_121_"
   },
   {
     label: "Direct Email",
-    href: "mailto:akash@example.com",
+    href: "mailto:akashkumarhzb121@gmail.com",
     iconName: "mail",
-    username: "akash@example.com"
+    username: "akashkumarhzb121@gmail.com"
   }
 ];

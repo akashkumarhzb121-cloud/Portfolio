@@ -197,7 +197,7 @@ export default function Contact() {
                   <input
                     id="contact-name"
                     type="text"
-                    placeholder="e.g. Alex Morgan"
+                    placeholder="e.g. Akash Kumar"
                     {...register('name')}
                     className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-slate-500 transition-all focus:outline-none shadow-sm ${
                       errors.name ? 'border-rose-500 focus:border-rose-400' : 'border-white/[0.12] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40'
@@ -216,7 +216,7 @@ export default function Contact() {
                   <input
                     id="contact-email"
                     type="email"
-                    placeholder="alex@company.com"
+                    placeholder="akash@company.com"
                     {...register('email')}
                     className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-slate-500 transition-all focus:outline-none shadow-sm ${
                       errors.email ? 'border-rose-500 focus:border-rose-400' : 'border-white/[0.12] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40'
@@ -245,6 +245,7 @@ export default function Contact() {
                   <option value="3D Interactive Experiences">3D Interactive UI (WebGL / Three.js / Canvas)</option>
                   <option value="Database Design & Cloud Deployment">Database Design & Cloud Deployments (MongoDB Atlas / SQL / Vercel / Render)</option>
                   <option value="Full Project Collaboration">Full Project Collaboration / Consulting</option>
+                  <option value="Full Project Collaboration">Other</option>
                 </select>
                 {errors.service && (
                   <p className="mt-1.5 text-xs text-rose-400">{errors.service.message}</p>
@@ -300,7 +301,7 @@ export default function Contact() {
       {/* Bending Marquee in Contact Section */}
       <div className="mt-16">
         <BendingMarquee
-          text="FULL-STACK EXCELLENCE · OPEN FOR CONTRACTS & COLLABORATION · SAY HELLO"
+          text=" React · TypeScript · Node.js · MongoDB · Express.js · Three.js · GSAP "
           color="#67e8f9"
           speed={1.8}
         />

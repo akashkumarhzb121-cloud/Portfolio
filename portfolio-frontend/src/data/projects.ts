@@ -2,75 +2,75 @@ import type { Project } from "@/types/portfolio";
 
 export const projects: Project[] = [
   {
-    id: "immersive-studio",
+    id: "rapidcare",
     number: "01",
-    title: "Immersive Product Studio",
-    description: "An editorial, motion-led product storytelling platform built with real-time 3D viewport controls, smooth kinetic typography, and accessible micro-interactions. Features WebGL shader pipeline, interactive 360° model inspection, and custom GSAP scrubbed scroll transitions engineered for sub-60fps rendering.",
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
+    title: "RapidCare",
+    description: "An AI-powered healthcare platform designed to improve rural care continuity through intelligent triage, referral tracking, teleconsultation and emergency escalation.",
+    image: "/images/projects/RapidCare.png",
     fallbackGradient: "linear-gradient(135deg, #09203f 0%, #537895 100%)",
-    technologies: ["React", "TypeScript", "Three.js", "GSAP", "Tailwind CSS", "WebGL", "Figma"],
+    technologies: ["React", "Node.js", "Express.js", "MongoDB", "Socket.IO", "Groq AI", "JWT", "Tailwind CSS"],
     highlights: [
-      "Real-time 60fps WebGL canvas viewport controls",
-      "Dynamic GSAP timeline orchestration and kinetic text",
-      "Adaptive device responsive 3D model streaming"
+      "AI-driven triage & intelligent care-level routing",
+      "Real-time ambulance dispatch with bed reservation",
+      "Multilingual, voice-enabled & offline-first workflows"
     ],
-    liveUrl: "https://github.com/akashkumar",
-    githubUrl: "https://github.com/akashkumar",
-    category: "Creative 3D & Frontend Architecture",
+    liveUrl: "https://rapidcare108.vercel.app",
+    githubUrl: "https://github.com/akashkumarhzb121-cloud/rapidcare",
+    category: "HEALTHTECH · AI-POWERED CARE CONTINUITY",
     featured: true
   },
   {
-    id: "analytics-dashboard",
+    id: "modplint-interiors",
     number: "02",
-    title: "Analytics Dashboard",
-    description: "A high-density financial analytics suite delivering sub-second updates, customizable data visualizations, intuitive keyboard shortcuts, and strict accessibility compliance. Engineered with virtualized table grids handling 100k+ data points, dynamic filter presets, and automated export pipelines.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+    title: "Modplint Interiors",
+    description: "A production digital platform for a real interior-design business, combining portfolio presentation, service discovery and client consultation workflows.",
+    image: "/images/projects/Modplint Interiors.png",
     fallbackGradient: "linear-gradient(135deg, #141e30 0%, #243b55 100%)",
-    technologies: ["React", "TypeScript", "Tailwind CSS", "Data Viz", "Zod", "REST APIs", "Node.js"],
+    technologies: ["React", "Node.js", "Express.js", "MongoDB", "JWT", "Cloudinary", "REST APIs"],
     highlights: [
-      "Sub-second streaming chart updates and metrics",
-      "Virtualized data tables supporting 100,000+ rows",
-      "Accessible keyboard shortcuts & WCAG 2.1 AA audit"
+      "Portfolio, services, testimonials & consultation booking",
+      "REST APIs with MongoDB Atlas & JWT authentication",
+      "Cloudinary image management & production deployment"
     ],
-    liveUrl: "https://github.com/akashkumar",
-    githubUrl: "https://github.com/akashkumar",
-    category: "Enterprise FinTech Platform",
+    liveUrl: "https://modplint.vercel.app",
+    githubUrl: "https://github.com/akashkumarhzb121-cloud/modplint-frontend",
+    category: "REAL-WORLD · INTERIOR DESIGN PLATFORM",
     featured: true
   },
   {
-    id: "creative-commerce",
+    id: "student-management-system",
     number: "03",
-    title: "Creative Commerce",
-    description: "A luxury architectural commerce storefront fusing editorial visual pacing with instant client-side transitions, headless cart state, and smooth scroll choreography. Built with optimized responsive media delivery, reactive checkout flows, and sub-100ms page transitions across catalog views.",
-    image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80",
+    title: "Student Management System",
+    description: "A full-stack college ERP platform designed to centralize academic and administrative workflows for Admin, Faculty, and Students with secure role-based access.",
+    image: "/images/projects/Student Management System.png",
     fallbackGradient: "linear-gradient(135deg, #2b1055 0%, #7597de 100%)",
-    technologies: ["React", "Motion", "Tailwind CSS", "Figma", "Shadcn/UI", "TypeScript", "State Mgmt"],
+    technologies: ["React", "Node.js", "Express.js", "MongoDB", "JWT", "REST APIs"],
     highlights: [
-      "Headless cart architecture with persistent local cache",
-      "Editorial scroll choreography and fluid transitions",
-      "Sub-100ms instant catalog navigation and checkout flow"
+      "Role-based dashboards for Admin, Faculty & Students",
+      "Attendance, fees, assignments, examinations & leave workflows",
+      "JWT authentication, REST APIs & MongoDB"
     ],
-    liveUrl: "https://github.com/akashkumar",
-    githubUrl: "https://github.com/akashkumar",
-    category: "E-Commerce Experience",
+    liveUrl: "https://collegesms.vercel.app",
+    githubUrl: "https://github.com/akashkumarhzb121-cloud/student-management-system-client",
+    category: "COLLEGE ERP · FULL-STACK APPLICATION",
     featured: true
   },
   {
-    id: "cloud-collaboration-engine",
+    id: "mern-docs",
     number: "04",
-    title: "Full-Stack Cloud Workspace",
-    description: "A secure, multi-tenant collaboration engine featuring real-time presence synchronization, RBAC permission tiers, JWT authentication, and high-throughput MongoDB cluster aggregation pipelines. Implements resilient Node.js / Express REST API architecture with production Docker deployments.",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+    title: "MERN Docs",
+    description: "A developer-focused documentation platform covering the MERN ecosystem, backend engineering, security, deployment and advanced development concepts.",
+    image: "/images/projects/MERN Docs.png",
     fallbackGradient: "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)",
-    technologies: ["Node.js", "Express.js", "MongoDB", "JWT & RBAC", "React", "REST APIs", "Mongoose"],
+    technologies: ["React", "Node.js", "Express.js", "MongoDB", "JavaScript", "REST APIs"],
     highlights: [
-      "Role-Based Access Control (RBAC) with JWT session cookies",
-      "MongoDB Atlas aggregation pipelines for analytics",
-      "RESTful API design with thorough validation and error handling"
+      "150+ technical topics with structured examples",
+      "Documentation architecture built for learning & revision",
+      "100+ organic users without paid promotion"
     ],
-    liveUrl: "https://github.com/akashkumar",
-    githubUrl: "https://github.com/akashkumar",
-    category: "Full-Stack Cloud Architecture",
+    liveUrl: "https://mernstacknotes.vercel.app",
+    githubUrl: "https://github.com/akashkumarhzb121-cloud/MERN-Developer-Handbook",
+    category: "PRODUCT · DEVELOPER DOCUMENTATION",
     featured: true
   }
 ];

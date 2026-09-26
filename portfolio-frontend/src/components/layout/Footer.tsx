@@ -69,7 +69,7 @@ export default function Footer() {
           {/* AK Brand Monogram */}
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-400 to-purple-500 p-0.5 shadow-md mb-6">
             <div className="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center font-extrabold text-2xl text-cyan-400">
-              AK<span className="text-purple-400">.</span>
+              AK<span className="text-purple-400"></span>
             </div>
           </div>
 

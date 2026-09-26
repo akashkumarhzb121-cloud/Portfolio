@@ -66,12 +66,42 @@ export default function Projects() {
 
                     {/* Corner Project Index */}
                     <div className="absolute top-6 left-6 font-mono text-xs sm:text-sm font-bold px-3 py-1.5 rounded-lg bg-[#050505]/85 backdrop-blur-md border border-white/10 text-cyan-400 shadow-md">
-                      CASE {project.number}
+                      PEOJECT {project.number}
+                    </div>
+                    {/* Bottom Action Links & Index on the Left Image Area */}
+                    <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 flex items-center justify-between z-20">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-xs sm:text-sm font-bold tracking-wide transition-all shadow-[0_0_20px_rgba(103,232,249,0.4)] hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+                          aria-label={`View live demo of ${project.title}`}
+                        >
+                          <span>Live Demo</span>
+                          <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </a>
+
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#08080a]/90 hover:bg-white/[0.15] border border-white/20 text-slate-200 hover:text-white text-xs sm:text-sm font-semibold tracking-wide transition-all backdrop-blur-md cursor-pointer hover:scale-105 active:scale-95"
+                          aria-label={`View GitHub source code of ${project.title}`}
+                        >
+                          <Code2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <span>Source</span>
+                        </a>
+                      </div>
+
+                      <span className="font-mono text-xs sm:text-sm font-bold text-cyan-400/90 bg-[#050505]/85 px-2.5 py-1 rounded-md border border-white/10 backdrop-blur-md">
+                        {project.number}
+                      </span>
                     </div>
                   </div>
 
                   {/* Content & Metadata */}
-                  <div className="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
+                  <div className="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-mono text-xs uppercase tracking-wider text-cyan-400 font-semibold">
@@ -110,37 +140,6 @@ export default function Projects() {
                           </span>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Action Links */}
-                    <div className="mt-8 pt-6 border-t border-white/[0.08] flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <a
-                          href={project.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-xs font-bold tracking-wide transition-all shadow-[0_0_15px_rgba(103,232,249,0.3)] hover:scale-105"
-                          aria-label={`View live demo of ${project.title}`}
-                        >
-                          <span>Live Demo</span>
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </a>
-
-                        <a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-slate-300 hover:text-white text-xs font-semibold tracking-wide transition-all"
-                          aria-label={`View GitHub source code of ${project.title}`}
-                        >
-                          <Code2 className="w-3.5 h-3.5" />
-                          <span>Source</span>
-                        </a>
-                      </div>
-
-                      <span className="font-mono text-xs text-slate-500 font-bold">
-                        #{project.number}
-                      </span>
                     </div>
                   </div>
                 </div>

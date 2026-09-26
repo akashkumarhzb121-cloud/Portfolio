@@ -86,7 +86,7 @@ export default function Lanyard({
               Akash Kumar
             </h3>
             <p className="text-xs font-mono text-cyan-300 mt-1 uppercase tracking-wider">
-              Creative Frontend Developer
+              A Software Engineer & Developer
             </p>
             <div className="flex items-center gap-1.5 mt-3 text-[11px] text-slate-400">
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />

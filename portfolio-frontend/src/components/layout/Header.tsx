@@ -74,7 +74,7 @@ export default function Header() {
           aria-label="Akash Kumar - Return to top"
         >
           <span className="group-hover:text-cyan-400 transition-colors">AK</span>
-          <span className="text-cyan-400 group-hover:scale-125 transition-transform inline-block">.</span>
+          <span className="text-cyan-400 group-hover:scale-125 transition-transform inline-block"></span>
         </a>
 
         {/* Desktop Navigation using JellyRadio effect */}
