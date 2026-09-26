@@ -1,6 +1,6 @@
 import TextScatter from '@/components/effects/TextScatter';
 import Lanyard from '@/components/effects/Lanyard';
-import { User, Download, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Download, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function About() {
   return (
@@ -14,11 +14,6 @@ export default function About() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Biography and Career Positioning */}
           <div className="lg:col-span-7 flex flex-col justify-center">
-            <div className="eyebrow-badge">
-              <User className="w-3.5 h-3.5" />
-              <span>04 · About & Experience</span>
-            </div>
-
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
               <TextScatter>Curious by default.</TextScatter>
             </h2>

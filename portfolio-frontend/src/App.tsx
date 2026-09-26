@@ -2,7 +2,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import Header from "@/components/layout/Header";
 import Hero from "@/components/sections/Hero";
-import TextReveal3D from "@/components/effects/TextReveal3D";
+import SystemOverview from "@/components/sections/SystemOverview";
 import TechStack from "@/components/sections/TechStack";
 import Projects from "@/components/sections/Projects";
 import Services from "@/components/sections/Services";
@@ -42,11 +42,8 @@ export default function App() {
             {/* 1. Hero Section (#home) */}
             <Hero />
 
-            {/* 2. 3D Text Reveal Transition */}
-            <TextReveal3D
-              text="Crafting high-precision interfaces where motion, usability, and modern architecture converge."
-              subtext="Bridging the gap between software engineering and expressive digital design."
-            />
+            {/* 2. System Overview Dashboard (#system-overview) */}
+            <SystemOverview />
 
             {/* 3. Tech Stack Section (#tech-stack) */}
             <TechStack />

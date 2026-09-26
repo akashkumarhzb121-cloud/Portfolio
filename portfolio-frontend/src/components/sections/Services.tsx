@@ -2,7 +2,7 @@ import TextScatter from '@/components/effects/TextScatter';
 import AccordionGallery from '@/components/effects/AccordionGallery';
 import BendingMarquee from '@/components/effects/BendingMarquee';
 import { services } from '@/data/services';
-import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function Services() {
   return (
@@ -29,13 +29,8 @@ export default function Services() {
           aria-hidden="true"
         />
 
-      <div className="site-container pt-12 sm:pt-16 mb-10 sm:mb-14 relative z-10">
+      <div className="site-container pt-10 sm:pt-14 mb-10 sm:mb-14 relative z-10">
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-slate-900 text-cyan-400 border border-slate-800 font-mono text-xs uppercase tracking-widest shadow-md">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>03 · Full-Stack Offerings</span>
-          </div>
-
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950 mb-4 leading-tight">
             <TextScatter>Services</TextScatter>
           </h2>

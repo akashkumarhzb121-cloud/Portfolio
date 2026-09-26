@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Mail, Copy, Check, Send, Sparkles, MessageSquare, Clock, Globe } from 'lucide-react';
+import { Mail, Copy, Check, Send, Sparkles, Clock, Globe } from 'lucide-react';
 import TextScatter from '@/components/effects/TextScatter';
 import BendingMarquee from '@/components/effects/BendingMarquee';
 
@@ -91,11 +91,6 @@ export default function Contact() {
 
       <div className="site-container mb-12 sm:mb-16 relative z-10">
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-slate-900/90 text-cyan-400 border border-cyan-500/30 font-mono text-xs uppercase tracking-widest shadow-md">
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>05 · Start a Conversation</span>
-          </div>
-
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
             <TextScatter>Contact</TextScatter>
           </h2>

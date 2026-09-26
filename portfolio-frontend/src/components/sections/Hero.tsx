@@ -18,12 +18,6 @@ export default function Hero() {
 
       <div className="site-container relative z-10 my-auto">
         <div className="max-w-4xl">
-          {/* Eyebrow badge */}
-          <div className="inline-flex items-center gap-2 mb-6 px-3.5 py-1.5 rounded-full bg-cyan-400/[0.08] border border-cyan-400/20 text-cyan-300 font-mono text-xs uppercase tracking-widest backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#67e8f9] animate-pulse" />
-            <span>Creative Frontend Developer · 2026</span>
-          </div>
-
           {/* Headline with ParticleText on Akash Kumar */}
           <div className="mb-6">
             <h1 className="text-4xl sm:text-6xl md:text-8xl font-extrabold tracking-tight text-white leading-[1.05]">

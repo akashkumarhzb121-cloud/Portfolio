@@ -417,7 +417,7 @@ class App {
   isDown: boolean = false;
   start: number = 0;
   autoRotate: boolean = true;
-  autoRotateSpeed: number = 0.35;
+  autoRotateSpeed: number = 0.06;
   lastScrollY: number = 0;
   boundOnResize: any;
   boundOnWheel: any;
@@ -438,7 +438,7 @@ class App {
       scrollSpeed = 2,
       scrollEase = 0.05,
       autoRotate = true,
-      autoRotateSpeed = 0.35
+      autoRotateSpeed = 0.06
     }: any = {}
   ) {
     this.container = container;
@@ -518,7 +518,7 @@ class App {
   onTouchMove(e: any) {
     if (!this.isDown) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const distance = (this.start - x) * (this.scrollSpeed * 0.025);
+    const distance = (this.start - x) * (this.scrollSpeed * 0.008);
     this.scroll.target = (this.scroll.position || 0) + distance;
   }
 
@@ -529,7 +529,7 @@ class App {
 
   onWheel(e: any) {
     const delta = e.deltaY || e.wheelDelta || e.detail;
-    this.scroll.target += (delta > 0 ? this.scrollSpeed : -this.scrollSpeed) * 0.2;
+    this.scroll.target += (delta > 0 ? this.scrollSpeed : -this.scrollSpeed) * 0.08;
     this.onCheckDebounce();
   }
 
@@ -537,13 +537,13 @@ class App {
     switch (e.key) {
       case 'ArrowRight':
         e.preventDefault();
-        this.scroll.target += this.scrollSpeed * 5;
+        this.scroll.target += this.scrollSpeed * 1.5;
         this.onCheckDebounce();
         break;
 
       case 'ArrowLeft':
         e.preventDefault();
-        this.scroll.target -= this.scrollSpeed * 5;
+        this.scroll.target -= this.scrollSpeed * 1.5;
         this.onCheckDebounce();
         break;
 
@@ -610,7 +610,7 @@ class App {
     if (!this.container) return;
     const rect = this.container.getBoundingClientRect();
     if (rect.bottom > 0 && rect.top < window.innerHeight) {
-      this.scroll.target += deltaY * 0.45;
+      this.scroll.target += deltaY * 0.035;
     }
   }
 
@@ -672,7 +672,7 @@ export const CircularGallery = forwardRef<CircularGalleryRef, CircularGalleryPro
     scrollSpeed = 2,
     scrollEase = 0.05,
     autoRotate = true,
-    autoRotateSpeed = 0.35
+    autoRotateSpeed = 0.06
   },
   ref
 ) {

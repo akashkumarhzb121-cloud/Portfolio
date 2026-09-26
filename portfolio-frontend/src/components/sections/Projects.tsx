@@ -1,4 +1,4 @@
-import { ArrowUpRight, FolderGit2, Code2, CheckCircle2 } from 'lucide-react';
+import { ArrowUpRight, Code2, CheckCircle2 } from 'lucide-react';
 import TextScatter from '@/components/effects/TextScatter';
 import ScrollStack, { ScrollStackItem } from '@/components/effects/ScrollStack';
 import { projects } from '@/data/projects';
@@ -14,11 +14,6 @@ export default function Projects() {
       <div className="site-container mb-12 sm:mb-16 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/[0.08]">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full bg-slate-900/90 text-cyan-400 border border-cyan-500/30 font-mono text-xs uppercase tracking-widest shadow-md">
-              <FolderGit2 className="w-3.5 h-3.5" />
-              <span>02 · Selected Work</span>
-            </div>
-
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
               <TextScatter>Projects</TextScatter>
             </h2>
@@ -28,7 +23,7 @@ export default function Projects() {
             </p>
           </div>
 
-          <div className="text-xs font-mono text-cyan-400 font-semibold uppercase tracking-widest hidden md:block">
+          <div className="text-xs font-mono text-cyan-400 font-semibold uppercase tracking-widest hidden md:block pb-1">
             Scroll to inspect stack (04 Full-Scale Systems)
           </div>
         </div>
