@@ -32,7 +32,7 @@ export const projects: Project[] = [
       "REST APIs with MongoDB Atlas & JWT authentication",
       "Cloudinary image management & production deployment"
     ],
-    liveUrl: "https://modplint.vercel.app",
+    liveUrl: "https://www.modplintinteriors.com",
     githubUrl: "https://github.com/akashkumarhzb121-cloud/modplint-frontend",
     category: "REAL-WORLD · INTERIOR DESIGN PLATFORM",
     featured: true

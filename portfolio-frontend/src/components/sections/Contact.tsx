@@ -301,7 +301,7 @@ export default function Contact() {
       {/* Bending Marquee in Contact Section */}
       <div className="mt-16">
         <BendingMarquee
-          text=" React · TypeScript · Node.js · MongoDB · Express.js · Three.js · GSAP "
+          text=" FULL-STACK · ⚛️ React · 💻 TypeScript · 🟢 Node.js · 🍃 MongoDB · 📝 Express.js · 🌐 Three.js · 🪄 GSAP "
           color="#67e8f9"
           speed={1.8}
         />

@@ -98,7 +98,7 @@ export default function Services() {
       {/* Bending Marquee flowing along a curved SVG path */}
       <div className="mt-4">
         <BendingMarquee
-          text=" FULL-STACK · React · TypeScript · Node.js · MongoDB · Express.js · Three.js · GSAP "
+          text=" FULL-STACK · ⚛️ React · 💻 TypeScript · 🟢 Node.js · 🍃 MongoDB · 📝 Express.js · 🌐 Three.js · 🪄 GSAP "
           color="#0284c7"
           speed={1.8}
         />
