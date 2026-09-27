@@ -29,7 +29,18 @@ export function createApp(): Express {
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin)) {
+      const cleanOrigin = origin.trim().replace(/\/+$/, '').toLowerCase();
+      const isAllowed = allowedOrigins.some((allowed) => {
+        const cleanAllowed = allowed.trim().replace(/\/+$/, '').toLowerCase();
+        if (cleanAllowed === cleanOrigin) return true;
+        // Also support Vercel preview/branch domains if frontend origins include vercel.app
+        if (cleanAllowed.endsWith('.vercel.app') && cleanOrigin.endsWith('.vercel.app')) {
+          return true;
+        }
+        return false;
+      });
+
+      if (isAllowed) {
         return callback(null, true);
       }
 

@@ -43,8 +43,22 @@ export default function Contact() {
     }
   };
 
+  const getNormalizedEndpoint = (url: string | undefined): string => {
+    if (!url) return '';
+    const trimmed = url.trim().replace(/\/+$/, '');
+    if (trimmed.endsWith('/api/contact')) {
+      return trimmed;
+    }
+    // If user provided base origin (e.g. https://portfolio-cxic.onrender.com or http://localhost:5000)
+    if (/^https?:\/\/[^/]+$/.test(trimmed)) {
+      return `${trimmed}/api/contact`;
+    }
+    return trimmed;
+  };
+
   const onSubmit = async (values: ContactFormValues) => {
-    const endpoint = import.meta.env.VITE_CONTACT_FORM_ENDPOINT;
+    const rawEndpoint = import.meta.env.VITE_CONTACT_FORM_ENDPOINT;
+    const endpoint = getNormalizedEndpoint(rawEndpoint);
 
     if (!endpoint) {
       toast.info(
