@@ -70,11 +70,20 @@ export default function Contact() {
         body: JSON.stringify(values)
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error(`Submission failed with status ${response.status}`);
+        let errorMsg = data?.message;
+        if (!errorMsg && data?.errors) {
+          errorMsg = Object.values(data.errors)
+            .flat()
+            .filter(Boolean)
+            .join('; ');
+        }
+        throw new Error(errorMsg || `Submission failed with status ${response.status}`);
       }
 
-      toast.success('Message delivered successfully! I will reply shortly.');
+      toast.success(data?.message || 'Message delivered successfully! I will reply shortly.');
       reset();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown network failure';
@@ -245,7 +254,7 @@ export default function Contact() {
                   <option value="3D Interactive Experiences">3D Interactive UI (WebGL / Three.js / Canvas)</option>
                   <option value="Database Design & Cloud Deployment">Database Design & Cloud Deployments (MongoDB Atlas / SQL / Vercel / Render)</option>
                   <option value="Full Project Collaboration">Full Project Collaboration / Consulting</option>
-                  <option value="Full Project Collaboration">Other</option>
+                  <option value="Other">Other / Custom Inquiry</option>
                 </select>
                 {errors.service && (
                   <p className="mt-1.5 text-xs text-rose-400">{errors.service.message}</p>

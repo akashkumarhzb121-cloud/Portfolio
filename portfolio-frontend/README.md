@@ -149,10 +149,10 @@ portfolio-frontend/
 
 ## Featured Projects
 
-1. **Immersive Product Studio**: An editorial 3D product storytelling platform with WebGL shader pipelines, real-time 360° model inspection, and GSAP scrubbed transitions.
-2. **Enterprise Analytics Dashboard**: High-density financial dashboard handling 100,000+ data rows with virtualized tables, sub-second chart updates, and WCAG AA compliance.
-3. **Creative Commerce Experience**: Architectural commerce storefront featuring headless persistent cart state, responsive media delivery, and fluid transitions.
-4. **Full-Stack Cloud Workspace**: Multi-tenant collaboration engine with RBAC tiers, JWT authentication, MongoDB Atlas aggregation pipelines, and Dockerized Node/Express REST APIs.
+1. **RapidCare** (`HEALTHTECH · AI-POWERED CARE CONTINUITY`): An AI-powered healthcare platform designed to improve rural care continuity through intelligent triage, real-time ambulance dispatch with bed reservation, and offline-first workflows.
+2. **Modplint Interiors** (`REAL-WORLD · INTERIOR DESIGN PLATFORM`): A production digital platform for a real interior-design business, combining portfolio showcases, service discovery, and client consultation booking with MongoDB Atlas and Cloudinary.
+3. **Student Management System** (`COLLEGE ERP · FULL-STACK APPLICATION`): A full-stack college ERP platform centralizing academic and administrative workflows for Admin, Faculty, and Students with role-based access control.
+4. **MERN Docs** (`PRODUCT · DEVELOPER DOCUMENTATION`): A developer-focused documentation platform covering the full MERN ecosystem, backend engineering, and system design patterns.
 
 ---
 
@@ -192,39 +192,53 @@ portfolio-frontend/
 
 ## Environment Variables
 
-Create a `.env` file in the root of `portfolio-frontend`:
+Copy `.env.example` to `.env` in `portfolio-frontend`:
 
-```env
-# Optional: Formspree, Basin, or custom backend API endpoint for contact submissions
-VITE_CONTACT_FORM_ENDPOINT=https://formspree.io/f/your_form_id
+```bash
+cp .env.example .env
 ```
 
+```env
+# For local backend testing (running portfolio-backend on port 5000):
+# VITE_CONTACT_FORM_ENDPOINT=http://localhost:5000/api/contact
+
+# For production deployment on Vercel:
+VITE_CONTACT_FORM_ENDPOINT=https://YOUR-RENDER-SERVICE.onrender.com/api/contact
+```
+
+> [!IMPORTANT]
+> **Secrets Security**:
+> Never place backend secrets (`MONGODB_URI`, `RESEND_API_KEY`, etc.) in `portfolio-frontend` or Vercel environment variables. All `VITE_*` variables are embedded into client-side JavaScript bundles and publicly accessible to visitors.
+
 > [!NOTE]
-> If `VITE_CONTACT_FORM_ENDPOINT` is not configured, the contact form gracefully falls back to opening the visitor's native email client with pre-filled subject and body.
+> If `VITE_CONTACT_FORM_ENDPOINT` is not configured, the contact form displays an informational notice and opens the visitor's native email client with pre-filled details. Once configured, all submissions are securely handled by the Render backend.
 
 ---
 
 ## Vercel Deployment Guide
 
-The project is pre-configured with [`vercel.json`](vercel.json) for 1-click zero-config deployment.
+The frontend is deployed to **Vercel** independently of the backend.
 
-### Option 1: Deploy via GitHub (Recommended)
-1. Push your repository to GitHub:
-   ```bash
-   git add .
-   git commit -m "feat: complete portfolio with 3D interactions"
-   git push origin main
-   ```
-2. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **Add New Project**.
-3. Import your GitHub repository.
-4. If `portfolio-frontend` is inside a parent folder, set the **Root Directory** to `portfolio-frontend`. Otherwise, leave default `/`.
-5. Click **Deploy**. Vercel will automatically build and distribute to global edge CDN.
+### Project Settings
+- **Root Directory**: `portfolio-frontend` *(crucial if in a monorepo or parent repository)*
+- **Framework Preset**: `Vite`
+- **Build Command**: `npm run build` (or `tsc -b && vite build`)
+- **Output Directory**: `dist`
+- **Install Command**: `npm install`
 
-### Option 2: Deploy via Vercel CLI
-```bash
-npm install -g vercel
-vercel
-```
+### Setting up the Backend Endpoint on Vercel
+1. Go to your project on the [Vercel Dashboard](https://vercel.com/dashboard).
+2. Navigate to **Settings** -> **Environment Variables**.
+3. Add a new variable:
+   - **Key**: `VITE_CONTACT_FORM_ENDPOINT`
+   - **Value**: `https://YOUR-RENDER-SERVICE.onrender.com/api/contact` (replace with your live Render backend URL)
+   - **Environment**: Select `Production`, `Preview`, and `Development`.
+4. Trigger a redeployment:
+   - Go to the **Deployments** tab, click the three dots (`...`) on the latest deployment, and select **Redeploy**.
+   - Alternatively, push a new commit to your `main` branch.
+
+> [!NOTE]
+> Ensure your deployed Vercel domain (e.g. `https://your-portfolio.vercel.app`) is included in the backend's `FRONTEND_ORIGINS` environment variable on Render so CORS requests are accepted.
 
 ---
 
