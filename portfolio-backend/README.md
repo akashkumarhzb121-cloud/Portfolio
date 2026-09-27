@@ -150,9 +150,15 @@ cp .env.example .env
 | `NODE_ENV` | Optional | `development` | Runtime environment (`development`, `production`, `test`) |
 | `MONGODB_URI` | **Required** | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/portfolio` | Connection URI for MongoDB Atlas database |
 | `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
-| `RESEND_API_KEY` | **Required** | `re_xxxxxxxxxxxxxxxxxxxx` | Secret API key from Resend dashboard |
-| `CONTACT_EMAIL` | **Required** | `akash@example.com` | Destination inbox for enquiry notifications |
-| `EMAIL_FROM` | Optional | `Portfolio Contact <onboarding@resend.dev>` | Verified sender email address |
+| `SMTP_HOST` | Optional | `smtp.gmail.com` | SMTP host server for direct email delivery |
+| `SMTP_PORT` | Optional | `587` | SMTP port (`587` for STARTTLS, `465` for SSL) |
+| `SMTP_USER` | **Recommended** | `your-email@gmail.com` | SMTP account email address |
+| `SMTP_PASSWORD` | **Recommended** | `xxxx xxxx xxxx xxxx` | SMTP password or Google App Password (16 characters) |
+| `SMTP_FROM_EMAIL`| Optional | `your-email@gmail.com` | From email header |
+| `SMTP_FROM_NAME` | Optional | `TheSiniySky` | Display sender name |
+| `CONTACT_EMAIL` | **Required** | `akashkumarhzb121@gmail.com` | Destination inbox for receiving contact enquiries |
+| `RESEND_API_KEY` | Optional | `re_xxxxxxxxxxxxxxxxxxxx` | Secret API key from Resend dashboard (used as fallback) |
+| `EMAIL_FROM` | Optional | `Portfolio Contact <onboarding@resend.dev>` | Resend sender address if using Resend |
 
 ---
 
@@ -193,7 +199,7 @@ The backend includes a complete test suite powered by Vitest and Supertest testi
 - Health check endpoints (`/health` and `/api/health`)
 - Input validation (name, email, service, message lengths & formats)
 - MongoDB save failure handling (`500`)
-- Resend email failure handling (`502` with enquiry record saved)
+- Email failure handling (`502` with enquiry record saved)
 - Centralized error and 404 handlers
 
 Run tests once:
@@ -213,6 +219,25 @@ npm run typecheck
 
 ---
 
+## SMTP Email Setup (Gmail App Password)
+
+To receive inquiries directly in your inbox using Gmail:
+1. Go to your [Google Account Security Settings](https://myaccount.google.com/security).
+2. Ensure **2-Step Verification** is turned ON.
+3. Under "2-Step Verification", navigate to **App passwords** (or search "App passwords" in the Google Account search bar).
+4. Create a new App Password (e.g. Name: `Portfolio Contact Backend`).
+5. Copy the 16-character generated password (e.g. `ssaa enym isut bswo`).
+6. Set the following environment variables in `.env` (locally) and on Render:
+   - `SMTP_HOST`: `smtp.gmail.com`
+   - `SMTP_PORT`: `587`
+   - `SMTP_USER`: `your-email@gmail.com`
+   - `SMTP_PASSWORD`: `ssaa enym isut bswo`
+   - `SMTP_FROM_EMAIL`: `your-email@gmail.com`
+   - `SMTP_FROM_NAME`: `TheSiniySky`
+   - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
+
+---
+
 ## MongoDB Atlas Setup Guide
 
 1. Log in to [MongoDB Atlas](https://cloud.mongodb.com/).
@@ -221,51 +246,54 @@ npm run typecheck
 4. Under **Network Access**, add an IP Access entry:
    - For Render deployment, add `0.0.0.0/0` (Allow access from anywhere) since Render instances use dynamic outbound IPs.
 5. In your cluster dashboard, click **Connect** -> **Drivers** -> **Node.js**.
-6. Copy the connection string into `MONGODB_URI`, replacing `<username>` and `<password>`. Example:
-   ```env
-   MONGODB_URI=mongodb+srv://my_user:secretpassword@cluster0.mongodb.net/portfolio?retryWrites=true&w=majority
-   ```
+6. Copy the connection string into `MONGODB_URI`, replacing `<username>` and `<password>`.
+   *(Note: If you accidentally keep `<>` in your password, the backend automatically sanitizes it).*
 
 ---
 
-## Resend Setup Guide
+## Render Deployment Guide & Troubleshooting
 
-1. Register at [Resend.com](https://resend.com/).
-2. Go to **API Keys** and generate a new key with sending permissions.
-3. Paste the key into `RESEND_API_KEY`:
-   ```env
-   RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
-   ```
-4. For initial testing, set `EMAIL_FROM=Portfolio Contact <onboarding@resend.dev>`.
-5. For production, add and verify your custom domain in Resend DNS settings, then set `EMAIL_FROM=Portfolio Contact <contact@yourdomain.com>`.
+### Why the Initial Deploy Error Occurred:
+If you encountered:
+```
+Error: Cannot find module '/opt/render/project/src/portfolio-backend/index.js'
+```
+This happens when Render uses its default Web Service settings:
+- Default Build Command: `npm install` (which skipped building TypeScript `dist/`)
+- Default Start Command: `node index.js` (which looked for `index.js` in root)
 
----
+### How We Fixed It (100% Fail-Safe):
+1. **Added `index.js` Launcher**: Root `index.js` delegates directly to `./dist/server.js`.
+2. **Added `postinstall` Script**: `npm install` now automatically triggers `tsc -p tsconfig.json`, building `dist/` even if you leave the default build command as `npm install`.
+3. **Updated `"main"`**: Points to `dist/server.js`.
 
-## Render Deployment Guide
-
+### Render Web Service Settings:
 1. Log in to the [Render Dashboard](https://dashboard.render.com/).
-2. Click **New +** -> **Web Service**.
-3. Connect your GitHub repository containing `portfolio-backend`.
-4. Configure the Web Service settings:
-   - **Name**: `portfolio-backend` (or your preferred name)
+2. Click **New +** -> **Web Service** (or edit your existing service).
+3. Configure the Web Service settings:
+   - **Name**: `portfolio-backend`
    - **Root Directory**: `portfolio-backend` *(crucial!)*
    - **Environment**: `Node`
    - **Branch**: `main`
-   - **Build Command**: `npm run build`
-   - **Start Command**: `npm run start`
+   - **Build Command**: `npm install && npm run build` (or `npm run build`)
+   - **Start Command**: `npm start` (or `node dist/server.js`)
    - **Plan**: `Free`
-5. In **Advanced** -> **Health Check Path**:
+4. In **Advanced** -> **Health Check Path**:
    - Set to `/health`
-6. Under **Environment Variables**, add:
+5. Under **Environment Variables**, add:
    - `NODE_ENV`: `production`
    - `MONGODB_URI`: `<your MongoDB Atlas connection string>`
    - `FRONTEND_ORIGINS`: `https://your-portfolio.vercel.app,http://localhost:5173`
-   - `RESEND_API_KEY`: `<your Resend API key>`
-   - `CONTACT_EMAIL`: `<your recipient email>`
-   - `EMAIL_FROM`: `Portfolio Contact <onboarding@resend.dev>` (or your verified domain)
-7. Click **Create Web Service**.
-8. Once deployed, copy your Render public URL (e.g. `https://portfolio-backend-xyz.onrender.com`).
-9. Update your frontend environment variable `VITE_CONTACT_FORM_ENDPOINT` to `https://portfolio-backend-xyz.onrender.com/api/contact`.
+   - `SMTP_HOST`: `smtp.gmail.com`
+   - `SMTP_PORT`: `587`
+   - `SMTP_USER`: `<your-sender-gmail@gmail.com>`
+   - `SMTP_PASSWORD`: `<your 16-character Google App Password>`
+   - `SMTP_FROM_EMAIL`: `<your-sender-gmail@gmail.com>`
+   - `SMTP_FROM_NAME`: `TheSiniySky`
+   - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
+   - `RESEND_API_KEY`: *(optional fallback if using Resend)*
+6. Click **Manual Deploy** -> **Deploy latest commit**.
+7. Once deployed, verify `https://your-service.onrender.com/health` returns status `200 OK`.
 
 ---
 

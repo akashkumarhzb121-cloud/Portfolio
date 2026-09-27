@@ -1,32 +1,53 @@
+import nodemailer, { type Transporter } from 'nodemailer';
 import { Resend } from 'resend';
 import { env } from '../config/env.js';
 import type { ContactInput } from '../schemas/contact.schema.js';
 
 let resendClient: Resend | null = null;
+let smtpTransporter: Transporter | null = null;
 
 function getResendClient(): Resend {
   if (!resendClient) {
-    resendClient = new Resend(env.RESEND_API_KEY);
+    resendClient = new Resend(env.RESEND_API_KEY || '');
   }
   return resendClient;
+}
+
+function getSmtpTransporter(): Transporter {
+  if (!smtpTransporter) {
+    const pass = (env.SMTP_PASSWORD || '').replace(/\s+/g, '');
+    smtpTransporter = nodemailer.createTransport({
+      host: env.SMTP_HOST || 'smtp.gmail.com',
+      port: env.SMTP_PORT || 587,
+      secure: env.SMTP_PORT === 465,
+      auth: {
+        user: env.SMTP_USER,
+        pass
+      }
+    });
+  }
+  return smtpTransporter;
 }
 
 export interface SendNotificationResult {
   success: boolean;
   messageId?: string;
   error?: string;
+  provider?: 'smtp' | 'resend' | 'simulated';
 }
 
 export async function sendContactNotification(
   input: ContactInput,
   metadata?: { ip?: string; createdAt?: Date }
 ): Promise<SendNotificationResult> {
-  // If in test environment without real key, return simulated success unless mocked
-  if (env.NODE_ENV === 'test' && (!env.RESEND_API_KEY || env.RESEND_API_KEY === 're_test_key')) {
-    return { success: true, messageId: 'simulated-test-id' };
+  // If in test environment without real credentials, return simulated success
+  if (
+    env.NODE_ENV === 'test' &&
+    (!env.SMTP_USER || env.SMTP_USER === 'test@example.com') &&
+    (!env.RESEND_API_KEY || env.RESEND_API_KEY === 're_test_key')
+  ) {
+    return { success: true, messageId: 'simulated-test-id', provider: 'simulated' };
   }
-
-  const resend = getResendClient();
 
   const formattedDate = (metadata?.createdAt || new Date()).toLocaleString('en-US', {
     timeZone: 'Asia/Kolkata',
@@ -100,27 +121,63 @@ Project Message:
 ${input.message}
   `.trim();
 
-  try {
-    const { data, error } = await resend.emails.send({
-      from: env.EMAIL_FROM,
-      to: [env.CONTACT_EMAIL],
-      replyTo: input.email,
-      subject,
-      html: htmlContent,
-      text: textContent
-    });
+  // 1. Primary: If SMTP credentials are configured (e.g. Gmail SMTP), send via Nodemailer
+  if (env.SMTP_USER && env.SMTP_PASSWORD) {
+    try {
+      const transporter = getSmtpTransporter();
+      const fromName = env.SMTP_FROM_NAME || 'Portfolio Contact';
+      const fromEmail = env.SMTP_FROM_EMAIL || env.SMTP_USER;
+      const recipient = env.CONTACT_EMAIL || env.SMTP_USER;
 
-    if (error) {
-      console.error('❌ Resend API returned error:', error);
-      return { success: false, error: error.message || 'Email delivery failed' };
+      const info = await transporter.sendMail({
+        from: `"${fromName}" <${fromEmail}>`,
+        to: recipient,
+        replyTo: input.email,
+        subject,
+        html: htmlContent,
+        text: textContent
+      });
+
+      console.log(`✅ Enquiry email dispatched via SMTP to ${recipient} (Message ID: ${info.messageId})`);
+      return { success: true, messageId: info.messageId, provider: 'smtp' };
+    } catch (smtpErr: unknown) {
+      const errMsg = smtpErr instanceof Error ? smtpErr.message : 'SMTP dispatch failure';
+      console.error('❌ SMTP dispatch error:', errMsg);
+      return { success: false, error: errMsg, provider: 'smtp' };
     }
-
-    return { success: true, messageId: data?.id };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown email service failure';
-    console.error('❌ Resend sendContactNotification error:', message);
-    return { success: false, error: message };
   }
+
+  // 2. Secondary / Fallback: If Resend API Key is configured, send via Resend
+  if (env.RESEND_API_KEY) {
+    try {
+      const resend = getResendClient();
+      const { data, error } = await resend.emails.send({
+        from: env.EMAIL_FROM,
+        to: [env.CONTACT_EMAIL],
+        replyTo: input.email,
+        subject,
+        html: htmlContent,
+        text: textContent
+      });
+
+      if (error) {
+        console.error('❌ Resend API returned error:', error);
+        return { success: false, error: error.message || 'Email delivery failed', provider: 'resend' };
+      }
+
+      console.log(`✅ Enquiry email dispatched via Resend to ${env.CONTACT_EMAIL}`);
+      return { success: true, messageId: data?.id, provider: 'resend' };
+    } catch (resendErr: unknown) {
+      const errMsg = resendErr instanceof Error ? resendErr.message : 'Resend dispatch failure';
+      console.error('❌ Resend sendContactNotification error:', errMsg);
+      return { success: false, error: errMsg, provider: 'resend' };
+    }
+  }
+
+  return {
+    success: false,
+    error: 'No email transport configured. Please configure SMTP_USER/SMTP_PASSWORD or RESEND_API_KEY.'
+  };
 }
 
 function escapeHtml(str: string): string {

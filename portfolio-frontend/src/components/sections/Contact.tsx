@@ -18,7 +18,7 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 
 export default function Contact() {
   const [copied, setCopied] = useState(false);
-  const directEmail = 'akash@example.com';
+  const directEmail = 'akashkumarhzb121@gmail.com';
 
   const {
     register,

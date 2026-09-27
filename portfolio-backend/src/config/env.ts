@@ -18,6 +18,10 @@ const envSchema = z.object({
   MONGODB_URI: z
     .string()
     .min(1, 'MONGODB_URI is required')
+    .transform((uri) => {
+      // Remove accidental literal < > placeholder brackets from Atlas password if present
+      return uri.replace(/(mongodb(?:\+srv)?:\/\/[^:]+):<([^>]+)>(@.*)/, '$1:$2$3');
+    })
     .default(process.env.NODE_ENV === 'test' ? 'mongodb://localhost:27017/portfolio-test' : ''),
   FRONTEND_ORIGINS: z
     .string()
@@ -28,14 +32,25 @@ const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean)
     ),
-  RESEND_API_KEY: z
+  // SMTP Direct Email Credentials (e.g. Gmail SMTP)
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z
     .string()
-    .min(1, 'RESEND_API_KEY is required')
-    .default(process.env.NODE_ENV === 'test' ? 're_test_key' : ''),
+    .default('587')
+    .transform((val) => parseInt(val, 10)),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  SMTP_FROM_EMAIL: z.string().optional(),
+  SMTP_FROM_NAME: z.string().default('TheSiniySky'),
+
+  // Resend API Alternative / Fallback
+  RESEND_API_KEY: z.string().optional(),
+
+  // Primary inbox to receive enquiry notifications
   CONTACT_EMAIL: z
     .string()
     .email('CONTACT_EMAIL must be a valid email address')
-    .default(process.env.NODE_ENV === 'test' ? 'test@example.com' : ''),
+    .default('akashkumarhzb121@gmail.com'),
   EMAIL_FROM: z
     .string()
     .default('Portfolio Contact <onboarding@resend.dev>')
@@ -54,13 +69,12 @@ try {
       .join('\n');
     console.error(`\n❌ Invalid server environment configuration:\n${formattedErrors}\n`);
   }
-  // If running in development and some keys are missing, provide informative guidance
+  // If running in development and some keys are missing, provide informative defaults
   if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
     parsedEnv = envSchema.parse({
       ...process.env,
       MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/portfolio_dev',
-      RESEND_API_KEY: process.env.RESEND_API_KEY || 're_dummy_dev_key',
-      CONTACT_EMAIL: process.env.CONTACT_EMAIL || 'dev@example.com'
+      CONTACT_EMAIL: process.env.CONTACT_EMAIL || 'akashkumarhzb121@gmail.com'
     });
   } else {
     throw error;
