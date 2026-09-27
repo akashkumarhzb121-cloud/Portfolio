@@ -1,7 +1,7 @@
 # Root .gitignore
 .env
 .env.*
-!.env.example
+.env.example
 node_modules/
 dist/
 dist-ssr/
