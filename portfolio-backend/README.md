@@ -126,7 +126,7 @@ A high-reliability, production-ready backend service providing contact inquiry c
   "message": "Database error: unable to save your enquiry. Please try again or email directly."
 }
 ```
-- **`502 Bad Gateway`**: Enquiry was recorded in MongoDB Atlas, but Resend email dispatch failed.
+- **`502 Bad Gateway`**: Enquiry was recorded in MongoDB Atlas, but all configured email providers failed.
 ```json
 {
   "success": false,
@@ -152,12 +152,12 @@ cp .env.example .env
 | `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
 | `SMTP_HOST` | Optional | `smtp.gmail.com` | SMTP host server for direct email delivery |
 | `SMTP_PORT` | Optional | `587` | SMTP port (`587` for STARTTLS, `465` for SSL) |
-| `SMTP_USER` | **Recommended** | `your-email@gmail.com` | SMTP account email address |
-| `SMTP_PASSWORD` | **Recommended** | `xxxx xxxx xxxx xxxx` | SMTP password or Google App Password (16 characters) |
+| `SMTP_USER` | Optional | `your-email@gmail.com` | SMTP account email address |
+| `SMTP_PASSWORD` | Optional | `xxxx xxxx xxxx xxxx` | SMTP password or Google App Password (16 characters) |
 | `SMTP_FROM_EMAIL`| Optional | `your-email@gmail.com` | From email header |
 | `SMTP_FROM_NAME` | Optional | `TheSiniySky` | Display sender name |
 | `CONTACT_EMAIL` | **Required** | `akashkumarhzb121@gmail.com` | Destination inbox for receiving contact enquiries |
-| `RESEND_API_KEY` | Optional | `re_xxxxxxxxxxxxxxxxxxxx` | Secret API key from Resend dashboard (used as fallback) |
+| `RESEND_API_KEY` | Recommended for Render | `re_xxxxxxxxxxxxxxxxxxxx` | Secret API key from Resend dashboard; used if SMTP is unavailable |
 | `EMAIL_FROM` | Optional | `Portfolio Contact <onboarding@resend.dev>` | Resend sender address if using Resend |
 
 ---
@@ -284,14 +284,10 @@ This happens when Render uses its default Web Service settings:
    - `NODE_ENV`: `production`
    - `MONGODB_URI`: `<your MongoDB Atlas connection string>`
    - `FRONTEND_ORIGINS`: `https://your-portfolio.vercel.app,http://localhost:5173`
-   - `SMTP_HOST`: `smtp.gmail.com`
-   - `SMTP_PORT`: `587`
-   - `SMTP_USER`: `<your-sender-gmail@gmail.com>`
-   - `SMTP_PASSWORD`: `<your 16-character Google App Password>`
-   - `SMTP_FROM_EMAIL`: `<your-sender-gmail@gmail.com>`
-   - `SMTP_FROM_NAME`: `TheSiniySky`
+   - `RESEND_API_KEY`: `<your Resend API key>` *(recommended: HTTPS works where SMTP connections time out)*
+   - `EMAIL_FROM`: `Portfolio Contact <onboarding@resend.dev>` *(or a sender on a domain verified in Resend)*
    - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
-   - `RESEND_API_KEY`: *(optional fallback if using Resend)*
+   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`: *(optional Gmail SMTP; Resend is tried automatically if SMTP fails)*
 6. Click **Manual Deploy** -> **Deploy latest commit**.
 7. Once deployed, verify `https://your-service.onrender.com/health` returns status `200 OK`.
 
@@ -301,4 +297,6 @@ This happens when Render uses its default Web Service settings:
 
 - **Atomic Status Tracking**: Every enquiry begins with `emailStatus: 'pending'`. Upon email dispatch confirmation, it transitions to `'sent'`. If email dispatch fails, it is marked as `'failed'` with `emailError` containing the exact error.
 - **No False Positives**: The frontend is explicitly notified via `502 Bad Gateway` if email delivery fails. It will **never** display a success toast if your inbox was not reached.
+- **SMTP Fallback**: When SMTP times out or is unreachable, the backend tries Resend if `RESEND_API_KEY` is configured. Render deployments should prefer Resend because outbound Gmail SMTP connections may be unavailable.
+- **Saved Enquiry Notice**: A `502` response includes the saved enquiry reference. The frontend tells the visitor the enquiry was recorded and to include that reference if they email directly.
 - **Retry Handling**: If a visitor retries after an email delivery failure or network error, a fresh enquiry record is created in MongoDB with its own unique `_id` and timestamp. The site owner can still retrieve all enquiries directly from MongoDB Atlas at any time.

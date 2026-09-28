@@ -20,6 +20,9 @@ function getSmtpTransporter(): Transporter {
       host: env.SMTP_HOST || 'smtp.gmail.com',
       port: env.SMTP_PORT || 587,
       secure: env.SMTP_PORT === 465,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
       auth: {
         user: env.SMTP_USER,
         pass
@@ -121,6 +124,8 @@ Project Message:
 ${input.message}
   `.trim();
 
+  let smtpError: string | undefined;
+
   // 1. Primary: If SMTP credentials are configured (e.g. Gmail SMTP), send via Nodemailer
   if (env.SMTP_USER && env.SMTP_PASSWORD) {
     try {
@@ -141,13 +146,12 @@ ${input.message}
       console.log(`✅ Enquiry email dispatched via SMTP to ${recipient} (Message ID: ${info.messageId})`);
       return { success: true, messageId: info.messageId, provider: 'smtp' };
     } catch (smtpErr: unknown) {
-      const errMsg = smtpErr instanceof Error ? smtpErr.message : 'SMTP dispatch failure';
-      console.error('❌ SMTP dispatch error:', errMsg);
-      return { success: false, error: errMsg, provider: 'smtp' };
+      smtpError = smtpErr instanceof Error ? smtpErr.message : 'SMTP dispatch failure';
+      console.error('❌ SMTP dispatch error:', smtpError);
     }
   }
 
-  // 2. Secondary / Fallback: If Resend API Key is configured, send via Resend
+  // 2. Fallback: Use Resend over HTTPS if SMTP is unavailable or not configured.
   if (env.RESEND_API_KEY) {
     try {
       const resend = getResendClient();
@@ -162,21 +166,37 @@ ${input.message}
 
       if (error) {
         console.error('❌ Resend API returned error:', error);
-        return { success: false, error: error.message || 'Email delivery failed', provider: 'resend' };
+        const resendError = error.message || 'Email delivery failed';
+        return {
+          success: false,
+          error: smtpError
+            ? `SMTP delivery failed: ${smtpError}. Resend delivery failed: ${resendError}`
+            : resendError,
+          provider: 'resend'
+        };
       }
 
       console.log(`✅ Enquiry email dispatched via Resend to ${env.CONTACT_EMAIL}`);
       return { success: true, messageId: data?.id, provider: 'resend' };
     } catch (resendErr: unknown) {
-      const errMsg = resendErr instanceof Error ? resendErr.message : 'Resend dispatch failure';
-      console.error('❌ Resend sendContactNotification error:', errMsg);
-      return { success: false, error: errMsg, provider: 'resend' };
+      const resendError = resendErr instanceof Error ? resendErr.message : 'Resend dispatch failure';
+      console.error('❌ Resend sendContactNotification error:', resendError);
+      return {
+        success: false,
+        error: smtpError
+          ? `SMTP delivery failed: ${smtpError}. Resend delivery failed: ${resendError}`
+          : resendError,
+        provider: 'resend'
+      };
     }
   }
 
   return {
     success: false,
-    error: 'No email transport configured. Please configure SMTP_USER/SMTP_PASSWORD or RESEND_API_KEY.'
+    error: smtpError
+      ? `SMTP delivery failed: ${smtpError}. Configure RESEND_API_KEY to enable HTTPS fallback.`
+      : 'No email transport configured. Please configure SMTP_USER/SMTP_PASSWORD or RESEND_API_KEY.',
+    provider: smtpError ? 'smtp' : undefined
   };
 }
 

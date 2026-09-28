@@ -87,6 +87,14 @@ export default function Contact() {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
+        if (response.status === 502 && data?.enquiryId) {
+          toast.error(
+            `Your enquiry was saved (reference ${data.enquiryId}), but the email notification failed. Please email ${directEmail} and include this reference.`,
+            { duration: 10000 }
+          );
+          return;
+        }
+
         let errorMsg = data?.message;
         if (!errorMsg && data?.errors) {
           errorMsg = Object.values(data.errors)
@@ -100,6 +108,14 @@ export default function Contact() {
       toast.success(data?.message || 'Message delivered successfully! I will reply shortly.');
       reset();
     } catch (err: unknown) {
+      if (err instanceof TypeError) {
+        toast.error(
+          `We couldn't confirm whether your enquiry was received. Check your email before trying again, or contact ${directEmail} directly.`,
+          { duration: 10000 }
+        );
+        return;
+      }
+
       const message = err instanceof Error ? err.message : 'Unknown network failure';
       toast.error(`Unable to send message: ${message}. Please email directly at ${directEmail}`);
     }
