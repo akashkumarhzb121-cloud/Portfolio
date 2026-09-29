@@ -63,7 +63,7 @@ describe('Portfolio Backend API Tests', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.message).toContain('Message delivered successfully');
+      expect(res.body.message).toContain('Message received successfully');
       expect(ContactEnquiry.create).toHaveBeenCalledTimes(1);
       expect(emailService.sendContactNotification).toHaveBeenCalledTimes(1);
     });
@@ -162,7 +162,7 @@ describe('Portfolio Backend API Tests', () => {
       expect(res.body.message).toContain('Database error');
     });
 
-    it('returns 502 when database succeeds but email notification fails', async () => {
+    it('returns 201 when database succeeds even if email notification fails', async () => {
       const mockSavedDoc = {
         _id: 'mock_doc_id_456',
         name: 'Sarah Connor',
@@ -188,11 +188,42 @@ describe('Portfolio Backend API Tests', () => {
           message: 'Need help designing high-throughput distributed microservices.'
         });
 
-      expect(res.status).toBe(502);
-      expect(res.body.success).toBe(false);
-      expect(res.body.message).toContain('email notification delivery failed');
-      expect(res.body).toHaveProperty('enquiryId', 'mock_doc_id_456');
-      expect(res.body).toHaveProperty('deliveryCode', 'ETIMEDOUT');
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toContain('Message received successfully');
+    });
+
+    it('responds without waiting for the email notification', async () => {
+      const mockSavedDoc = {
+        _id: 'mock_doc_id_789',
+        name: 'Sarah Connor',
+        email: 'sarah@example.com',
+        service: 'Backend Architecture & APIs',
+        message: 'Need help designing high-throughput distributed microservices.',
+        createdAt: new Date()
+      };
+
+      vi.spyOn(ContactEnquiry, 'create').mockResolvedValue(mockSavedDoc as any);
+      let finishEmail!: (result: { success: boolean; error: string }) => void;
+      vi.spyOn(emailService, 'sendContactNotification').mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finishEmail = resolve;
+          })
+      );
+
+      const res = await request(app)
+        .post('/api/contact')
+        .send({
+          name: 'Sarah Connor',
+          email: 'sarah@example.com',
+          service: 'Backend Architecture & APIs',
+          message: 'Need help designing high-throughput distributed microservices.'
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      finishEmail({ success: false, error: 'SMTP connection timeout' });
     });
   });
 });

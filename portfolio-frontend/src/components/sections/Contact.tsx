@@ -121,7 +121,7 @@ export default function Contact() {
         throw new Error(errorMsg || `Submission failed with status ${response.status}`);
       }
 
-      toast.success(data?.message || 'Message delivered successfully! I will reply shortly.');
+      toast.success(data?.message || 'Message received successfully! I will reply shortly.');
       reset();
     } catch (err: unknown) {
       if (err instanceof TypeError) {

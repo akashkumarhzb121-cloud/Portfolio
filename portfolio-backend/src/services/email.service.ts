@@ -1,9 +1,6 @@
-import { setDefaultResultOrder } from 'node:dns';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '../config/env.js';
 import type { ContactInput } from '../schemas/contact.schema.js';
-
-setDefaultResultOrder('ipv4first');
 
 let smtpTransporter: Transporter | null = null;
 
@@ -11,12 +8,15 @@ function getSmtpTransporter(): Transporter {
   if (!smtpTransporter) {
     smtpTransporter = nodemailer.createTransport({
       host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_PORT === 465,
-      requireTLS: env.SMTP_PORT !== 465,
+      port: 587,
+      secure: false,
+      requireTLS: true,
       connectionTimeout: 10000,
       greetingTimeout: 10000,
-      socketTimeout: 20000,
+      socketTimeout: 10000,
+      tls: {
+        rejectUnauthorized: false
+      },
       auth: {
         user: env.SMTP_USER,
         pass: env.SMTP_PASSWORD?.replace(/\s+/g, '')
@@ -85,7 +85,7 @@ export async function sendContactNotification(input: ContactInput): Promise<Send
     const errorCode = getSmtpErrorCode(error);
     console.error('SMTP contact notification failed:', {
       host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
+      port: 587,
       errorCode,
       message
     });

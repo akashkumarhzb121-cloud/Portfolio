@@ -33,14 +33,6 @@ const envSchema = z.object({
         .filter(Boolean)
     ),
   SMTP_HOST: z.string().default('smtp.gmail.com'),
-  SMTP_PORT: z
-    .string()
-    .regex(/^\d+$/, 'SMTP_PORT must contain only a port number')
-    .default('587')
-    .transform((val) => Number.parseInt(val, 10))
-    .refine((port) => Number.isInteger(port) && port > 0 && port <= 65535, {
-      message: 'SMTP_PORT must be a valid port number between 1 and 65535'
-    }),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM_EMAIL: z.string().optional(),

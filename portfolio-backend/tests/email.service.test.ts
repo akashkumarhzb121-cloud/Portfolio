@@ -5,7 +5,6 @@ const mocks = vi.hoisted(() => ({
   sendMail: vi.fn(),
   env: {
     SMTP_HOST: 'smtp.gmail.com',
-    SMTP_PORT: 587,
     SMTP_USER: 'sender@example.com',
     SMTP_PASSWORD: 'test-password',
     SMTP_FROM_EMAIL: 'sender@example.com',
@@ -26,7 +25,6 @@ describe('sendContactNotification', () => {
     vi.clearAllMocks();
     Object.assign(mocks.env, {
       SMTP_HOST: 'smtp.gmail.com',
-      SMTP_PORT: 587,
       SMTP_USER: 'sender@example.com',
       SMTP_PASSWORD: 'test-password',
       SMTP_FROM_EMAIL: 'sender@example.com',
@@ -57,7 +55,10 @@ describe('sendContactNotification', () => {
         port: 587,
         secure: false,
         requireTLS: true,
-        connectionTimeout: 10000
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+        tls: { rejectUnauthorized: false }
       })
     );
     expect(mocks.sendMail).toHaveBeenCalledOnce();

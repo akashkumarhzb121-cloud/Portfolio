@@ -1,7 +1,13 @@
-import { app } from './app.js';
-import { connectDB, disconnectDB } from './config/db.js';
-import { env } from './config/env.js';
-import type { Server } from 'http';
+import { setDefaultResultOrder } from 'node:dns';
+import type { Server } from 'node:http';
+
+setDefaultResultOrder('ipv4first');
+
+const [{ app }, { connectDB, disconnectDB }, { env }] = await Promise.all([
+  import('./app.js'),
+  import('./config/db.js'),
+  import('./config/env.js')
+]);
 
 let server: Server | null = null;
 

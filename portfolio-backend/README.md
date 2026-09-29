@@ -94,11 +94,11 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 | `message` | string | Trimmed, min 10 chars, max 5000 chars | `"Project details..."` |
 
 #### Responses
-- **`201 Created`**: MongoDB persistence and SMTP notification succeeded.
+- **`201 Created`**: The enquiry was saved to MongoDB. SMTP notification is dispatched asynchronously and may fail independently.
 ```json
 {
   "success": true,
-  "message": "Message delivered successfully! I will reply shortly."
+  "message": "Message received successfully! I will reply shortly."
 }
 ```
 - **`400 Bad Request`**: Validation failed or malformed JSON payload.
@@ -125,14 +125,7 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
   "message": "Database error: unable to save your enquiry. Please try again or email directly."
 }
 ```
-- **`502 Bad Gateway`**: Enquiry was recorded in MongoDB Atlas, but all configured email providers failed.
-```json
-{
-  "success": false,
-  "message": "Your enquiry was recorded in the database, but email notification delivery failed. Please reach out directly if urgent.",
-  "enquiryId": "65fc12a3b4c5d6e7f8a90123"
-}
-```
+Email notification failures are logged by the backend and do not change the response after the enquiry has been saved.
 
 ---
 
@@ -145,7 +138,6 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 | `MONGODB_URI` | **Required** | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/portfolio` | Connection URI for MongoDB Atlas database |
 | `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
 | `SMTP_HOST` | Required in production | SMTP provider's relay host | SMTP server hostname; configure the host supplied by your provider |
-| `SMTP_PORT` | Optional | `587` | SMTP port (`587` for Gmail/STARTTLS, `465` for SSL; use `2525` only when your provider specifies it) |
 | `SMTP_USER` | For email delivery | `your-email@gmail.com` | SMTP account email address |
 | `SMTP_PASSWORD` | For email delivery | Google App Password | SMTP password or Google App Password |
 | `SMTP_FROM_EMAIL`| Optional | Same as `SMTP_USER` | From email address |
@@ -223,13 +215,12 @@ Use the SMTP credentials supplied by your email provider. If using Gmail, create
 5. Copy the 16-character generated password (e.g. `ssaa enym isut bswo`).
 6. Set the following environment variables locally:
    - `SMTP_HOST`: `smtp.gmail.com`
-   - `SMTP_PORT`: `587`
    - `SMTP_USER`: `your-email@gmail.com`
    - `SMTP_PASSWORD`: `ssaa enym isut bswo`
    - `SMTP_FROM_NAME`: `TheSiniySky`
    - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
 
-Keep the SMTP host and port paired: Gmail uses `smtp.gmail.com` on port `587` with STARTTLS (or port `465` with implicit TLS); port `2525` is only for SMTP providers that explicitly support it. Set a single numeric `SMTP_PORT` in the Render service environment—comma-separated ports are invalid. If Render cannot reach the provider on the selected port, use an email provider/API supported by your hosting platform instead.
+The backend connects to the configured SMTP host on port `587` using STARTTLS. If Render cannot reach the provider on that port, use an email provider/API supported by your hosting platform instead.
 
 ---
 
@@ -280,7 +271,6 @@ This happens when Render uses its default Web Service settings:
    - `MONGODB_URI`: `<your MongoDB Atlas connection string>`
    - `FRONTEND_ORIGINS`: `https://your-portfolio.vercel.app,http://localhost:5173`
    - `SMTP_HOST`: `smtp.gmail.com`
-   - `SMTP_PORT`: `587`
    - `SMTP_USER`: `<your Gmail address>`
    - `SMTP_PASSWORD`: `<your Google App Password>`
    - `SMTP_FROM_NAME`: `TheSiniySky`
@@ -292,7 +282,7 @@ This happens when Render uses its default Web Service settings:
 
 ## Failure & Duplicate Submission Policy
 
-- **No False Positives**: The frontend is explicitly notified via `502 Bad Gateway` if email delivery fails. It will **never** display a success toast if your inbox was not reached.
+- **Persistence First**: The API returns `201 Created` as soon as an enquiry is saved. SMTP notifications run asynchronously; a success response confirms persistence, not inbox delivery.
 - **SMTP Only**: There is no Resend fallback. Confirm the hosting provider allows outbound SMTP and configure valid SMTP credentials.
-- **Saved Enquiry Notice**: A `502` response includes the saved enquiry reference. The frontend tells the visitor the enquiry was recorded and to include that reference if they email directly.
-- **Retry Handling**: If a visitor retries after an email delivery failure or network error, a fresh enquiry record is created in MongoDB with its own unique `_id` and timestamp. The site owner can still retrieve all enquiries directly from MongoDB Atlas at any time.
+- **Delivery Diagnostics**: SMTP failures are logged server-side with the enquiry ID and delivery error.
+- **Retry Handling**: If a visitor retries after an uncertain network failure, a fresh enquiry record is created in MongoDB with its own unique `_id` and timestamp. The site owner can retrieve all enquiries directly from MongoDB Atlas at any time.

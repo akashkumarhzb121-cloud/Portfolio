@@ -40,24 +40,23 @@ export async function submitContact(
       return;
     }
 
-    const emailResult = await sendContactNotification(validData);
-
-    if (!emailResult.success) {
-      console.error(`⚠️ Email dispatch failed for enquiry ${enquiry._id}:`, emailResult.error);
-
-      res.status(502).json({
-        success: false,
-        message: 'Your enquiry was recorded in the database, but email notification delivery failed. Please reach out directly if urgent.',
-        enquiryId: enquiry._id,
-        deliveryCode: emailResult.errorCode
-      });
-      return;
-    }
-
     res.status(201).json({
       success: true,
-      message: 'Message delivered successfully! I will reply shortly.'
+      message: 'Message received successfully! I will reply shortly.'
     });
+
+    void sendContactNotification(validData)
+      .then((emailResult) => {
+        if (!emailResult.success) {
+          console.error(`⚠️ Email dispatch failed for enquiry ${enquiry._id}:`, {
+            error: emailResult.error,
+            errorCode: emailResult.errorCode
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        console.error(`⚠️ Email dispatch failed for enquiry ${enquiry._id}:`, error);
+      });
   } catch (error) {
     next(error);
   }
