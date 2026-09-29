@@ -1,6 +1,9 @@
+import { setDefaultResultOrder } from 'node:dns';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '../config/env.js';
 import type { ContactInput } from '../schemas/contact.schema.js';
+
+setDefaultResultOrder('ipv4first');
 
 let smtpTransporter: Transporter | null = null;
 

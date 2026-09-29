@@ -4,8 +4,8 @@ const mocks = vi.hoisted(() => ({
   createTransport: vi.fn(),
   sendMail: vi.fn(),
   env: {
-    SMTP_HOST: 'smtp.provider.example',
-    SMTP_PORT: 2525,
+    SMTP_HOST: 'smtp.gmail.com',
+    SMTP_PORT: 587,
     SMTP_USER: 'sender@example.com',
     SMTP_PASSWORD: 'test-password',
     SMTP_FROM_EMAIL: 'sender@example.com',
@@ -25,8 +25,8 @@ describe('sendContactNotification', () => {
     vi.resetModules();
     vi.clearAllMocks();
     Object.assign(mocks.env, {
-      SMTP_HOST: 'smtp.provider.example',
-      SMTP_PORT: 2525,
+      SMTP_HOST: 'smtp.gmail.com',
+      SMTP_PORT: 587,
       SMTP_USER: 'sender@example.com',
       SMTP_PASSWORD: 'test-password',
       SMTP_FROM_EMAIL: 'sender@example.com',
@@ -53,8 +53,8 @@ describe('sendContactNotification', () => {
     });
     expect(mocks.createTransport).toHaveBeenCalledWith(
       expect.objectContaining({
-        host: 'smtp.provider.example',
-        port: 2525,
+        host: 'smtp.gmail.com',
+        port: 587,
         secure: false,
         requireTLS: true,
         connectionTimeout: 10000

@@ -145,7 +145,7 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 | `MONGODB_URI` | **Required** | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/portfolio` | Connection URI for MongoDB Atlas database |
 | `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
 | `SMTP_HOST` | Required in production | SMTP provider's relay host | SMTP server hostname; configure the host supplied by your provider |
-| `SMTP_PORT` | Optional | `2525` | SMTP port (`2525` for provider-supported STARTTLS, `465` for SSL) |
+| `SMTP_PORT` | Optional | `587` | SMTP port (`587` for Gmail/STARTTLS, `465` for SSL; use `2525` only when your provider specifies it) |
 | `SMTP_USER` | For email delivery | `your-email@gmail.com` | SMTP account email address |
 | `SMTP_PASSWORD` | For email delivery | Google App Password | SMTP password or Google App Password |
 | `SMTP_FROM_EMAIL`| Optional | Same as `SMTP_USER` | From email address |
@@ -229,7 +229,7 @@ Use the SMTP credentials supplied by your email provider. If using Gmail, create
    - `SMTP_FROM_NAME`: `TheSiniySky`
    - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
 
-For Render, configure the relay hostname and port supplied by your provider. Use port `2525` only if that provider supports SMTP/STARTTLS on it; Gmail's standard SMTP ports `465` and `587` are not suitable when Render blocks outbound SMTP on those ports. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASSWORD` in the Render service environment. Non-465 connections require STARTTLS.
+Keep the SMTP host and port paired: Gmail uses `smtp.gmail.com` on port `587` with STARTTLS (or port `465` with implicit TLS); port `2525` is only for SMTP providers that explicitly support it. Set a single numeric `SMTP_PORT` in the Render service environment—comma-separated ports are invalid. If Render cannot reach the provider on the selected port, use an email provider/API supported by your hosting platform instead.
 
 ---
 
