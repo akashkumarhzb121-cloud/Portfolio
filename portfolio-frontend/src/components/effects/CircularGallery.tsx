@@ -414,6 +414,7 @@ class App {
   screen: any;
   viewport: any;
   raf: number = 0;
+  isVisible: boolean = false;
   isDown: boolean = false;
   start: number = 0;
   autoRotate: boolean = true;
@@ -454,7 +455,6 @@ class App {
     this.onResize();
     this.createGeometry();
     this.createMedias(items, bend, textColor, borderRadius, font);
-    this.update();
     this.addEventListeners();
   }
 
@@ -585,6 +585,8 @@ class App {
   }
 
   update() {
+    if (!this.isVisible) return;
+
     if (this.autoRotate && !this.isDown) {
       this.scroll.target += this.autoRotateSpeed;
     }
@@ -596,6 +598,16 @@ class App {
     this.renderer.render({ scene: this.scene, camera: this.camera });
     this.scroll.last = this.scroll.current;
     this.raf = window.requestAnimationFrame(this.update.bind(this));
+  }
+
+  setVisible(isVisible: boolean) {
+    if (this.isVisible === isVisible) return;
+    this.isVisible = isVisible;
+    if (isVisible) {
+      this.update();
+    } else {
+      window.cancelAnimationFrame(this.raf);
+    }
   }
 
   spin(delta: number) {
@@ -640,6 +652,7 @@ class App {
   }
 
   destroy() {
+    this.isVisible = false;
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.boundOnResize);
     window.removeEventListener('scroll', this.boundOnWindowScroll);
@@ -701,8 +714,19 @@ export const CircularGallery = forwardRef<CircularGalleryRef, CircularGalleryPro
       autoRotateSpeed
     });
     appRef.current = app;
+    const observer = 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => {
+        if (entry) app.setVisible(entry.isIntersecting);
+      })
+      : null;
+    if (observer) {
+      observer.observe(containerRef.current);
+    } else {
+      app.setVisible(true);
+    }
 
     return () => {
+      observer?.disconnect();
       app.destroy();
       appRef.current = null;
     };

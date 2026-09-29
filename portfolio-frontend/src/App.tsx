@@ -38,7 +38,14 @@ export default function App() {
           />
 
           <Header />
-          <main className="relative z-10">
+          <main
+            className="relative z-10"
+            style={{
+              transform: 'translate3d(0, 0, 0)',
+              backfaceVisibility: 'hidden',
+              willChange: 'transform'
+            }}
+          >
             {/* 1. Hero Section (#home) */}
             <Hero />
 
