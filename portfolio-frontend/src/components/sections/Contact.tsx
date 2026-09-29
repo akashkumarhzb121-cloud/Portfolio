@@ -57,9 +57,7 @@ export default function Contact() {
   };
 
   const onSubmit = async (values: ContactFormValues) => {
-    const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT?.trim();
-    const rawEndpoint = formspreeEndpoint || import.meta.env.VITE_CONTACT_FORM_ENDPOINT;
-    const endpoint = getNormalizedEndpoint(rawEndpoint);
+    const endpoint = getNormalizedEndpoint(import.meta.env.VITE_CONTACT_FORM_ENDPOINT);
 
     if (!endpoint) {
       toast.info(

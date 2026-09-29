@@ -40,15 +40,13 @@ describe('Portfolio Backend API Tests', () => {
         email: 'jane@example.com',
         service: 'Full-Stack Web Development',
         message: 'I would like to discuss building a SaaS platform.',
-        emailStatus: 'pending',
-        createdAt: new Date(),
-        save: vi.fn().mockResolvedValue(true)
+        createdAt: new Date()
       };
 
       vi.spyOn(ContactEnquiry, 'create').mockResolvedValue(mockSavedDoc as any);
       vi.spyOn(emailService, 'sendContactNotification').mockResolvedValue({
         success: true,
-        messageId: 'resend_msg_123'
+        messageId: 'smtp_msg_123'
       });
 
       const payload = {
@@ -68,8 +66,6 @@ describe('Portfolio Backend API Tests', () => {
       expect(res.body.message).toContain('Message delivered successfully');
       expect(ContactEnquiry.create).toHaveBeenCalledTimes(1);
       expect(emailService.sendContactNotification).toHaveBeenCalledTimes(1);
-      expect(mockSavedDoc.emailStatus).toBe('sent');
-      expect(mockSavedDoc.save).toHaveBeenCalled();
     });
   });
 
@@ -173,16 +169,13 @@ describe('Portfolio Backend API Tests', () => {
         email: 'sarah@example.com',
         service: 'Backend Architecture & APIs',
         message: 'Need help designing high-throughput distributed microservices.',
-        emailStatus: 'pending',
-        emailError: undefined as string | undefined,
-        createdAt: new Date(),
-        save: vi.fn().mockResolvedValue(true)
+        createdAt: new Date()
       };
 
       vi.spyOn(ContactEnquiry, 'create').mockResolvedValue(mockSavedDoc as any);
       vi.spyOn(emailService, 'sendContactNotification').mockResolvedValue({
         success: false,
-        error: 'Resend API rate limit exceeded'
+        error: 'SMTP connection timeout'
       });
 
       const res = await request(app)
@@ -198,9 +191,6 @@ describe('Portfolio Backend API Tests', () => {
       expect(res.body.success).toBe(false);
       expect(res.body.message).toContain('email notification delivery failed');
       expect(res.body).toHaveProperty('enquiryId', 'mock_doc_id_456');
-      expect(mockSavedDoc.emailStatus).toBe('failed');
-      expect(mockSavedDoc.emailError).toBe('Resend API rate limit exceeded');
-      expect(mockSavedDoc.save).toHaveBeenCalled();
     });
   });
 });

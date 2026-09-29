@@ -32,28 +32,22 @@ const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean)
     ),
-  // SMTP Direct Email Credentials (e.g. Gmail SMTP)
   SMTP_HOST: z.string().default('smtp.gmail.com'),
   SMTP_PORT: z
     .string()
     .default('587')
-    .transform((val) => parseInt(val, 10)),
+    .transform((val) => Number.parseInt(val, 10))
+    .refine((port) => Number.isInteger(port) && port > 0 && port <= 65535, {
+      message: 'SMTP_PORT must be a valid port number between 1 and 65535'
+    }),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM_EMAIL: z.string().optional(),
   SMTP_FROM_NAME: z.string().default('TheSiniySky'),
-
-  // Resend API Alternative / Fallback
-  RESEND_API_KEY: z.string().optional(),
-
-  // Primary inbox to receive enquiry notifications
   CONTACT_EMAIL: z
     .string()
     .email('CONTACT_EMAIL must be a valid email address')
-    .default('akashkumarhzb121@gmail.com'),
-  EMAIL_FROM: z
-    .string()
-    .default('Portfolio Contact <onboarding@resend.dev>')
+    .default('akashkumarhzb121@gmail.com')
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

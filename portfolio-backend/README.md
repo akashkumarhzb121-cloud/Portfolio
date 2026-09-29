@@ -4,10 +4,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Express](https://img.shields.io/badge/Express-5.2-black?logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-Mongoose-emerald?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
-[![Resend](https://img.shields.io/badge/Resend-Email_API-black?logo=resend&logoColor=white)](https://resend.com)
 [![Render Ready](https://img.shields.io/badge/Render-Configured-46E3B7?logo=render&logoColor=white)](https://render.com)
 
-A high-reliability, production-ready backend service providing contact inquiry capture, strict input validation, MongoDB Atlas persistence, rate limiting, and Resend email notifications for Akash Kumar's portfolio.
+A small contact API that validates enquiries, stores them in MongoDB, and sends inbox notifications through SMTP.
 
 ---
 
@@ -19,7 +18,7 @@ A high-reliability, production-ready backend service providing contact inquiry c
 - [Local Setup & Development](#local-setup--development)
 - [Automated Testing](#automated-testing)
 - [MongoDB Atlas Setup Guide](#mongodb-atlas-setup-guide)
-- [Resend Setup Guide](#resend-setup-guide)
+- [SMTP Setup](#smtp-setup-gmail-app-password)
 - [Render Deployment Guide](#render-deployment-guide)
 - [Failure & Duplicate Submission Policy](#failure--duplicate-submission-policy)
 
@@ -32,7 +31,7 @@ A high-reliability, production-ready backend service providing contact inquiry c
 - **Framework**: Express 5
 - **Database & ODM**: MongoDB Atlas with Mongoose
 - **Validation**: Zod schema validation
-- **Email Engine**: Resend API
+- **Email**: SMTP via Nodemailer
 - **Security & Protection**:
   - `helmet`: Secure HTTP response headers
   - `cors`: Strict origin whitelisting (`FRONTEND_ORIGINS`) with no wildcards
@@ -49,7 +48,7 @@ A high-reliability, production-ready backend service providing contact inquiry c
 - **Root Directory Rule**:
   - Render must be pointed to `portfolio-backend` as its Root Directory.
   - Vercel must be pointed to `portfolio-frontend` as its Root Directory.
-  - Backend secrets (`MONGODB_URI`, `RESEND_API_KEY`) must **never** be placed in frontend code or Vercel environment variables.
+  - Backend secrets (`MONGODB_URI`, `SMTP_PASSWORD`) must **never** be placed in frontend code or Vercel environment variables.
 
 ---
 
@@ -95,7 +94,7 @@ A high-reliability, production-ready backend service providing contact inquiry c
 | `message` | string | Trimmed, min 10 chars, max 5000 chars | `"Project details..."` |
 
 #### Responses
-- **`201 Created`**: Both MongoDB persistence and Resend email notification succeeded.
+- **`201 Created`**: MongoDB persistence and SMTP notification succeeded.
 ```json
 {
   "success": true,
@@ -139,11 +138,6 @@ A high-reliability, production-ready backend service providing contact inquiry c
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` in `portfolio-backend`:
-```bash
-cp .env.example .env
-```
-
 | Variable | Required | Default / Example | Purpose |
 | :--- | :--- | :--- | :--- |
 | `PORT` | Optional | `5000` | Port for Express server (assigned automatically on Render) |
@@ -152,13 +146,13 @@ cp .env.example .env
 | `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
 | `SMTP_HOST` | Optional | `smtp.gmail.com` | SMTP host server for direct email delivery |
 | `SMTP_PORT` | Optional | `587` | SMTP port (`587` for STARTTLS, `465` for SSL) |
-| `SMTP_USER` | Optional | `your-email@gmail.com` | SMTP account email address |
-| `SMTP_PASSWORD` | Optional | `xxxx xxxx xxxx xxxx` | SMTP password or Google App Password (16 characters) |
-| `SMTP_FROM_EMAIL`| Optional | `your-email@gmail.com` | From email header |
+| `SMTP_USER` | For email delivery | `your-email@gmail.com` | SMTP account email address |
+| `SMTP_PASSWORD` | For email delivery | Google App Password | SMTP password or Google App Password |
+| `SMTP_FROM_EMAIL`| Optional | Same as `SMTP_USER` | From email address |
 | `SMTP_FROM_NAME` | Optional | `TheSiniySky` | Display sender name |
-| `CONTACT_EMAIL` | **Required** | `akashkumarhzb121@gmail.com` | Destination inbox for receiving contact enquiries |
-| `RESEND_API_KEY` | Recommended for Render | `re_xxxxxxxxxxxxxxxxxxxx` | Secret API key from Resend dashboard; used if SMTP is unavailable |
-| `EMAIL_FROM` | Optional | `Portfolio Contact <onboarding@resend.dev>` | Resend sender address if using Resend |
+| `CONTACT_EMAIL` | Optional | `akashkumarhzb121@gmail.com` | Inbox that receives contact notifications |
+
+Create a `.env` file in this directory for local development. SMTP credentials are required to send notifications; if they are missing, the contact is still saved and the API returns an explicit delivery error.
 
 ---
 
@@ -221,7 +215,7 @@ npm run typecheck
 
 ## SMTP Email Setup (Gmail App Password)
 
-To receive inquiries directly in your inbox using Gmail:
+To send enquiry notifications to your inbox using Gmail:
 1. Go to your [Google Account Security Settings](https://myaccount.google.com/security).
 2. Ensure **2-Step Verification** is turned ON.
 3. Under "2-Step Verification", navigate to **App passwords** (or search "App passwords" in the Google Account search bar).
@@ -232,7 +226,6 @@ To receive inquiries directly in your inbox using Gmail:
    - `SMTP_PORT`: `587`
    - `SMTP_USER`: `your-email@gmail.com`
    - `SMTP_PASSWORD`: `ssaa enym isut bswo`
-   - `SMTP_FROM_EMAIL`: `your-email@gmail.com`
    - `SMTP_FROM_NAME`: `TheSiniySky`
    - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
 
@@ -284,10 +277,12 @@ This happens when Render uses its default Web Service settings:
    - `NODE_ENV`: `production`
    - `MONGODB_URI`: `<your MongoDB Atlas connection string>`
    - `FRONTEND_ORIGINS`: `https://your-portfolio.vercel.app,http://localhost:5173`
-   - `RESEND_API_KEY`: `<your Resend API key>` *(recommended: HTTPS works where SMTP connections time out)*
-   - `EMAIL_FROM`: `Portfolio Contact <onboarding@resend.dev>` *(or a sender on a domain verified in Resend)*
-   - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
-   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`: *(optional Gmail SMTP; Resend is tried automatically if SMTP fails)*
+   - `SMTP_HOST`: `smtp.gmail.com`
+   - `SMTP_PORT`: `587`
+   - `SMTP_USER`: `<your Gmail address>`
+   - `SMTP_PASSWORD`: `<your Google App Password>`
+   - `SMTP_FROM_NAME`: `TheSiniySky`
+   - `CONTACT_EMAIL`: `<inbox for notifications>`
 6. Click **Manual Deploy** -> **Deploy latest commit**.
 7. Once deployed, verify `https://your-service.onrender.com/health` returns status `200 OK`.
 
@@ -295,8 +290,7 @@ This happens when Render uses its default Web Service settings:
 
 ## Failure & Duplicate Submission Policy
 
-- **Atomic Status Tracking**: Every enquiry begins with `emailStatus: 'pending'`. Upon email dispatch confirmation, it transitions to `'sent'`. If email dispatch fails, it is marked as `'failed'` with `emailError` containing the exact error.
 - **No False Positives**: The frontend is explicitly notified via `502 Bad Gateway` if email delivery fails. It will **never** display a success toast if your inbox was not reached.
-- **SMTP Fallback**: When SMTP times out or is unreachable, the backend tries Resend if `RESEND_API_KEY` is configured. Render deployments should prefer Resend because outbound Gmail SMTP connections may be unavailable.
+- **SMTP Only**: There is no Resend fallback. Confirm the hosting provider allows outbound SMTP and configure valid SMTP credentials.
 - **Saved Enquiry Notice**: A `502` response includes the saved enquiry reference. The frontend tells the visitor the enquiry was recorded and to include that reference if they email directly.
 - **Retry Handling**: If a visitor retries after an email delivery failure or network error, a fresh enquiry record is created in MongoDB with its own unique `_id` and timestamp. The site owner can still retrieve all enquiries directly from MongoDB Atlas at any time.

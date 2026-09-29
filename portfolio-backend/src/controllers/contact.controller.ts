@@ -21,23 +21,15 @@ export async function submitContact(
     }
 
     const validData = parseResult.data;
-    const clientIp =
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      req.ip ||
-      req.socket.remoteAddress;
-    const userAgent = req.headers['user-agent'];
 
-    // 2. Persist enquiry into MongoDB Atlas
+    // Save the enquiry before sending so it remains available if SMTP delivery fails.
     let enquiry;
     try {
       enquiry = await ContactEnquiry.create({
         name: validData.name,
         email: validData.email,
         service: validData.service,
-        message: validData.message,
-        ip: clientIp,
-        userAgent,
-        emailStatus: 'pending'
+        message: validData.message
       });
     } catch (dbErr: unknown) {
       console.error('❌ Database save failure for contact enquiry:', dbErr);
@@ -48,23 +40,11 @@ export async function submitContact(
       return;
     }
 
-    // 3. Dispatch notification email via Resend
-    const emailResult = await sendContactNotification(validData, {
-      ip: clientIp,
-      createdAt: enquiry.createdAt
-    });
+    const emailResult = await sendContactNotification(validData);
 
     if (!emailResult.success) {
       console.error(`⚠️ Email dispatch failed for enquiry ${enquiry._id}:`, emailResult.error);
 
-      // Record failure state in MongoDB
-      enquiry.emailStatus = 'failed';
-      enquiry.emailError = emailResult.error || 'Email dispatch failed';
-      await enquiry.save().catch((saveErr) => {
-        console.error('Failed to update enquiry failure state:', saveErr);
-      });
-
-      // Explicit failure: do NOT report false success to user
       res.status(502).json({
         success: false,
         message: 'Your enquiry was recorded in the database, but email notification delivery failed. Please reach out directly if urgent.',
@@ -72,12 +52,6 @@ export async function submitContact(
       });
       return;
     }
-
-    // 4. Update status to sent upon successful email dispatch
-    enquiry.emailStatus = 'sent';
-    await enquiry.save().catch((saveErr) => {
-      console.error('Failed to update enquiry sent state:', saveErr);
-    });
 
     res.status(201).json({
       success: true,

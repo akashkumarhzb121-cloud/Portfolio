@@ -1,14 +1,10 @@
-import { Schema, model, type Document, type InferSchemaType } from 'mongoose';
+import { Schema, model, type Document } from 'mongoose';
 
 export interface IContactEnquiry extends Document {
   name: string;
   email: string;
   service: string;
   message: string;
-  ip?: string;
-  userAgent?: string;
-  emailStatus: 'pending' | 'sent' | 'failed';
-  emailError?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,23 +37,6 @@ const contactEnquirySchema = new Schema<IContactEnquiry>(
       trim: true,
       minlength: [10, 'Message must be at least 10 characters'],
       maxlength: [5000, 'Message cannot exceed 5000 characters']
-    },
-    ip: {
-      type: String,
-      trim: true
-    },
-    userAgent: {
-      type: String,
-      trim: true
-    },
-    emailStatus: {
-      type: String,
-      enum: ['pending', 'sent', 'failed'],
-      default: 'pending'
-    },
-    emailError: {
-      type: String,
-      trim: true
     }
   },
   {
