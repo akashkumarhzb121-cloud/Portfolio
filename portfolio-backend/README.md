@@ -144,8 +144,8 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 | `NODE_ENV` | Optional | `development` | Runtime environment (`development`, `production`, `test`) |
 | `MONGODB_URI` | **Required** | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/portfolio` | Connection URI for MongoDB Atlas database |
 | `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
-| `SMTP_HOST` | Optional | `smtp.gmail.com` | SMTP host server for direct email delivery |
-| `SMTP_PORT` | Optional | `587` | SMTP port (`587` for STARTTLS, `465` for SSL) |
+| `SMTP_HOST` | Required in production | SMTP provider's relay host | SMTP server hostname; configure the host supplied by your provider |
+| `SMTP_PORT` | Optional | `2525` | SMTP port (`2525` for provider-supported STARTTLS, `465` for SSL) |
 | `SMTP_USER` | For email delivery | `your-email@gmail.com` | SMTP account email address |
 | `SMTP_PASSWORD` | For email delivery | Google App Password | SMTP password or Google App Password |
 | `SMTP_FROM_EMAIL`| Optional | Same as `SMTP_USER` | From email address |
@@ -213,21 +213,23 @@ npm run typecheck
 
 ---
 
-## SMTP Email Setup (Gmail App Password)
+## SMTP Email Setup
 
-To send enquiry notifications to your inbox using Gmail:
+Use the SMTP credentials supplied by your email provider. If using Gmail, create an App Password:
 1. Go to your [Google Account Security Settings](https://myaccount.google.com/security).
 2. Ensure **2-Step Verification** is turned ON.
 3. Under "2-Step Verification", navigate to **App passwords** (or search "App passwords" in the Google Account search bar).
 4. Create a new App Password (e.g. Name: `Portfolio Contact Backend`).
 5. Copy the 16-character generated password (e.g. `ssaa enym isut bswo`).
-6. Set the following environment variables in `.env` (locally) and on Render:
+6. Set the following environment variables locally:
    - `SMTP_HOST`: `smtp.gmail.com`
    - `SMTP_PORT`: `587`
    - `SMTP_USER`: `your-email@gmail.com`
    - `SMTP_PASSWORD`: `ssaa enym isut bswo`
    - `SMTP_FROM_NAME`: `TheSiniySky`
    - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
+
+For Render, configure the relay hostname and port supplied by your provider. Use port `2525` only if that provider supports SMTP/STARTTLS on it; Gmail's standard SMTP ports `465` and `587` are not suitable when Render blocks outbound SMTP on those ports. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, and `SMTP_PASSWORD` in the Render service environment. Non-465 connections require STARTTLS.
 
 ---
 

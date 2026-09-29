@@ -4,8 +4,8 @@ const mocks = vi.hoisted(() => ({
   createTransport: vi.fn(),
   sendMail: vi.fn(),
   env: {
-    SMTP_HOST: 'smtp.gmail.com',
-    SMTP_PORT: 587,
+    SMTP_HOST: 'smtp.provider.example',
+    SMTP_PORT: 2525,
     SMTP_USER: 'sender@example.com',
     SMTP_PASSWORD: 'test-password',
     SMTP_FROM_EMAIL: 'sender@example.com',
@@ -25,8 +25,8 @@ describe('sendContactNotification', () => {
     vi.resetModules();
     vi.clearAllMocks();
     Object.assign(mocks.env, {
-      SMTP_HOST: 'smtp.gmail.com',
-      SMTP_PORT: 587,
+      SMTP_HOST: 'smtp.provider.example',
+      SMTP_PORT: 2525,
       SMTP_USER: 'sender@example.com',
       SMTP_PASSWORD: 'test-password',
       SMTP_FROM_EMAIL: 'sender@example.com',
@@ -53,9 +53,10 @@ describe('sendContactNotification', () => {
     });
     expect(mocks.createTransport).toHaveBeenCalledWith(
       expect.objectContaining({
-        host: 'smtp.gmail.com',
-        port: 587,
+        host: 'smtp.provider.example',
+        port: 2525,
         secure: false,
+        requireTLS: true,
         connectionTimeout: 10000
       })
     );
@@ -87,7 +88,9 @@ describe('sendContactNotification', () => {
   });
 
   it('returns an SMTP error without trying another provider', async () => {
-    mocks.sendMail.mockRejectedValue(new Error('SMTP connection timeout'));
+    mocks.sendMail.mockRejectedValue(
+      Object.assign(new Error('SMTP connection timeout'), { code: 'ETIMEDOUT' })
+    );
     const { sendContactNotification } = await import('../src/services/email.service.js');
 
     const result = await sendContactNotification({
@@ -97,7 +100,33 @@ describe('sendContactNotification', () => {
       message: 'Please contact me about a new project.'
     });
 
-    expect(result).toEqual({ success: false, error: 'SMTP connection timeout' });
+    expect(result).toEqual({
+      success: false,
+      error: 'SMTP connection timeout',
+      errorCode: 'ETIMEDOUT'
+    });
     expect(mocks.sendMail).toHaveBeenCalledOnce();
+  });
+
+  it('includes a safe SMTP response code for provider authentication errors', async () => {
+    mocks.sendMail.mockRejectedValue(
+      Object.assign(new Error('Authentication failed'), {
+        code: 'EAUTH',
+        responseCode: 535
+      })
+    );
+    const { sendContactNotification } = await import('../src/services/email.service.js');
+
+    const result = await sendContactNotification({
+      name: 'Jane Doe',
+      email: 'jane@example.com',
+      service: 'Full-Stack Web Development',
+      message: 'Please contact me about a new project.'
+    });
+
+    expect(result).toMatchObject({
+      success: false,
+      errorCode: 'EAUTH/SMTP_535'
+    });
   });
 });

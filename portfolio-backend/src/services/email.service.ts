@@ -10,6 +10,7 @@ function getSmtpTransporter(): Transporter {
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_PORT === 465,
+      requireTLS: env.SMTP_PORT !== 465,
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 20000,
@@ -26,6 +27,22 @@ export interface SendNotificationResult {
   success: boolean;
   messageId?: string;
   error?: string;
+  errorCode?: string;
+}
+
+function getSmtpErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  const codes: string[] = [];
+  if ('code' in error && typeof error.code === 'string') {
+    codes.push(error.code);
+  }
+  if ('responseCode' in error && typeof error.responseCode === 'number') {
+    codes.push(`SMTP_${error.responseCode}`);
+  }
+  return codes.length > 0 ? codes.join('/') : undefined;
 }
 
 export async function sendContactNotification(input: ContactInput): Promise<SendNotificationResult> {
@@ -62,7 +79,13 @@ export async function sendContactNotification(input: ContactInput): Promise<Send
     return { success: true, messageId: info.messageId };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown SMTP delivery error';
-    console.error('SMTP contact notification failed:', message);
-    return { success: false, error: message };
+    const errorCode = getSmtpErrorCode(error);
+    console.error('SMTP contact notification failed:', {
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      errorCode,
+      message
+    });
+    return { success: false, error: message, errorCode };
   }
 }

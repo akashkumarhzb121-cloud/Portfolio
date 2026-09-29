@@ -175,7 +175,8 @@ describe('Portfolio Backend API Tests', () => {
       vi.spyOn(ContactEnquiry, 'create').mockResolvedValue(mockSavedDoc as any);
       vi.spyOn(emailService, 'sendContactNotification').mockResolvedValue({
         success: false,
-        error: 'SMTP connection timeout'
+        error: 'SMTP connection timeout',
+        errorCode: 'ETIMEDOUT'
       });
 
       const res = await request(app)
@@ -191,6 +192,7 @@ describe('Portfolio Backend API Tests', () => {
       expect(res.body.success).toBe(false);
       expect(res.body.message).toContain('email notification delivery failed');
       expect(res.body).toHaveProperty('enquiryId', 'mock_doc_id_456');
+      expect(res.body).toHaveProperty('deliveryCode', 'ETIMEDOUT');
     });
   });
 });

@@ -87,12 +87,14 @@ export default function Contact() {
         message?: string;
         errors?: unknown;
         enquiryId?: string;
+        deliveryCode?: string;
       } | null = await response.json().catch(() => null);
 
       if (!response.ok) {
         if (response.status === 502 && data?.enquiryId) {
+          const diagnostic = data.deliveryCode ? ` SMTP code: ${data.deliveryCode}.` : '';
           toast.error(
-            `Your enquiry was saved (reference ${data.enquiryId}), but the email notification failed. Please email ${directEmail} and include this reference.`,
+            `Your enquiry was saved (reference ${data.enquiryId}), but the email notification failed.${diagnostic} Please email ${directEmail} and include this reference.`,
             { duration: 10000 }
           );
           return;

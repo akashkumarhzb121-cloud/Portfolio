@@ -48,7 +48,8 @@ export async function submitContact(
       res.status(502).json({
         success: false,
         message: 'Your enquiry was recorded in the database, but email notification delivery failed. Please reach out directly if urgent.',
-        enquiryId: enquiry._id
+        enquiryId: enquiry._id,
+        deliveryCode: emailResult.errorCode
       });
       return;
     }
