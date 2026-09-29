@@ -199,19 +199,20 @@ cp .env.example .env
 ```
 
 ```env
-# For local backend testing (running portfolio-backend on port 5000):
-# VITE_CONTACT_FORM_ENDPOINT=http://localhost:5000/api/contact
+# Preferred: send contact form submissions directly to Formspree.
+# Create a form in Formspree and use its endpoint URL (https://formspree.io/f/<form-id>).
+# VITE_FORMSPREE_ENDPOINT=https://formspree.io/f/YOUR_FORM_ID
 
-# For production deployment on Vercel:
-VITE_CONTACT_FORM_ENDPOINT=https://YOUR-RENDER-SERVICE.onrender.com/api/contact
+# Optional fallback: use the portfolio backend instead.
+# VITE_CONTACT_FORM_ENDPOINT=http://localhost:5000/api/contact
 ```
 
 > [!IMPORTANT]
 > **Secrets Security**:
-> Never place backend secrets (`MONGODB_URI`, `RESEND_API_KEY`, etc.) in `portfolio-frontend` or Vercel environment variables. All `VITE_*` variables are embedded into client-side JavaScript bundles and publicly accessible to visitors.
+> Never place backend secrets (`MONGODB_URI`, `RESEND_API_KEY`, etc.) in `portfolio-frontend` or Vercel environment variables. All `VITE_*` variables are embedded into client-side JavaScript bundles and publicly accessible to visitors. A Formspree form endpoint is intended for browser use, but configure Formspree's spam protection.
 
 > [!NOTE]
-> If `VITE_CONTACT_FORM_ENDPOINT` is not configured, the contact form displays an informational notice and opens the visitor's native email client with pre-filled details. Once configured, all submissions are securely handled by the Render backend.
+> `VITE_FORMSPREE_ENDPOINT`, when set, is preferred and receives submissions directly from the browser. This route does not save enquiries to the portfolio MongoDB backend. If it is unset, `VITE_CONTACT_FORM_ENDPOINT` is used; with the Render backend, enquiries are stored in MongoDB and email delivery depends on the backend's configured provider. If neither variable is set, the contact form opens the visitor's native email client with pre-filled details.
 
 ---
 
@@ -226,19 +227,20 @@ The frontend is deployed to **Vercel** independently of the backend.
 - **Output Directory**: `dist`
 - **Install Command**: `npm install`
 
-### Setting up the Backend Endpoint on Vercel
+### Setting up Formspree on Vercel
 1. Go to your project on the [Vercel Dashboard](https://vercel.com/dashboard).
 2. Navigate to **Settings** -> **Environment Variables**.
-3. Add a new variable:
-   - **Key**: `VITE_CONTACT_FORM_ENDPOINT`
-   - **Value**: `https://YOUR-RENDER-SERVICE.onrender.com/api/contact` (replace with your live Render backend URL)
+3. Create a form in Formspree, enable email notifications to your inbox, and copy its endpoint.
+4. Add a Vercel environment variable:
+   - **Key**: `VITE_FORMSPREE_ENDPOINT`
+   - **Value**: `https://formspree.io/f/YOUR_FORM_ID` (use the actual endpoint shown for your Formspree form)
    - **Environment**: Select `Production`, `Preview`, and `Development`.
-4. Trigger a redeployment:
+5. Trigger a redeployment:
    - Go to the **Deployments** tab, click the three dots (`...`) on the latest deployment, and select **Redeploy**.
    - Alternatively, push a new commit to your `main` branch.
 
 > [!NOTE]
-> Ensure your deployed Vercel domain (e.g. `https://your-portfolio.vercel.app`) is included in the backend's `FRONTEND_ORIGINS` environment variable on Render so CORS requests are accepted.
+> When `VITE_FORMSPREE_ENDPOINT` is configured, submissions go directly to Formspree and do not depend on the Render API, Render CORS, MongoDB, or SMTP/Resend configuration. Keep Formspree's allowed-domain/spam settings aligned with your deployed Vercel domain.
 
 ---
 

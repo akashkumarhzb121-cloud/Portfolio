@@ -57,12 +57,13 @@ export default function Contact() {
   };
 
   const onSubmit = async (values: ContactFormValues) => {
-    const rawEndpoint = import.meta.env.VITE_CONTACT_FORM_ENDPOINT;
+    const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT?.trim();
+    const rawEndpoint = formspreeEndpoint || import.meta.env.VITE_CONTACT_FORM_ENDPOINT;
     const endpoint = getNormalizedEndpoint(rawEndpoint);
 
     if (!endpoint) {
       toast.info(
-        'Frontend demo mode: VITE_CONTACT_FORM_ENDPOINT is not yet configured. Opening your mail client as fallback.',
+        'The contact form is not configured. Opening your mail client as fallback.',
         { duration: 6000 }
       );
 
@@ -84,7 +85,11 @@ export default function Contact() {
         body: JSON.stringify(values)
       });
 
-      const data = await response.json().catch(() => null);
+      const data: {
+        message?: string;
+        errors?: unknown;
+        enquiryId?: string;
+      } | null = await response.json().catch(() => null);
 
       if (!response.ok) {
         if (response.status === 502 && data?.enquiryId) {
@@ -96,10 +101,21 @@ export default function Contact() {
         }
 
         let errorMsg = data?.message;
-        if (!errorMsg && data?.errors) {
+        if (!errorMsg && Array.isArray(data?.errors)) {
+          errorMsg = data.errors
+            .map((error: unknown) => {
+              if (typeof error === 'string') return error;
+              if (error && typeof error === 'object' && 'message' in error) {
+                return String(error.message);
+              }
+              return '';
+            })
+            .filter(Boolean)
+            .join('; ');
+        } else if (!errorMsg && data?.errors && typeof data.errors === 'object') {
           errorMsg = Object.values(data.errors)
             .flat()
-            .filter(Boolean)
+            .filter((error): error is string => typeof error === 'string')
             .join('; ');
         }
         throw new Error(errorMsg || `Submission failed with status ${response.status}`);
