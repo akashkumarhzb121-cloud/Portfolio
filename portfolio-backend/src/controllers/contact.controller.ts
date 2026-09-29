@@ -22,7 +22,7 @@ export async function submitContact(
 
     const validData = parseResult.data;
 
-    // Save the enquiry before sending so it remains available if SMTP delivery fails.
+    // Save the enquiry before dispatching its email notification.
     let enquiry;
     try {
       enquiry = await ContactEnquiry.create({

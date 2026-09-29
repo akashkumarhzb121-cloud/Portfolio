@@ -6,7 +6,7 @@
 [![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-Mongoose-emerald?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Render Ready](https://img.shields.io/badge/Render-Configured-46E3B7?logo=render&logoColor=white)](https://render.com)
 
-A small contact API that validates enquiries, stores them in MongoDB, and sends inbox notifications through SMTP.
+A small contact API that validates enquiries, stores them in MongoDB, and sends inbox notifications through Resend.
 
 ---
 
@@ -18,7 +18,7 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 - [Local Setup & Development](#local-setup--development)
 - [Automated Testing](#automated-testing)
 - [MongoDB Atlas Setup Guide](#mongodb-atlas-setup-guide)
-- [SMTP Setup](#smtp-setup-gmail-app-password)
+- [Resend Setup](#resend-email-setup)
 - [Render Deployment Guide](#render-deployment-guide)
 - [Failure & Duplicate Submission Policy](#failure--duplicate-submission-policy)
 
@@ -31,7 +31,7 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 - **Framework**: Express 5
 - **Database & ODM**: MongoDB Atlas with Mongoose
 - **Validation**: Zod schema validation
-- **Email**: SMTP via Nodemailer
+- **Email**: Resend HTTP API
 - **Security & Protection**:
   - `helmet`: Secure HTTP response headers
   - `cors`: Strict origin whitelisting (`FRONTEND_ORIGINS`) with no wildcards
@@ -48,7 +48,7 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 - **Root Directory Rule**:
   - Render must be pointed to `portfolio-backend` as its Root Directory.
   - Vercel must be pointed to `portfolio-frontend` as its Root Directory.
-  - Backend secrets (`MONGODB_URI`, `SMTP_PASSWORD`) must **never** be placed in frontend code or Vercel environment variables.
+  - Backend secrets (`MONGODB_URI`, `RESEND_API_KEY`) must **never** be placed in frontend code or Vercel environment variables.
 
 ---
 
@@ -94,7 +94,7 @@ A small contact API that validates enquiries, stores them in MongoDB, and sends 
 | `message` | string | Trimmed, min 10 chars, max 5000 chars | `"Project details..."` |
 
 #### Responses
-- **`201 Created`**: The enquiry was saved to MongoDB. SMTP notification is dispatched asynchronously and may fail independently.
+- **`201 Created`**: The enquiry was saved to MongoDB. Resend notification is dispatched asynchronously and may fail independently.
 ```json
 {
   "success": true,
@@ -137,14 +137,10 @@ Email notification failures are logged by the backend and do not change the resp
 | `NODE_ENV` | Optional | `development` | Runtime environment (`development`, `production`, `test`) |
 | `MONGODB_URI` | **Required** | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/portfolio` | Connection URI for MongoDB Atlas database |
 | `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
-| `SMTP_HOST` | Required in production | SMTP provider's relay host | SMTP server hostname; configure the host supplied by your provider |
-| `SMTP_USER` | For email delivery | `your-email@gmail.com` | SMTP account email address |
-| `SMTP_PASSWORD` | For email delivery | Google App Password | SMTP password or Google App Password |
-| `SMTP_FROM_EMAIL`| Optional | Same as `SMTP_USER` | From email address |
-| `SMTP_FROM_NAME` | Optional | `TheSiniySky` | Display sender name |
+| `RESEND_API_KEY` | **Required** | `re_...` | Resend API key |
 | `CONTACT_EMAIL` | Optional | `akashkumarhzb121@gmail.com` | Inbox that receives contact notifications |
 
-Create a `.env` file in this directory for local development. SMTP credentials are required to send notifications; if they are missing, the contact is still saved and the API returns an explicit delivery error.
+Create a `.env` file in this directory for local development and set `RESEND_API_KEY`. Contact notifications are sent from `onboarding@resend.dev` until a sender domain is verified.
 
 ---
 
@@ -205,22 +201,12 @@ npm run typecheck
 
 ---
 
-## SMTP Email Setup
+## Resend Email Setup
 
-Use the SMTP credentials supplied by your email provider. If using Gmail, create an App Password:
-1. Go to your [Google Account Security Settings](https://myaccount.google.com/security).
-2. Ensure **2-Step Verification** is turned ON.
-3. Under "2-Step Verification", navigate to **App passwords** (or search "App passwords" in the Google Account search bar).
-4. Create a new App Password (e.g. Name: `Portfolio Contact Backend`).
-5. Copy the 16-character generated password (e.g. `ssaa enym isut bswo`).
-6. Set the following environment variables locally:
-   - `SMTP_HOST`: `smtp.gmail.com`
-   - `SMTP_USER`: `your-email@gmail.com`
-   - `SMTP_PASSWORD`: `ssaa enym isut bswo`
-   - `SMTP_FROM_NAME`: `TheSiniySky`
-   - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
-
-The backend connects to the configured SMTP host on port `465` using implicit TLS. If Render cannot reach the provider on that port, use an email provider/API supported by your hosting platform instead.
+1. Create an API key in your [Resend dashboard](https://resend.com/api-keys).
+2. Set `RESEND_API_KEY` in the backend environment.
+3. Set `CONTACT_EMAIL` to the inbox that should receive portfolio enquiries.
+4. Until your sending domain is verified, the backend uses `onboarding@resend.dev` as the sender. Resend sandbox restrictions may limit recipients to the account owner.
 
 ---
 
@@ -270,10 +256,7 @@ This happens when Render uses its default Web Service settings:
    - `NODE_ENV`: `production`
    - `MONGODB_URI`: `<your MongoDB Atlas connection string>`
    - `FRONTEND_ORIGINS`: `https://your-portfolio.vercel.app,http://localhost:5173`
-   - `SMTP_HOST`: `smtp.gmail.com`
-   - `SMTP_USER`: `<your Gmail address>`
-   - `SMTP_PASSWORD`: `<your Google App Password>`
-   - `SMTP_FROM_NAME`: `TheSiniySky`
+   - `RESEND_API_KEY`: `<your Resend API key>`
    - `CONTACT_EMAIL`: `<inbox for notifications>`
 6. Click **Manual Deploy** -> **Deploy latest commit**.
 7. Once deployed, verify `https://your-service.onrender.com/health` returns status `200 OK`.
@@ -282,7 +265,6 @@ This happens when Render uses its default Web Service settings:
 
 ## Failure & Duplicate Submission Policy
 
-- **Persistence First**: The API returns `201 Created` as soon as an enquiry is saved. SMTP notifications run asynchronously; a success response confirms persistence, not inbox delivery.
-- **SMTP Only**: There is no Resend fallback. Confirm the hosting provider allows outbound SMTP and configure valid SMTP credentials.
-- **Delivery Diagnostics**: SMTP failures are logged server-side with the enquiry ID and delivery error.
+- **Persistence First**: The API returns `201 Created` as soon as an enquiry is saved. Resend notifications run asynchronously; a success response confirms persistence, not inbox delivery.
+- **Delivery Diagnostics**: Resend failures are logged server-side with the enquiry ID and delivery error.
 - **Retry Handling**: If a visitor retries after an uncertain network failure, a fresh enquiry record is created in MongoDB with its own unique `_id` and timestamp. The site owner can retrieve all enquiries directly from MongoDB Atlas at any time.

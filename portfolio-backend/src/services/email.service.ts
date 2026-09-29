@@ -1,29 +1,8 @@
-import nodemailer, { type Transporter } from 'nodemailer';
+import { Resend } from 'resend';
 import { env } from '../config/env.js';
 import type { ContactInput } from '../schemas/contact.schema.js';
 
-let smtpTransporter: Transporter | null = null;
-
-function getSmtpTransporter(): Transporter {
-  if (!smtpTransporter) {
-    smtpTransporter = nodemailer.createTransport({
-      host: env.SMTP_HOST,
-      port: 465,
-      secure: true,
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-      tls: {
-        rejectUnauthorized: false
-      },
-      auth: {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASSWORD?.replace(/\s+/g, '')
-      }
-    });
-  }
-  return smtpTransporter;
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export interface SendNotificationResult {
   success: boolean;
@@ -32,38 +11,23 @@ export interface SendNotificationResult {
   errorCode?: string;
 }
 
-function getSmtpErrorCode(error: unknown): string | undefined {
+function getErrorCode(error: unknown): string | undefined {
   if (!error || typeof error !== 'object') {
     return undefined;
   }
 
-  const codes: string[] = [];
   if ('code' in error && typeof error.code === 'string') {
-    codes.push(error.code);
+    return error.code;
   }
-  if ('responseCode' in error && typeof error.responseCode === 'number') {
-    codes.push(`SMTP_${error.responseCode}`);
-  }
-  return codes.length > 0 ? codes.join('/') : undefined;
+  return 'name' in error && typeof error.name === 'string' ? error.name : undefined;
 }
 
 export async function sendContactNotification(input: ContactInput): Promise<SendNotificationResult> {
-  if (!env.SMTP_USER || !env.SMTP_PASSWORD) {
-    return {
-      success: false,
-      error: 'SMTP is not configured. Set SMTP_USER and SMTP_PASSWORD.'
-    };
-  }
-
   const recipient = env.CONTACT_EMAIL;
 
   try {
-    const transporter = getSmtpTransporter();
-    const info = await transporter.sendMail({
-      from: {
-        name: env.SMTP_FROM_NAME,
-        address: env.SMTP_FROM_EMAIL || env.SMTP_USER
-      },
+    const { data, error } = await resend.emails.send({
+      from: 'onboarding@resend.dev',
       to: recipient,
       replyTo: input.email,
       subject: `New Portfolio Enquiry: ${input.service} from ${input.name}`,
@@ -77,14 +41,23 @@ export async function sendContactNotification(input: ContactInput): Promise<Send
       ].join('\n')
     });
 
-    console.log(`Contact notification sent via SMTP to ${recipient} (${info.messageId})`);
-    return { success: true, messageId: info.messageId };
+    if (error) {
+      const errorCode = getErrorCode(error);
+      console.error('Resend contact notification failed:', {
+        recipient,
+        errorCode,
+        message: error.message
+      });
+      return { success: false, error: error.message, errorCode };
+    }
+
+    console.log(`Contact notification sent via Resend to ${recipient} (${data?.id})`);
+    return { success: true, messageId: data?.id };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown SMTP delivery error';
-    const errorCode = getSmtpErrorCode(error);
-    console.error('SMTP contact notification failed:', {
-      host: env.SMTP_HOST,
-      port: 465,
+    const message = error instanceof Error ? error.message : 'Unknown Resend delivery error';
+    const errorCode = getErrorCode(error);
+    console.error('Resend contact notification failed:', {
+      recipient,
       errorCode,
       message
     });

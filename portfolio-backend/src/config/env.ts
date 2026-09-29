@@ -32,11 +32,7 @@ const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean)
     ),
-  SMTP_HOST: z.string().default('smtp.gmail.com'),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASSWORD: z.string().optional(),
-  SMTP_FROM_EMAIL: z.string().optional(),
-  SMTP_FROM_NAME: z.string().default('TheSiniySky'),
+  RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   CONTACT_EMAIL: z
     .string()
     .email('CONTACT_EMAIL must be a valid email address')

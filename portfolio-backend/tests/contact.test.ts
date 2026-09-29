@@ -4,6 +4,26 @@ import { app } from '../src/app.js';
 import { ContactEnquiry } from '../src/models/enquiry.model.js';
 import * as emailService from '../src/services/email.service.js';
 
+const resendMocks = vi.hoisted(() => ({
+  sendEmail: vi.fn()
+}));
+
+vi.mock('resend', () => ({
+  Resend: class {
+    emails = { send: resendMocks.sendEmail };
+  }
+}));
+
+vi.mock('../src/config/env.js', () => ({
+  env: {
+    PORT: 5000,
+    NODE_ENV: 'test',
+    FRONTEND_ORIGINS: ['http://localhost:5173'],
+    RESEND_API_KEY: 're_test_api_key',
+    CONTACT_EMAIL: 'recipient@example.com'
+  }
+}));
+
 describe('Portfolio Backend API Tests', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -175,7 +195,7 @@ describe('Portfolio Backend API Tests', () => {
       vi.spyOn(ContactEnquiry, 'create').mockResolvedValue(mockSavedDoc as any);
       vi.spyOn(emailService, 'sendContactNotification').mockResolvedValue({
         success: false,
-        error: 'SMTP connection timeout',
+        error: 'Resend request failed',
         errorCode: 'ETIMEDOUT'
       });
 
@@ -223,7 +243,7 @@ describe('Portfolio Backend API Tests', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      finishEmail({ success: false, error: 'SMTP connection timeout' });
+      finishEmail({ success: false, error: 'Resend request failed' });
     });
   });
 });
