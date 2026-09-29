@@ -220,7 +220,7 @@ Use the SMTP credentials supplied by your email provider. If using Gmail, create
    - `SMTP_FROM_NAME`: `TheSiniySky`
    - `CONTACT_EMAIL`: `akashkumarhzb121@gmail.com`
 
-The backend connects to the configured SMTP host on port `587` using STARTTLS. If Render cannot reach the provider on that port, use an email provider/API supported by your hosting platform instead.
+The backend connects to the configured SMTP host on port `465` using implicit TLS. If Render cannot reach the provider on that port, use an email provider/API supported by your hosting platform instead.
 
 ---
 

@@ -8,9 +8,8 @@ function getSmtpTransporter(): Transporter {
   if (!smtpTransporter) {
     smtpTransporter = nodemailer.createTransport({
       host: env.SMTP_HOST,
-      port: 587,
-      secure: false,
-      requireTLS: true,
+      port: 465,
+      secure: true,
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 10000,
@@ -85,7 +84,7 @@ export async function sendContactNotification(input: ContactInput): Promise<Send
     const errorCode = getSmtpErrorCode(error);
     console.error('SMTP contact notification failed:', {
       host: env.SMTP_HOST,
-      port: 587,
+      port: 465,
       errorCode,
       message
     });
