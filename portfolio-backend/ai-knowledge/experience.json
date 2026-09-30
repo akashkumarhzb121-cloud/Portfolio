@@ -1,0 +1,51 @@
+{
+  "experience": [
+    {
+      "id": "codeup-internship",
+      "company": "Codeup",
+      "role": "Full Stack Development Intern",
+      "employment_type": "Internship",
+      "location": "Remote",
+      "duration": "Jun 2026 - Jul 2026",
+      "period": "45 days",
+      "summary": "Completed an intensive engineering internship focused on full-stack MERN architecture, secure role-based access systems, and production cloud deployments.",
+      "highlights": [
+        "Architected a comprehensive Student Management System featuring role-based access control (RBAC) across distinct Admin, Faculty, and Student portals.",
+        "Built modular RESTful APIs using Node.js and Express.js with robust JWT authentication and secure data persistence on MongoDB Atlas.",
+        "Managed end-to-end continuous deployment, performance monitoring, and debugging across Vercel and Render environments."
+      ],
+      "technologies": [
+        "React",
+        "Node.js",
+        "Express.js",
+        "MongoDB",
+        "JWT",
+        "REST APIs",
+        "Vercel",
+        "Render"
+      ]
+    },
+    {
+      "id": "novitech-internship",
+      "company": "Novitech Pvt. Ltd.",
+      "role": "Web Development Intern",
+      "employment_type": "Internship",
+      "location": "Remote",
+      "duration": "2024",
+      "period": "30 days",
+      "summary": "Delivered client-facing, high-performance web interfaces during a focused 30-day agile development sprint.",
+      "highlights": [
+        "Developed and deployed two client-ready production landing pages adhering to strict responsive design principles.",
+        "Ensured seamless cross-browser compatibility, mobile-first responsiveness, and optimized asset loading across mobile, tablet, and desktop views.",
+        "Collaborated with project stakeholders to translate Figma design specs into clean, semantic, and maintainable code."
+      ],
+      "technologies": [
+        "HTML5",
+        "CSS3",
+        "JavaScript (ES6+)",
+        "Responsive Web Design",
+        "Git"
+      ]
+    }
+  ]
+}

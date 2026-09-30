@@ -1,0 +1,55 @@
+{
+  "id": "netflix-streaming-clone",
+  "name": "Netflix Clone",
+  "category": "Media Streaming & Interface Engineering",
+  "featured": false,
+  "role": "Frontend Software Engineer",
+  "status": "Completed",
+  "timeline": "2025",
+  "tagline": "Responsive streaming application interface with dynamic TMDB media catalog integration.",
+  "description": "Full-featured Netflix web interface replica focused on fluid media exploration, asynchronous API data consumption, responsive carousel carousels, and trailer playback.",
+  "problem": "Building high-performance media catalog applications requires handling massive asynchronous image assets, seamless horizontal carousel interactions, and responsive multi-row categorical filtering without UI stutter.",
+  "solution": "Developed a modern React single-page application integrating The Movie Database (TMDB) API, utilizing dynamic banner trailers, categorized media rows, and optimized image CDN delivery.",
+  "metrics_and_highlights": [
+    "Integrated 8+ categorical TMDB API endpoints including Originals, Trending Now, Top Rated, and genre-specific rows.",
+    "Engineered dynamic hero billboard with randomized featured title metadata and background backdrop transitions.",
+    "Integrated embedded video player trailers matching user selection via YouTube/movie-trailer integrations.",
+    "Ensured fluid mobile-to-desktop responsive layout using modern CSS flex/grid and Tailwind CSS."
+  ],
+  "architecture_and_core_modules": {
+    "media_catalog_and_display": [
+      "Dynamic hero banner fetching daily trending releases with responsive backdrop fading",
+      "Horizontal scroll rows with hover zoom effects, poster aspect ratios, and smooth lateral scrolling",
+      "Categorical filtering across Movies, TV Series, Action, Comedy, Horror, and Documentaries"
+    ],
+    "integration_and_playback": [
+      "Asynchronous REST data consumption via Axios with centralized TMDB API query configurations",
+      "Interactive trailer overlay modals fetching official movie trailers upon poster click",
+      "Responsive navigation bar featuring scroll-threshold background opacity transitions"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React",
+      "JavaScript (ES6+)",
+      "HTML5",
+      "CSS3",
+      "Tailwind CSS",
+      "Axios"
+    ],
+    "apis_and_services": [
+      "The Movie Database (TMDB) API",
+      "YouTube IFrame API"
+    ],
+    "deployment_and_tools": [
+      "Vercel",
+      "Git",
+      "GitHub",
+      "VS Code"
+    ]
+  },
+  "links": {
+    "live_demo": "https://spotify-clone-1fd3.vercel.app/",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/Netflix-Clone"
+  }
+}

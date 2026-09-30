@@ -1,0 +1,51 @@
+{
+  "id": "premier-showcase-platform",
+  "name": "Premier",
+  "category": "Interactive Web & Digital Experience",
+  "featured": false,
+  "role": "Frontend Software Engineer",
+  "status": "Completed",
+  "timeline": "2025 - 2026",
+  "tagline": "Modern, dynamic web platform crafted with fluid animations and responsive component architecture.",
+  "description": "Interactive front-facing web experience engineered with high-impact visuals, optimized client-side routing, and modular component architecture focused on smooth user engagement and modern design aesthetics.",
+  "problem": "Modern web platforms often struggle to balance complex UI animations and rich typography with fast initial render times, mobile responsiveness, and clean code maintainability.",
+  "solution": "Built a responsive single-page application leveraging modern frontend build tooling, micro-animations, structured asset pipelines, and performance-tuned layout transitions.",
+  "metrics_and_highlights": [
+    "Architected lightweight component hierarchy optimizing First Contentful Paint (FCP) and smooth interaction frame rates.",
+    "Integrated modern responsive UI patterns with mobile-first CSS architecture.",
+    "Configured modern build tooling (Vite / React) for rapid Hot Module Replacement (HMR) and optimized static asset chunking.",
+    "Engineered dynamic navigation workflows and interactive sections tailored for desktop and mobile viewports."
+  ],
+  "architecture_and_core_modules": {
+    "interface_and_interactions": [
+      "Dynamic hero section with typography animations and responsive call-to-action pathways",
+      "Interactive content sections featuring subtle hover physics, card layouts, and scroll-linked reveals",
+      "Mobile-friendly drawer navigation with seamless viewport adaptation"
+    ],
+    "frontend_engineering": [
+      "Modular, reusable UI components following clean atomic design principles",
+      "Performance-tuned asset loading and CSS transitions ensuring 60fps rendering",
+      "Clean separation of UI layout primitives and interactive client logic"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React",
+      "JavaScript (ES6+)",
+      "HTML5",
+      "CSS3",
+      "Tailwind CSS",
+      "Vite"
+    ],
+    "tooling_and_deployment": [
+      "Vercel",
+      "Git",
+      "GitHub",
+      "VS Code"
+    ]
+  },
+  "links": {
+    "live_demo": "https://premier-rho.vercel.app/",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/premier"
+  }
+}

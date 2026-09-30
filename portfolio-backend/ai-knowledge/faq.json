@@ -1,0 +1,40 @@
+{
+  "faqs": [
+    {
+      "id": "faq-core-focus",
+      "category": "Expertise & Background",
+      "question": "What kind of engineering work do you specialize in?",
+      "answer": "I specialize in creative frontend engineering and scalable full-stack development[cite: 1, 12]. My core focus bridges interactive 3D WebGL experiences (Three.js, React Three Fiber, OGL) with production-grade web systems (React, Next.js, Node.js, Express, MongoDB, PostgreSQL)[cite: 1, 11, 12]."
+    },
+    {
+      "id": "faq-availability-roles",
+      "category": "Availability & Collaboration",
+      "question": "Are you available for full-time roles, internships, or freelance work?",
+      "answer": "Yes. I am actively open to Software Development Engineer (SDE) full-time roles, engineering internships, and selective high-impact freelance projects[cite: 1]. I am comfortable working across remote, hybrid, or on-site arrangements[cite: 1]."
+    },
+    {
+      "id": "faq-tech-stack",
+      "category": "Technical Architecture",
+      "question": "What is your primary technology stack?",
+      "answer": "My primary stack includes C++ and DSA for foundational problem solving[cite: 1], React 19, TypeScript, and Tailwind CSS for modern client interfaces[cite: 1, 11, 12], Node.js, Express, and RESTful APIs with JWT authentication for backend architectures, and Three.js/OGL for interactive 3D graphics."
+    },
+    {
+      "id": "faq-full-stack-capabilities",
+      "category": "Technical Architecture",
+      "question": "Do you build both frontend interfaces and backend infrastructure?",
+      "answer": "Yes. I engineer complete end-to-end architectures—from responsive, accessible client interfaces and 3D canvas shaders to secure REST APIs, role-based access control (RBAC), database schemas in MongoDB/PostgreSQL, and cloud deployments on Vercel and Render[cite: 1, 2, 4, 11, 12]."
+    },
+    {
+      "id": "faq-workflow-timeline",
+      "category": "Process & Delivery",
+      "question": "How do you manage project development and delivery timelines?",
+      "answer": "I follow an agile development lifecycle: translating Figma designs into modular component hierarchies[cite: 1, 7], setting up type-safe data contracts and validation layers (Zod, express-validator), implementing state and API layers, and setting up automated CI/CD deployments with health probes[cite: 11]."
+    },
+    {
+      "id": "faq-contact-channels",
+      "category": "Availability & Collaboration",
+      "question": "What is the best way to get in touch with you?",
+      "answer": "You can reach me directly via email at akashkumarhzb121@gmail.com, connect with me on LinkedIn (linkedin.com/in/akash-kumar-488074309), or submit an inquiry through the interactive contact form on my portfolio[cite: 1, 11, 12]."
+    }
+  ]
+}

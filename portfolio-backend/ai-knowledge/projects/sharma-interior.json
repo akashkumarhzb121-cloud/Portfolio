@@ -1,0 +1,57 @@
+{
+  "id": "sharma-interior-portfolio",
+  "name": "Sharma Interior",
+  "category": "Commercial Client Platform & Portfolio",
+  "featured": false,
+  "role": "Frontend Software Engineer",
+  "status": "Completed",
+  "timeline": "2026",
+  "tagline": "Modern responsive digital showcase and administrative portal for a Mumbai interior design studio.",
+  "description": "Production client-facing portfolio platform engineered to showcase architectural renovations, before-and-after project transformations, specialized design services, and promotional consultations with an integrated administrative management panel.",
+  "problem": "Traditional interior design practices lack interactive, high-performance web showcases to display before-and-after project imagery, detailed project specifications, and centralized client inquiry collection.",
+  "solution": "Built a responsive, mobile-first single-page application featuring multi-route client navigation, before/after visual showcases, project detail specifications, consultation intake forms, and an administrative dashboard.",
+  "metrics_and_highlights": [
+    "Engineered with React 19 and React Router DOM 7 for client-side navigation across 9 distinct routes.",
+    "Integrated dynamic project showcase architecture supporting before-and-after visual inspections, budget tiers, square footage specs, and client feedback.",
+    "Architected administrative authentication and dashboard interfaces for project indexing and inquiry management.",
+    "Built for performance and rapid delivery using Vite 8 and Tailwind CSS 3.4 with deployment on Vercel."
+  ],
+  "architecture_and_core_modules": {
+    "showcase_and_client_suites": [
+      "Portfolio gallery with before/after visual toggles and project category sorting",
+      "Dynamic project detail routes displaying scope, square footage, budget metrics, and client testimonials",
+      "Service catalog highlighting residential living spaces, commercial offices, and modular kitchen solutions",
+      "Promotional seasonal offers hub and direct client inquiry intake forms"
+    ],
+    "admin_and_management": [
+      "Authentication gate (/auth) for studio management and staff verification",
+      "Centralized administrative dashboard (/dashboard) for tracking incoming inquiries and curating project assets",
+      "Modular data architecture (src/data/index.js) separating styling metadata, project specs, and testimonials"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React 19",
+      "React Router DOM 7",
+      "Vite 8",
+      "Tailwind CSS 3",
+      "PostCSS",
+      "Autoprefixer",
+      "Lucide React"
+    ],
+    "code_quality_and_tooling": [
+      "ESLint 9",
+      "@vitejs/plugin-react",
+      "TypeScript Types (Definitions)"
+    ],
+    "deployment_and_infra": [
+      "Vercel (Production SPA Deployment)",
+      "Git",
+      "GitHub"
+    ]
+  },
+  "links": {
+    "live_demo": "https://sharma-interior.vercel.app",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/project-sharma-interior"
+  }
+}

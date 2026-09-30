@@ -1,0 +1,24 @@
+{
+  "basics": {
+    "name": "Akash Kumar",
+    "title": "Creative Technologist & Full-Stack Engineer",
+    "tagline": "Crafting interactive 3D web experiences and scalable, AI-driven applications.",
+    "summary": "Full-stack engineer specializing in the intersection of high-performance frontend architecture, WebGL/3D interfaces, and intelligent backend systems. Driven by modern UI aesthetics, fluid interactions, and production-grade engineering.",
+    "location": {
+      "country": "India",
+      "remote_ready": true
+    },
+    "availability": "Open to full-time roles & high-impact freelance projects"
+  },
+  "current_focus": [
+    "Interactive 3D Web & Creative Development (Three.js / WebGL)",
+    "Scalable Full-Stack Architecture (Next.js, TypeScript, Node.js)",
+    "Frontier AI Integrations & LLM Application Interfaces",
+    "Component Systems & Performance Engineering"
+  ],
+  "social_links": {
+    "portfolio": "https://skykumar.vercel.app",
+    "github": "https://github.com/akashkumarhzb121-cloud",
+    "linkedin": "https://www.linkedin.com/in/akash-kumar-488074309"
+  }
+}

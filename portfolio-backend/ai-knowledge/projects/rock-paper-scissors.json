@@ -1,0 +1,48 @@
+{
+  "id": "rock-paper-scissors-game",
+  "name": "Rock Paper Scissors",
+  "category": "Interactive Web Game & Logic Engineering",
+  "featured": false,
+  "role": "Frontend Developer",
+  "status": "Completed",
+  "timeline": "2025",
+  "tagline": "Interactive web-based game featuring dynamic DOM state updates and computer move algorithms.",
+  "description": "Responsive browser implementation of the classic Rock Paper Scissors game, engineered with pure JavaScript logic, dynamic score tracking, and smooth visual outcome transitions.",
+  "problem": "Simple browser games often suffer from clunky event handling, layout shifts on state updates, and an absence of persistent session scorekeeping.",
+  "solution": "Built a fast, lightweight web game that calculates game-theory outcomes against an automated computer opponent, featuring real-time DOM manipulation and animated victory/defeat states.",
+  "metrics_and_highlights": [
+    "Implemented game loop evaluating user moves against randomized computer algorithms.",
+    "Integrated persistent score tracking updating dynamically without page refreshes.",
+    "Engineered responsive UI controls with interactive hover effects and visual outcome banners.",
+    "Optimized with lightweight, zero-dependency vanilla web standards for instant load times."
+  ],
+  "architecture_and_core_modules": {
+    "gameplay_and_logic_engine": [
+      "Conditional decision matrix resolving win, loss, and draw game states",
+      "Pseudo-random move generator simulating an automated opponent",
+      "Dynamic session scoreboard maintaining win-loss streaks"
+    ],
+    "interface_and_interactions": [
+      "Interactive choice buttons featuring click animations and selection highlights",
+      "Dynamic DOM status cards displaying chosen moves and round verdicts",
+      "One-click game reset controls reinitializing score states"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "JavaScript (ES6+)",
+      "HTML5",
+      "CSS3"
+    ],
+    "tooling_and_deployment": [
+      "Git",
+      "GitHub",
+      "GitHub Pages / Vercel",
+      "VS Code"
+    ]
+  },
+  "links": {
+    "live_demo": "https://rock-paper-scissor-three-pi.vercel.app/",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/Rock-Paper-Scissor"
+  }
+}

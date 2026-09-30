@@ -1,0 +1,70 @@
+{
+  "languages": [
+    "C",
+    "C++",
+    "Java",
+    "Python",
+    "JavaScript",
+    "TypeScript"
+  ],
+  "frontend": [
+    "React",
+    "Next.js",
+    "Tailwind CSS",
+    "HTML5",
+    "CSS3",
+    "Redux Toolkit",
+    "TanStack Query",
+    "Framer Motion",
+    "shadcn/ui"
+  ],
+  "backend": [
+    "Node.js",
+    "Express.js",
+    "RESTful APIs",
+    "GraphQL",
+    "Socket.io",
+    "JWT / NextAuth"
+  ],
+  "databases_and_orms": [
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Prisma",
+    "Mongoose"
+  ],
+  "3d_and_graphics": [
+    "Three.js",
+    "React Three Fiber (R3F)",
+    "Drei",
+    "OGL",
+    "GLSL (Shaders)",
+    "Blender"
+  ],
+  "ai_and_llm_engineering": [
+    "Vercel AI SDK",
+    "LangChain",
+    "OpenAI API",
+    "Anthropic API",
+    "RAG / Vector Embeddings"
+  ],
+  "devops_and_cloud": [
+    "Docker",
+    "Git",
+    "GitHub Actions",
+    "AWS (S3)",
+    "Vercel",
+    "Render"
+  ],
+  "testing": [
+    "Vitest / Jest",
+    "Playwright"
+  ],
+  "tools_and_design": [
+    "VS Code",
+    "Vite",
+    "Postman",
+    "Figma",
+    "Jira"
+  ]
+}

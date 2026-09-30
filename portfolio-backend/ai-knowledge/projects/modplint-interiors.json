@@ -1,0 +1,65 @@
+{
+  "id": "modplint-interiors",
+  "name": "Modplint Interiors",
+  "category": "Commercial Client Platform & CMS",
+  "featured": true,
+  "role": "Full-Stack Software Engineer",
+  "status": "Completed",
+  "timeline": "2025 - 2026",
+  "tagline": "End-to-end digital portfolio, consultation booking, and CMS for an interior design enterprise[cite: 1, 7].",
+  "description": "Production full-stack business platform built for a commercial interior design firm, featuring dynamic visual showcase galleries, customer consultation pipelines, and a protected administrative content management system[cite: 1, 7].",
+  "problem": "Interior design studios often lose high-ticket leads due to unindexed visual portfolios, manual consultation scheduling, and a lack of self-serve administrative content control[cite: 1, 7].",
+  "solution": "Delivered a responsive web application and secure RESTful API with automated Cloudinary media asset processing, multi-criteria project search/filtering, client booking management, and verified review moderation[cite: 1, 7, 8].",
+  "metrics_and_highlights": [
+    "Engineered 6 modular REST route controllers covering Projects, Bookings, Testimonials, Inquiries, Services, and Auth.",
+    "Implemented automated multipart Cloudinary asset optimization pipeline handling up to 10 project images per upload (1920x1080, quality auto).",
+    "Built dual-layer input validation and rate-limiting across public intake forms (contact submissions and consultation scheduling).",
+    "Configured custom serverless and SPA rewrite proxies via Vercel for seamless client-side routing and fast delivery[cite: 7, 8]."
+  ],
+  "architecture_and_core_modules": {
+    "portfolio_and_media_engine": [
+      "Dynamic project gallery supporting category filtering, keyword search, and server-side cursor/page pagination",
+      "Multer and Cloudinary integration enabling multipart upload, automatic aspect ratio preservation, and cascading media deletion on document removal"
+    ],
+    "client_intake_and_booking": [
+      "Consultation booking pipeline capturing project scopes, timeline dates, and estimated budget ranges",
+      "Inquiry and customer contact funnel with administrative status transitions (new, read, replied, archived)[cite: 7]",
+      "Testimonial submission portal with administrative review, approval, and homepage featuring workflows[cite: 7]"
+    ],
+    "admin_and_security_suite": [
+      "Role-based administrative authentication using bcrypt (12 salt rounds) and secure HTTP-only cookie-persisted JWTs[cite: 7]",
+      "express-validator sanitization, CORS whitelist enforcement, in-memory rate limiting, and centralized error handling[cite: 7]"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React",
+      "Vite",
+      "Tailwind CSS",
+      "Axios"
+    ],
+    "backend": [
+      "Node.js",
+      "Express.js",
+      "Mongoose ODM",
+      "JWT (JSON Web Tokens)",
+      "bcryptjs",
+      "Multer",
+      "express-validator"
+    ],
+    "database": [
+      "MongoDB Atlas"
+    ],
+    "cloud_and_services": [
+      "Cloudinary (Media Storage & Transform)",
+      "Vercel (Frontend & Serverless Hosting)",
+      "Render"
+    ]
+  },
+  "links": {
+    "live_demo": "https://modplintinteriors.com",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/modplint-interiors-frontend",
+    "server_repo": "https://github.com/akashkumarhzb121-cloud/modplint-interiors-backend",
+    "api_base_url": "https://backend-three-phi-64.vercel.app/api"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "dsa_profile": {
+    "headline": "Data Structures & Algorithms Problem Solver",
+    "summary": "Active problem solver focusing on optimal time-and-space complexity, core computer science fundamentals, and standard algorithmic patterns in C and C++.",
+    "primary_languages": [
+      "C++",
+      "C"
+    ],
+    "core_topics": {
+      "linear_data_structures": [
+        "Arrays & Matrices",
+        "Strings",
+        "Linked Lists (Singly/Doubly)",
+        "Stacks & Queues"
+      ],
+      "non_linear_data_structures": [
+        "Binary Trees & BST",
+        "Heaps / Priority Queues",
+        "Graphs (BFS/DFS, Topological Sort, Shortest Path)"
+      ],
+      "algorithms_and_paradigms": [
+        "Searching & Sorting",
+        "Hashing & Hash Maps",
+        "Recursion & Backtracking",
+        "Two Pointers & Sliding Window",
+        "Dynamic Programming (1D/2D)"
+      ]
+    },
+    "coding_platforms": {
+      "leetcode": "https://leetcode.com/u/iamakashkumarr",
+      "geeksforgeeks": "https://www.geeksforgeeks.org/profile/iamakashkumarr",
+      "github_repo-1": "https://github.com/akashkumarhzb121-cloud/VS-Code-DSA-",
+      "github_repo-2": "https://github.com/akashkumarhzb121-cloud/DSA-practice"
+    },
+    "metrics": {
+      "problems_solved": "100+",
+      "focus_areas": "Core Data Structures, Time & Space Complexity Optimization, OOP Concepts"
+    }
+  }
+}

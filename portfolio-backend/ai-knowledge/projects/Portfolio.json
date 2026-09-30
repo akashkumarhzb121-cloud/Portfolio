@@ -1,0 +1,79 @@
+{
+  "id": "creative-developer-portfolio",
+  "name": "Creative Portfolio & Digital Experience",
+  "category": "Creative Engineering & Interactive WebGL",
+  "featured": true,
+  "role": "Creative Technologist & Full-Stack Engineer",
+  "status": "Completed",
+  "timeline": "2026",
+  "tagline": "Editorial, high-performance developer portfolio merging creative WebGL physics with strict TypeScript full-stack architecture.",
+  "description": "Custom digital flagship portfolio pairing sub-60fps canvas animations, WebGL shaders, and 3D rigid-body kinematics with a resilient, decoupled Node.js/TypeScript micro-backend.",
+  "problem": "Traditional developer portfolios often rely on static, uninspired component templates that fail to tangibly showcase advanced frontend rendering, creative shader craft, and secure full-stack backend integration.",
+  "solution": "Architected an interactive, sci-fi-inspired experience featuring a 24px continuous coordinate grid, a WebGL curved cylinder stack, a real-time Rapier 3D physics ID badge, and a dedicated contact microservice with rate limiting and automated email dispatch[cite: 11, 12].",
+  "metrics_and_highlights": [
+    "Orchestrated sub-60fps 3D canvas rendering using Three.js, React Three Fiber, Rapier Physics, and OGL.",
+    "Engineered a persistent 24px dark grid coordinate layout across all viewports with Lenis inertial pin-stacking.",
+    "Built a decoupled TypeScript contact microservice on Render running Express 5, Zod runtime validation, and Resend delivery.",
+    "Implemented defensive API security: IP rate limiting (5 req / 15 min), strict origin CORS whitelist, and 32kb payload caps.",
+    "Achieved production-grade accessibility and performance with prefers-reduced-motion hooks and immutable 1-year asset edge caching."
+  ],
+  "architecture_and_core_modules": {
+    "creative_frontend_and_3d_engine": [
+      "Hero Spaceship Cockpit Viewport with hyperspace starfield simulation, telemetry HUD, and interactive particle canvas typography[cite: 12]",
+      "3D Curved Cylinder Tech Stack powered by OGL featuring idle auto-spin, scroll-momentum coupling, and touch/drag controls[cite: 12]",
+      "Interactive 3D identity badge built with React Three Fiber and Rapier Physics featuring spring kinematics, collision boundaries, and gravity[cite: 12]",
+      "Stay-in-place book-style project card pin stacking orchestrated via Lenis smooth scrolling[cite: 12]",
+      "GSAP-driven 3D text reveals, SVG bending marquees, and screen-blended dual-color glow cursor interpolation[cite: 12]"
+    ],
+    "backend_microservice_and_security": [
+      "Decoupled Node.js (v20+) and Express 5 API written in strict TypeScript (NodeNext resolution)",
+      "MongoDB Atlas inquiry persistence paired with asynchronous transactional email notifications via Resend API[cite: 11]",
+      "Multi-layer perimeter protection: Helmet HTTP headers, express-rate-limit, and payload memory exhaustion guards[cite: 11]",
+      "Automated test coverage implementing Vitest and Supertest across healthy and error-state pathways[cite: 11]"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React 19",
+      "TypeScript",
+      "Vite 8",
+      "Tailwind CSS v4",
+      "React Hook Form",
+      "Zod",
+      "Lucide React",
+      "Sonner"
+    ],
+    "3d_and_animation": [
+      "Three.js",
+      "React Three Fiber (R3F)",
+      "@react-three/drei",
+      "@react-three/rapier (Physics)",
+      "OGL",
+      "GSAP",
+      "Motion (Framer Motion v13)",
+      "Lenis Smooth Scroll"
+    ],
+    "backend": [
+      "Node.js",
+      "Express 5",
+      "TypeScript",
+      "Mongoose ODM",
+      "Resend API"
+    ],
+    "database": [
+      "MongoDB Atlas"
+    ],
+    "testing_and_devops": [
+      "Vitest",
+      "Supertest",
+      "Vercel (Client SPA)",
+      "Render (Backend Web Service)"
+    ]
+  },
+  "links": {
+    "live_demo": "https://skykumar.vercel.app",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/portfolio-frontend",
+    "server_repo": "https://github.com/akashkumarhzb121-cloud/portfolio-backend",
+    "api_base_url": "https://portfolio-backend.onrender.com"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "dribbble-creative-showcase",
+  "name": "Dribbble Creative Showcase Clone",
+  "category": "Creative UI & Portfolio Platform",
+  "featured": false,
+  "role": "Frontend Software Engineer",
+  "status": "Completed",
+  "timeline": "2025 - 2026",
+  "tagline": "Pixel-perfect designer showcase feed with dynamic tag filtering and interactive shot cards.",
+  "description": "High-fidelity front-facing recreation of the Dribbble design exploration platform, focusing on editorial typography, responsive masonry media feeds, fluid hover overlays, and designer engagement flows.",
+  "problem": "Media-heavy design portfolios require seamless image loading, responsive grid adjustments across diverse aspect ratios, and instant visual feedback without degrading viewport frame rates.",
+  "solution": "Built a modern React single-page application implementing responsive CSS grid/flex layouts, interactive designer shot overlays, categorical tag filtering, and subtle micro-interactions.",
+  "metrics_and_highlights": [
+    "Engineered dynamic responsive grid layouts accommodating diverse design shot ratios from mobile through ultrawide displays.",
+    "Built interactive shot hover cards with animated creator attribution badges, view counters, and instant save/like actions.",
+    "Integrated multi-category tag filtering (Animation, Branding, Mobile, Web Design) with instant client-side state updates.",
+    "Optimized media asset rendering to maintain smooth 60fps scrolling performance."
+  ],
+  "architecture_and_core_modules": {
+    "showcase_and_grid_engine": [
+      "Responsive masonry/grid feed featuring hover-triggered metadata (author, likes, saves)",
+      "Category discovery bar with horizontal scrolling and dynamic active-filter states",
+      "Designer hero section featuring high-impact visual banners and promotional CTA paths"
+    ],
+    "client_interactions_and_layout": [
+      "Interactive shot detail modals presenting high-resolution assets and project descriptions",
+      "Sticky navigation header with dynamic search inputs and responsive collapse menus",
+      "Modular, reusable UI card primitives adhering to modern component architecture"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React",
+      "JavaScript (ES6+)",
+      "HTML5",
+      "CSS3",
+      "Tailwind CSS",
+      "Vite"
+    ],
+    "tooling_and_deployment": [
+      "Vercel",
+      "Git",
+      "GitHub",
+      "VS Code"
+    ]
+  },
+  "links": {
+    "live_demo": "https://dribbble-sigma.vercel.app/",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/dribbble"
+  }
+}

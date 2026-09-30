@@ -1,0 +1,78 @@
+{
+  "services": [
+    {
+      "id": "full-stack-apps",
+      "name": "Full-Stack Web Applications",
+      "tagline": "Scalable, production-ready web apps built from concept to deployment.",
+      "description": "End-to-end architecture and implementation of fast, data-driven applications with secure authentication, modular REST/GraphQL APIs, and clean state management.",
+      "deliverables": [
+        "Custom SaaS platforms & dashboards",
+        "Secure database schemas & ORM integration",
+        "Third-party API & payment integrations"
+      ],
+      "technologies": [
+        "React",
+        "Next.js",
+        "TypeScript",
+        "Node.js",
+        "Express.js",
+        "PostgreSQL",
+        "MongoDB"
+      ]
+    },
+    {
+      "id": "creative-3d-web",
+      "name": "Creative Development & 3D Experiences",
+      "tagline": "Immersive, interactive WebGL visuals that set brands apart.",
+      "description": "High-impact interactive visual experiences leveraging WebGL and smooth micro-interactions to create memorable showcase portfolios, product customizers, and landing pages.",
+      "deliverables": [
+        "Interactive 3D product visualizers",
+        "WebGL shaders & canvas animations",
+        "Scroll-driven storytelling & micro-interactions"
+      ],
+      "technologies": [
+        "Three.js",
+        "React Three Fiber",
+        "GLSL",
+        "Framer Motion",
+        "Tailwind CSS"
+      ]
+    },
+    {
+      "id": "ai-integration",
+      "name": "AI & Smart API Integrations",
+      "tagline": "Embedding LLMs and intelligent workflows directly into modern web apps.",
+      "description": "Integration of frontier AI models, real-time streaming interfaces, and retrieval pipelines to turn static platforms into reactive, intelligent tools.",
+      "deliverables": [
+        "Streaming AI chatbots & copilot interfaces",
+        "Automated content & document processing pipelines",
+        "Custom workflow automations via APIs"
+      ],
+      "technologies": [
+        "Next.js",
+        "Vercel AI SDK",
+        "OpenAI API",
+        "Anthropic API",
+        "Vector Embeddings"
+      ]
+    },
+    {
+      "id": "frontend-modernization",
+      "name": "UI/UX Modernization & Performance",
+      "tagline": "Refactoring slow, outdated interfaces into fast, polished web experiences.",
+      "description": "Overhauling existing digital products with contemporary design systems, sub-second load times, fluid mobile responsiveness, and high Core Web Vitals scores.",
+      "deliverables": [
+        "Legacy code refactoring to modern React/Next.js",
+        "Design-to-code implementation from Figma",
+        "Performance, SEO, and accessibility optimization"
+      ],
+      "technologies": [
+        "React",
+        "Tailwind CSS",
+        "TypeScript",
+        "Figma",
+        "Lighthouse / Web Vitals"
+      ]
+    }
+  ]
+}

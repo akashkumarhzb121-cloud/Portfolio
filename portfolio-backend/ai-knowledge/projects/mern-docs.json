@@ -1,0 +1,58 @@
+{
+  "id": "mern-docs-platform",
+  "name": "MERN Docs",
+  "category": "Developer Education & Documentation Platform",
+  "featured": true,
+  "role": "Full-Stack Software Engineer & Technical Author",
+  "status": "Completed",
+  "timeline": "2025 - 2026",
+  "tagline": "Curated developer knowledge hub covering 150+ full-stack concepts, architecture patterns, and production deployments.",
+  "description": "Comprehensive technical documentation and learning platform engineered to help software developers master modern MERN stack architecture, backend security, RESTful API design, and cloud deployment pipelines.",
+  "problem": "Aspiring full-stack developers frequently struggle with fragmented documentation, outdated tutorial code, and a lack of real-world production security blueprints when learning modern web development.",
+  "solution": "Built and deployed a fast, content-driven developer platform with categorized documentation modules, interactive code examples, searchable engineering guides, and structured learning roadmaps[cite: 1, 10].",
+  "metrics_and_highlights": [
+    "Scaled platform organically to 100+ active developers without paid marketing or promotion.",
+    "Authored and structured 150+ in-depth technical guides covering React, Node.js, Express, MongoDB, security, and cloud deployment workflows[cite: 1].",
+    "Architected lightweight, SEO-friendly client routing with sub-second page transitions powered by React and Vite[cite: 1, 10].",
+    "Organized clear, production-tested architectural guides covering JWT authentication, rate limiting, and RBAC implementation[cite: 1]."
+  ],
+  "architecture_and_core_modules": {
+    "content_and_learning_engine": [
+      "Modular topic categorization spanning frontend components, backend servers, database schemas, and DevOps workflows[cite: 1]",
+      "Syntax-highlighted code blocks with real-world implementation snippets and edge-case notes[cite: 1]",
+      "Interactive technical roadmaps organizing foundational to advanced engineering patterns[cite: 1]"
+    ],
+    "platform_and_performance": [
+      "Client-side routing optimized with Vite for instant Hot Module Replacement (HMR) and fast static bundle loading[cite: 10]",
+      "Responsive layout optimized for cross-device desktop and mobile reading ergonomics[cite: 1]",
+      "Dynamic search indexing enabling developers to query topics and syntax references rapidly[cite: 1]"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React",
+      "Vite",
+      "JavaScript (ES6+)",
+      "Tailwind CSS",
+      "React Router DOM"
+    ],
+    "backend": [
+      "Node.js",
+      "Express.js",
+      "RESTful APIs"
+    ],
+    "database": [
+      "MongoDB"
+    ],
+    "devops_and_hosting": [
+      "Vercel (Client Hosting)",
+      "Git",
+      "GitHub"
+    ]
+  },
+  "links": {
+    "live_demo": "https://mernstacknotes.vercel.app",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/MERN-Developer-Handbook",
+    "server_repo": "https://github.com/akashkumarhzb121-cloud/MERN-Developer-Handbook"
+  }
+}

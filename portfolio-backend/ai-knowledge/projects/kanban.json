@@ -1,0 +1,60 @@
+{
+  "id": "kanban-task-management",
+  "name": "Kanban Task Management Platform",
+  "category": "Productivity & Workflow Engineering",
+  "featured": false,
+  "role": "Full-Stack Software Engineer",
+  "status": "Completed",
+  "timeline": "2025 - 2026",
+  "tagline": "Real-time, drag-and-drop collaborative Kanban board with state-driven column pipelines.",
+  "description": "Interactive workflow organization platform engineered to coordinate multi-stage project lifecycles, sprint progress, and task prioritization using fluid UI drag-and-drop interactions and persistent RESTful backend storage.",
+  "problem": "Agile software and product teams struggle with clunky, overloaded project management tools that lack responsive visual layout updates, drag-and-drop clarity, and simple state synchronization.",
+  "solution": "Engineered an agile task management board with optimized column state pipelines (Backlog, In Progress, In Review, Done), dynamic task re-ordering, subtask progress tracking, and resilient API endpoints for seamless data persistence.",
+  "metrics_and_highlights": [
+    "Implemented fluid drag-and-drop task interactions across stages with instant optimistic UI state updates.",
+    "Engineered decoupled client-server architecture with REST endpoints handling board creation, column mutations, and card lifecycle events.",
+    "Integrated subtask completion tracking, tag-based categorization, and priority-level indicators (Low, Medium, High, Urgent).",
+    "Optimized client rendering speeds with modern bundler tooling (Vite + Fast HMR)."
+  ],
+  "architecture_and_core_modules": {
+    "workflow_pipeline": [
+      "Dynamic board and column creation with customizable status workflows",
+      "Interactive card re-ordering and cross-column transitions with drag-and-drop state persistence",
+      "Task detail modals featuring subtask checklists, due-date pickers, and description markdown"
+    ],
+    "backend_and_data_layer": [
+      "RESTful API architecture handling granular board, column, and task CRUD operations",
+      "Structured NoSQL data models maintaining card sorting order indices and board memberships",
+      "Centralized error handling and schema validation for state mutations"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React",
+      "Vite",
+      "JavaScript (ES6+)",
+      "Tailwind CSS",
+      "HTML5 Drag and Drop / DnD Kit"
+    ],
+    "backend": [
+      "Node.js",
+      "Express.js",
+      "RESTful APIs",
+      "Mongoose ODM"
+    ],
+    "database": [
+      "MongoDB Atlas"
+    ],
+    "devops_and_tools": [
+      "Git",
+      "GitHub",
+      "VS Code",
+      "Vercel / Render"
+    ]
+  },
+  "links": {
+    "live_demo": "https://kannflow.vercel.app/",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/kanbanfrontend",
+    "server_repo": "https://github.com/akashkumarhzb121-cloud/kanbanbackend"
+  }
+}

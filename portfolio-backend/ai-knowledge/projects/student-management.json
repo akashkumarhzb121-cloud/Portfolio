@@ -1,0 +1,78 @@
+{
+  "id": "student-management-system",
+  "name": "Student Management System",
+  "category": "Enterprise Academic ERP",
+  "featured": true,
+  "role": "Full-Stack Software Engineer",
+  "status": "Completed",
+  "timeline": "2026",
+  "tagline": "Full-scale college ERP automating multi-tier academic operations with strict RBAC.",
+  "description": "Production-grade college enterprise resource planning (ERP) platform designed to streamline administrative overhead and unify communication across administrators, instructors, and students through modular, role-tailored dashboards.",
+  "problem": "Higher education institutions struggle with fragmented, manual systems across departments for attendance tracking, fee auditing, assignment submissions, timetable coordination, and grading pipelines.",
+  "solution": "Built a centralized, responsive web platform with role-based access control (RBAC), dual JWT access/refresh token security, bulk academic record operations, and automated GPA computation.",
+  "metrics_and_highlights": [
+    "Engineered 20+ secure RESTful API endpoints and 15+ relational-style MongoDB schemas.",
+    "Integrated 3 dedicated role dashboards: Admin (12 modules), Faculty (6 modules), and Student (9 modules).",
+    "Secured application perimeter using bcrypt (12 salt rounds), Helmet.js headers, rate-limiting (200 req/min), and NoSQL injection sanitization."
+  ],
+  "features": {
+    "security_and_auth": [
+      "Role-Based Access Control (RBAC) separating Admin, Faculty, and Student portals",
+      "Dual-token authentication flow (15m JWT access tokens + 7d HTTP-only cookie refresh tokens)",
+      "Centralized API error handling, input validation, and route protection guards"
+    ],
+    "admin_suite": [
+      "Real-time institutional dashboard displaying aggregate student, faculty, and department metrics",
+      "Complete CRUD interfaces with search, filtering, and server pagination",
+      "Dynamic timetable builder with grid visualization and automated room/faculty allocation",
+      "Fee tracking, penalty auditing, and institutional notice board management"
+    ],
+    "faculty_portal": [
+      "Batch attendance tracking with bulk present/absent/late toggle controls",
+      "Assignment lifecycle management, student submission tracking, and grading workflows",
+      "Direct internal marks upload and leave request workflows"
+    ],
+    "student_portal": [
+      "Personalized academic hub displaying attendance percentages, fee balances, and GPA calculations",
+      "Assignment submission portal and real-time subject-wise timetable views",
+      "Leave application tracking and priority-tagged institutional announcements"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React 19",
+      "Vite",
+      "Tailwind CSS",
+      "Redux Toolkit",
+      "React Query",
+      "React Router DOM",
+      "React Hook Form",
+      "Zod",
+      "Framer Motion"
+    ],
+    "backend": [
+      "Node.js",
+      "Express.js",
+      "RESTful APIs",
+      "Mongoose ODM",
+      "JSON Web Tokens (JWT)",
+      "bcryptjs"
+    ],
+    "database": [
+      "MongoDB Atlas"
+    ],
+    "security_and_devops": [
+      "Helmet.js",
+      "express-mongo-sanitize",
+      "express-rate-limit",
+      "Vercel (Client Hosting)",
+      "Render (Server Hosting)"
+    ]
+  },
+  "links": {
+    "live_demo": "https://collegesms.vercel.app",
+    "client_repo": "https://github.com/akashkumarhzb121-cloud/student-management-system-client",
+    "server_repo": "https://github.com/akashkumarhzb121-cloud/student-management-system-server",
+    "api_base_url": "https://student-management-system-server-utg4.onrender.com/api"
+  }
+}

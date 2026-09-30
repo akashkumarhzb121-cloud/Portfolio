@@ -1,0 +1,75 @@
+{
+  "id": "rapidcare-emergency-healthtech",
+  "name": "RapidCare",
+  "category": "AI Healthcare & Emergency Telemedicine Platform",
+  "featured": true,
+  "role": "Full-Stack Software Engineer",
+  "status": "Completed",
+  "timeline": "2026",
+  "tagline": "AI-driven clinical triage and emergency care continuity network with automated ambulance dispatch.",
+  "description": "Production-grade care continuity and emergency response system engineered for rural public healthcare ecosystems, resolving clinical delays through multilingual AI triage, automated dispatch, and multi-tier hospital routing.",
+  "problem": "Rural primary health centres face critical disconnects during acute medical emergencies, lacking structured triage, real-time hospital bed visibility, low-connectivity support, and continuous longitudinal tracking.",
+  "solution": "Built a full-stack platform uniting 5 distinct user roles via Socket.IO real-time channels, integrating Groq-accelerated Llama-3 clinical triage, multi-facility bed reservation protocols, offline-first IndexedDB field registries, and WebRTC video consultations[cite: 4, 5, 6].",
+  "metrics_and_highlights": [
+    "Built for Smart India Hackathon (SIH 2026 PS 26133) covering 14 core public health directives.",
+    "Curated and geocoded a network of 25 real government healthcare facilities across 11 Maharashtra districts using Haversine distance ranking[cite: 4, 6].",
+    "Architected 5 role-based dashboards: Emergency Operator, Hospital Staff, Frontline CHW, Specialist Doctor, and District Admin.",
+    "Implemented automated failover from sub-second LLM inference to a deterministic keyword triage classifier for guaranteed uptime."
+  ],
+  "architecture_and_core_modules": {
+    "ai_triage_and_dispatch": [
+      "Groq-hosted Llama-3 inference parsing unstructured symptom descriptions into validated JSON schema (severity, specialization, clinical reasoning)",
+      "Dual-path routing: auto-creates critical emergency incidents with instant ambulance dispatch, or standardizes referrals across facility tiers[cite: 4, 6]",
+      "Real-time bed-locking mechanism that auto-reserves beds on dispatch and releases availability upon facility rejection[cite: 4, 6]"
+    ],
+    "frontline_and_clinical_suites": [
+      "Field CHW portal with Web Speech API multilingual voice input (EN/HI/MR) and IndexedDB offline mutation queues auto-syncing upon reconnect",
+      "Live hospital OPD queue manager computing dynamic wait times and priority sorting (Emergency, High, Normal)[cite: 4, 5]",
+      "Telemedicine consultation module generating isolated Jitsi Meet WebRTC video rooms with post-consult prescription and follow-up logging[cite: 4, 5]",
+      "Complete 22-test diagnostic workflow tracking samples from ordering to lab report delivery[cite: 4, 5]"
+    ],
+    "district_analytics_and_gis": [
+      "Interactive Leaflet geospatial GIS visualizer displaying real-time occupancy markers (Available, Busy, Critical, Full)",
+      "District-level Recharts analytics aggregating 14-day referral trends, epidemiological emergency distributions, and medicine shortage thresholds"
+    ]
+  },
+  "technologies": {
+    "frontend": [
+      "React 18",
+      "Vite 5",
+      "Tailwind CSS 3",
+      "Framer Motion",
+      "Socket.IO Client",
+      "Leaflet",
+      "React-Leaflet",
+      "Recharts",
+      "i18next",
+      "IndexedDB (idb)",
+      "Web Speech API",
+      "Jitsi Meet WebRTC"
+    ],
+    "backend": [
+      "Node.js",
+      "Express.js",
+      "Socket.IO",
+      "Mongoose ODM",
+      "JWT Authentication",
+      "bcryptjs"
+    ],
+    "ai_and_external_apis": [
+      "Groq SDK (Llama-3)",
+      "OpenStreetMap Nominatim Geocoding",
+      "Haversine Geospatial Algorithm"
+    ],
+    "database_and_infra": [
+      "MongoDB Atlas",
+      "Render (Backend Service)",
+      "Vercel (Client SPA)"
+    ]
+  },
+  "links": {
+    "live_demo": "https://rapidcare.vercel.app",
+    "github_repo": "https://github.com/akashkumarhzb121-cloud/rapidcare",
+    "api_base_url": "https://rapidcare-backend.onrender.com"
+  }
+}
