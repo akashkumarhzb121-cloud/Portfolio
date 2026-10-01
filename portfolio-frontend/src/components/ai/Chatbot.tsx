@@ -49,7 +49,7 @@ export default function Chatbot() {
 
     const contactEndpoint =
       import.meta.env.VITE_CONTACT_FORM_ENDPOINT ||
-      'https://portfolio-cxic.onrender.com/api/contact';
+      'https://portfolio-5aso.onrender.com/api/contact';
 
     // Replace /contact with /ai/chat or append /api/ai/chat
     if (contactEndpoint.includes('/api/contact')) {

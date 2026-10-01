@@ -36,12 +36,13 @@ export default function ChatWindow({
   onOpenContact
 }: ChatWindowProps) {
   const [input, setInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesListRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom on message or loading state change
   useEffect(() => {
-    if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const messagesList = messagesListRef.current;
+    if (isOpen && messagesList) {
+      messagesList.scrollTo({ top: messagesList.scrollHeight, behavior: 'smooth' });
     }
   }, [messages, isLoading, isOpen]);
 
@@ -66,7 +67,7 @@ export default function ChatWindow({
       className="fixed bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[calc(100vh-6.5rem)] flex flex-col rounded-2xl border border-zinc-800/90 bg-[#0a0a0f]/95 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(103,232,249,0.1)] backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
     >
       {/* 1. Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-zinc-950/60 backdrop-blur-md">
+      <div className="flex shrink-0 items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-zinc-950/60 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
           <div className="relative w-8 h-8 rounded-full bg-gradient-to-tr from-[#67E8F9]/20 to-[#A78BFA]/20 border border-[#67E8F9]/40 flex items-center justify-center shadow-[0_0_12px_rgba(103,232,249,0.2)]">
             <Bot className="w-4 h-4 text-[#67E8F9]" />
@@ -86,7 +87,7 @@ export default function ChatWindow({
                 RAG 2.0
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400">Portfolio & Client Copilot</p>
+            <p className="text-[11px] text-zinc-400">Portfolio & Client Questions</p>
           </div>
         </div>
 
@@ -113,7 +114,11 @@ export default function ChatWindow({
       </div>
 
       {/* 2. Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+      <div
+        ref={messagesListRef}
+        data-lenis-prevent
+        className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y p-4 space-y-3 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
+      >
         {messages.length === 0 ? (
           <div className="h-full flex flex-col justify-center items-center text-center p-4 space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-inner">
@@ -183,11 +188,10 @@ export default function ChatWindow({
             )}
           </>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* 3. Input & Footer */}
-      <div className="p-3 border-t border-zinc-800/80 bg-zinc-950/80">
+      <div className="shrink-0 p-3 border-t border-zinc-800/80 bg-zinc-950/80">
         <ChatInput
           input={input}
           onChange={setInput}

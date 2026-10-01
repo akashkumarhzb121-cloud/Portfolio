@@ -49,7 +49,7 @@ export default function Contact() {
     if (trimmed.endsWith('/api/contact')) {
       return trimmed;
     }
-    // If user provided base origin (e.g. https://portfolio-cxic.onrender.com or http://localhost:5000)
+    // If user provided base origin (e.g. https://portfolio-5aso.onrender.com or http://localhost:5000)
     if (/^https?:\/\/[^/]+$/.test(trimmed)) {
       return `${trimmed}/api/contact`;
     }
@@ -229,7 +229,7 @@ export default function Contact() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-white/[0.08] text-xs text-slate-400">
-              Backend integration endpoint can be set via <code className="text-cyan-300 bg-white/[0.06] px-1 py-0.5 rounded font-mono">VITE_CONTACT_FORM_ENDPOINT</code>.
+              Your data is safe with me. All inquiries are <code className="text-cyan-300 bg-white/[0.06] px-1 py-0.5 rounded font-mono">kept strictly confidential.</code>
             </div>
           </div>
 
