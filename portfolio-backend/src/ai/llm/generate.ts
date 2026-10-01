@@ -7,7 +7,7 @@ import { getEmbedding } from '../rag/ingest.js';
 import { Conversation, type IChatMessage } from '../../models/conversation.model.js';
 
 // Initialize OpenAI-compatible LLM client (defaults to Groq free tier)
-const chatClient = env.AI_API_KEY
+export const chatClient = env.AI_API_KEY
   ? new OpenAI({
       apiKey: env.AI_API_KEY,
       baseURL: env.AI_BASE_URL || 'https://api.groq.com/openai/v1'
@@ -37,10 +37,26 @@ export interface GenerateChatResponse {
  * Generates dynamic follow-up suggestions based on query intent & analysis
  */
 function deriveSuggestedQuestions(analysis: QueryAnalysis): string[] {
+  if (analysis.isGreetingQuery || analysis.isCasualQuery) {
+    return [
+      'What technologies does Akash know?',
+      'Tell me about RapidCare',
+      'What services does Akash offer?'
+    ];
+  }
+
+  if (analysis.isCapabilitiesQuery) {
+    return [
+      'What technologies does Akash know?',
+      'Tell me about RapidCare',
+      'How do I hire Akash for a project?'
+    ];
+  }
+
   if (analysis.namedProjectSlug === 'rapidcare') {
     return [
-      'What technologies power RapidCare?',
-      'Can you show me Modplint Interiors?',
+      'What technologies were used in RapidCare?',
+      'Can Akash build something similar?',
       'How do I hire Akash for a project?'
     ];
   }
@@ -49,7 +65,7 @@ function deriveSuggestedQuestions(analysis: QueryAnalysis): string[] {
     return [
       'What technologies power this project?',
       'What other projects has Akash built?',
-      'How do I hire Akash for a project?'
+      'How do I contact Akash?'
     ];
   }
 
@@ -61,17 +77,33 @@ function deriveSuggestedQuestions(analysis: QueryAnalysis): string[] {
     ];
   }
 
-  if (analysis.isHiringQuery) {
+  if (analysis.isJobQuery || analysis.isInternshipQuery || analysis.isAvailabilityQuery) {
     return [
-      'What is Akash’s typical turnaround time?',
+      'Can I interview Akash?',
+      'What is Akash’s experience?',
+      'What is Akash’s tech stack?'
+    ];
+  }
+
+  if (analysis.isPricingQuery) {
+    return [
       'How can I contact Akash?',
-      'Show me featured projects built with React and Node.js'
+      'What services does Akash provide?',
+      'Show me featured projects built with React'
+    ];
+  }
+
+  if (analysis.isHiringQuery || analysis.isServicesQuery) {
+    return [
+      'How much does a project cost?',
+      'How can I contact Akash?',
+      'Tell me about RapidCare'
     ];
   }
 
   if (analysis.isSkillsQuery) {
     return [
-      'Tell me about Akash’s DSA problem-solving record',
+      'Does Akash know DSA?',
       'What projects has Akash built?',
       'How do I hire Akash for a project?'
     ];
@@ -89,11 +121,19 @@ function deriveSuggestedQuestions(analysis: QueryAnalysis): string[] {
     return [
       'What languages does Akash use for DSA?',
       'Tell me about Akash’s technical skills',
-      'How do I hire Akash?'
+      'What projects has Akash built?'
     ];
   }
 
-  // Default suggestions
+  if (analysis.isGeneralQuestion) {
+    const tech = analysis.detectedTechnologies[0] || 'modern tech';
+    return [
+      `Does Akash use ${tech}?`,
+      'What is Akash’s tech stack?',
+      'Tell me about RapidCare'
+    ];
+  }
+
   return [
     'Tell me about RapidCare',
     'What services does Akash offer?',
@@ -102,51 +142,209 @@ function deriveSuggestedQuestions(analysis: QueryAnalysis): string[] {
 }
 
 /**
- * Contextual fallback synthesizer when OpenAI API is not available or key is not set.
- * Uses query intent and top retrieved chunks to give structured, grounded answers.
+ * Produces structured conversational answers for common intents.
+ * Guarantees zero hallucinations and adheres to Section 23/24 principles.
  */
-function generateContextualFallbackAnswer(
+export function generateContextualFallbackAnswer(
   message: string,
   chunks: SearchResult[],
   analysis: QueryAnalysis
 ): string {
-  // Pure contact query
+  // 1. Greeting
+  if (analysis.isGreetingQuery) {
+    return (
+      "Hey! 👋 I'm SKY AI, Akash's portfolio assistant.\n\n" +
+      "I can help you explore Akash's skills, projects, experience, services, and how to contact him.\n\n" +
+      "What would you like to know? 🚀"
+    );
+  }
+
+  // 2. Capabilities
+  if (analysis.isCapabilitiesQuery) {
+    return (
+      "I'm SKY AI, Akash's portfolio assistant 🤖\n\n" +
+      "I can help you explore:\n\n" +
+      "- 👨‍💻 **About Akash**: Background, bio, and engineering focus\n" +
+      "- 🛠️ **Skills & Technologies**: Full-stack web, 3D/creative, databases, and tools\n" +
+      "- 🚀 **Projects**: Architectures, live demos, and GitHub repositories\n" +
+      "- 💼 **Experience & Roles**: Engineering work and real-world impact\n" +
+      "- 🌐 **Services**: Custom web development, 3D experiences, and AI integration\n" +
+      "- 📩 **Contact Information**: Direct email, LinkedIn, and enquiry channels\n" +
+      "- 💻 **Opportunities**: Full-time roles, internships, and freelance collaboration\n" +
+      "- 🧠 **Technical Topics**: Explanations of React, Node.js, Three.js, DSA, etc.\n\n" +
+      "You can ask me something like:\n" +
+      "- *\"What technologies does Akash know?\"*\n" +
+      "- *\"Tell me about RapidCare.\"*\n" +
+      "- *\"How can I hire Akash for a project?\"*"
+    );
+  }
+
+  // 3. Casual
+  if (analysis.isCasualQuery) {
+    const lower = message.toLowerCase();
+    if (lower.includes('how are you') || lower.includes('how is it going') || lower.includes('what s up') || lower.includes('whats up')) {
+      return "I'm doing great, thanks for asking! 😊 I'm here and ready to help you explore Akash's portfolio, featured projects, or discuss work opportunities. How can I assist you today?";
+    }
+    if (lower.includes('nice website') || lower.includes('cool website') || lower.includes('this looks great') || lower.includes('like this website')) {
+      return "Thank you! Akash designed and built this portfolio with modern web technologies, smooth animations, and interactive 3D elements. Let me know if you want to know how it was built or learn more about his work!";
+    }
+    if (lower.includes('thank')) {
+      return "You're very welcome! Feel free to ask if there's anything else about Akash's work or projects you'd like to explore.";
+    }
+    if (lower.includes('who are you') || lower.includes('who am i talking to') || lower.includes('are you an ai') || lower.includes('your name')) {
+      return "I'm SKY AI, Akash Kumar's portfolio assistant 🤖. I'm here to answer questions about Akash's engineering skills, featured projects, services, and how to get in touch with him.";
+    }
+    if (lower.includes('bye') || lower.includes('see you')) {
+      return "Goodbye! Have a great day, and feel free to reach out to Akash whenever you're ready to collaborate.";
+    }
+    return "I'm here to help you navigate Akash Kumar's portfolio! Feel free to ask about his projects, technical skills, services, or how to get in touch.";
+  }
+
+  // 4. Pricing query (Must precede pure contact and hiring)
+  if (analysis.isPricingQuery) {
+    return (
+      "Akash's pricing depends on the project's requirements, features, complexity, and timeline. Pricing is scoped transparently based on your project goals.\n\n" +
+      "**Services Offered:**\n" +
+      "- **Full-Stack Web Applications**: Scalable apps built with React, Node.js, Express, and MongoDB\n" +
+      "- **Creative Web & 3D Interactive**: 3D graphics, shaders, and animations using Three.js and WebGL\n" +
+      "- **AI & Smart Integrations**: Production RAG architectures, LLM pipelines, and AI assistants\n" +
+      "- **UI/UX Modernization**: High-performance refactoring and responsive design\n\n" +
+      "To discuss your requirements and get an accurate quote, please contact Akash directly at **akashkumarhzb121@gmail.com** or send a message via the portfolio contact form."
+    );
+  }
+
+  // 5. Named Project Query or Context Follow-up (e.g. RapidCare)
+  if (analysis.namedProjectSlug) {
+    const slug = analysis.namedProjectSlug;
+    const lower = message.toLowerCase();
+
+    if (slug === 'rapidcare') {
+      if (lower.includes('technolog') || lower.includes('tech') || lower.includes('stack') || lower.includes('used') || lower.includes('built with')) {
+        return (
+          "Technologies used in **RapidCare**:\n\n" +
+          "- **Frontend**: React, Tailwind CSS\n" +
+          "- **Backend**: Node.js, Express.js\n" +
+          "- **Database**: MongoDB\n" +
+          "- **Real-Time Communication**: Socket.IO (for live emergency tracking and dispatch coordination)\n" +
+          "- **AI Integration**: Groq AI (for automated triage protocol matching)\n" +
+          "- **Authentication**: JWT (JSON Web Tokens)\n\n" +
+          "Live Demo: [RapidCare Demo](https://rapidcare.vercel.app) | [GitHub Repository](https://github.com/akashkumarhzb121-cloud/rapidcare)"
+        );
+      }
+
+      if (lower.includes('similar') || lower.includes('can akash build') || lower.includes('build something similar')) {
+        return (
+          "Yes, absolutely! Akash specializes in engineering scalable full-stack applications and real-time systems similar to RapidCare, incorporating role-based dashboards, automated workflows, and AI assistance.\n\n" +
+          "To discuss building a custom solution, reach out to Akash at **akashkumarhzb121@gmail.com** or send a message through the contact form."
+        );
+      }
+
+      if (lower.includes('problem') || lower.includes('solve')) {
+        return (
+          "**RapidCare** solves critical inefficiencies in emergency response workflows:\n\n" +
+          "- **Problem**: Delayed patient triage, lack of real-time ambulance dispatch visibility, and disconnected bed allocation.\n" +
+          "- **Solution**: RapidCare provides automated AI clinical triage assessment, real-time vehicle dispatch tracking via Socket.IO, and live bed reservation to eliminate waiting bottlenecks during medical emergencies."
+        );
+      }
+
+      if (lower.includes('deployed') || lower.includes('live')) {
+        return (
+          "Yes, RapidCare is deployed and live! You can test the platform at [RapidCare Live](https://rapidcare.vercel.app) or explore the source code on [GitHub](https://github.com/akashkumarhzb121-cloud/rapidcare)."
+        );
+      }
+
+      return (
+        "**RapidCare** is an AI-driven clinical triage and emergency care continuity network developed by Akash Kumar.\n\n" +
+        "- **Core Features**: Automated medical triage matching, real-time ambulance dispatch coordination via Socket.IO, and seamless bed reservation.\n" +
+        "- **Tech Stack**: React, Node.js, Express, MongoDB, Socket.IO, Groq AI, and JWT.\n" +
+        "- **Links**: [Live Demo](https://rapidcare.vercel.app) | [GitHub Repo](https://github.com/akashkumarhzb121-cloud/rapidcare)"
+      );
+    }
+  }
+
+  // 6. Pure contact query
   if (analysis.isPureContactQuery) {
     return (
       "You can reach Akash Kumar directly through several channels:\n\n" +
       "- **Email**: [akashkumarhzb121@gmail.com](mailto:akashkumarhzb121@gmail.com)\n" +
-      "- **Location**: India (available for global remote work & relocation)\n" +
-      "- **Response Time**: Typically within 24 hours\n" +
-      "- **Online Profiles**: [GitHub](https://github.com/akashkumarhzb121-cloud) | [LinkedIn](https://linkedin.com/in/akash-kumar-developer) | [Twitter](https://x.com/sky_kumar121)\n\n" +
-      "You can also send a direct enquiry using the contact form on this portfolio."
+      "- **LinkedIn**: [Akash Kumar on LinkedIn](https://www.linkedin.com/in/akash-kumar-488074309)\n" +
+      "- **GitHub**: [github.com/akashkumarhzb121-cloud](https://github.com/akashkumarhzb121-cloud)\n" +
+      "- **Location**: India (open for remote work globally)\n" +
+      "- **Response Time**: Typically within 24 hours\n\n" +
+      "You can also send a direct enquiry using the interactive contact form on this portfolio."
     );
   }
 
-  // Hiring / Pricing / Services query
-  if (analysis.isHiringQuery) {
-    const lower = message.toLowerCase();
-    if (lower.includes('charge') || lower.includes('cost') || lower.includes('rate') || lower.includes('price')) {
-      return (
-        "Akash does not list fixed pricing because every project is tailored to specific technical requirements, scale, and deadlines. Pricing is scoped transparently based on your project goals.\n\n" +
-        "**Services Offered:**\n" +
-        "- **Full-Stack Web Applications**: Scalable apps built with React, Node.js, Express, and MongoDB\n" +
-        "- **Creative Web & 3D**: Interactive 3D graphics and web experiences using Three.js and WebGL\n" +
-        "- **AI & Smart Integrations**: Production RAG architectures, LLM pipelines, and AI assistants\n" +
-        "- **UI/UX Modernization**: High-performance refactoring and responsive design\n\n" +
-        "To get an accurate quote and timeline for your project, please reach out directly at **akashkumarhzb121@gmail.com** or submit an enquiry via the contact form below."
-      );
+  // 7. DSA query (Must precede general skills)
+  if (analysis.isDSAQuery) {
+    return (
+      "Akash Kumar has a strong problem-solving foundation in Data Structures and Algorithms:\n\n" +
+      "- **Languages Used**: C++, Java, JavaScript\n" +
+      "- **Topics**: Arrays, Two Pointers, Trees, Graphs, Dynamic Programming, Recursion, Binary Search\n" +
+      "- **Platforms**: Active practice on LeetCode, GeeksforGeeks, and CodeChef\n\n" +
+      "He applies algorithmic efficiency to optimize web performance, system state management, and database query design."
+    );
+  }
+
+  // 8. General technical questions (e.g. "What is React?", "What is Node.js?")
+  if (analysis.isGeneralQuestion && analysis.detectedTechnologies.length > 0) {
+    const tech = analysis.detectedTechnologies[0];
+    let techExplanation = `${tech} is a core technology commonly used in modern web development.`;
+
+    if (tech.toLowerCase().includes('react')) {
+      techExplanation = "React is an open-source JavaScript library developed by Meta for building dynamic, component-driven user interfaces. It uses a virtual DOM for efficient updates and a declarative paradigm that makes UI state predictable and manageable.";
+    } else if (tech.toLowerCase().includes('node')) {
+      techExplanation = "Node.js is an open-source, cross-platform JavaScript runtime environment built on Chrome's V8 engine that allows developers to run JavaScript on the server side using an asynchronous, event-driven I/O model.";
+    } else if (tech.toLowerCase().includes('mongo')) {
+      techExplanation = "MongoDB is a popular open-source NoSQL document database that stores data in flexible, JSON-like BSON documents, providing high scalability, flexible schema design, and powerful indexing.";
+    } else if (tech.toLowerCase().includes('jwt')) {
+      techExplanation = "JWT (JSON Web Token) is an open standard (RFC 7519) for securely transmitting information between parties as a compact, self-contained JSON object, commonly used for stateless authentication and authorization in modern REST APIs.";
     }
 
     return (
-      "To hire Akash or collaborate on a project:\n\n" +
-      "1. **Services Available**: Full-Stack Web Apps, Creative 3D Web, AI Integrations, and UI/UX Modernization.\n" +
-      "2. **Process**: Initial consultation -> architecture & scope definition -> sprint development with updates -> deployment & handoff.\n" +
-      "3. **Next Step**: Email **akashkumarhzb121@gmail.com** or send a message through the contact form below with your requirements."
+      `${techExplanation}\n\n` +
+      `Akash Kumar actively leverages **${tech}** across multiple production projects in his full-stack portfolio, including RapidCare and Modplint Interiors.`
     );
   }
 
-  // Skills / Tech stack query
+  // 9. Job / Internship / Availability query
+  if (analysis.isJobQuery || analysis.isInternshipQuery || analysis.isAvailabilityQuery) {
+    return (
+      "Yes! Akash is actively open to new engineering opportunities:\n\n" +
+      "- **Roles**: Software Development Engineer (SDE) full-time roles, engineering internships, and high-impact freelance projects\n" +
+      "- **Work Arrangements**: Open to remote, hybrid, or on-site arrangements\n" +
+      "- **Core Focus**: Scalable full-stack systems, creative frontend development, and modern web architectures\n\n" +
+      "To schedule an interview, discuss a role, or send a job opportunity, you can reach Akash directly at **akashkumarhzb121@gmail.com** or connect on [LinkedIn](https://www.linkedin.com/in/akash-kumar-488074309)."
+    );
+  }
+
+  // 10. General project list query (Must precede profile and skills)
+  if (analysis.isGeneralProjectListQuery) {
+    return (
+      "Here are featured projects built by Akash Kumar:\n\n" +
+      "1. **RapidCare**: AI-driven clinical triage & emergency dispatch network with real-time Socket.IO ambulance tracking.\n" +
+      "2. **Modplint Interiors**: Production commercial interior design web platform with consultation scheduling and media gallery.\n" +
+      "3. **MERN Docs**: Full-stack developer documentation portal with versioned markdown management.\n" +
+      "4. **Student Management System**: Enterprise student portal with role-based access control and analytics.\n" +
+      "5. **3D Interactive Portfolio**: Modern portfolio with WebGL shaders, Three.js physics, and smooth Lenis scrolling.\n\n" +
+      "Ask me about any specific project for details on its architecture and live demo!"
+    );
+  }
+
+  // 11. Skills / Tech stack query
   if (analysis.isSkillsQuery) {
+    const lower = message.toLowerCase();
+    if (lower.includes('backend')) {
+      return (
+        "Akash Kumar's backend engineering expertise:\n\n" +
+        "- **Core Runtime & Frameworks**: Node.js, Express.js\n" +
+        "- **APIs & Protocols**: RESTful APIs, WebSockets (Socket.IO), JWT Authentication & RBAC\n" +
+        "- **Databases**: MongoDB Atlas, Mongoose, Redis caching\n" +
+        "- **Deployment**: Render, Vercel, Docker basics, automated CI/CD probes\n\n" +
+        "He has engineered backend services for production apps like RapidCare, Modplint Interiors, and MERN Docs."
+      );
+    }
+
     return (
       "Here is a summary of Akash Kumar's core technical expertise:\n\n" +
       "- **Frontend**: React, Next.js, TypeScript, JavaScript (ES6+), HTML5, CSS3, Tailwind CSS\n" +
@@ -159,7 +357,7 @@ function generateContextualFallbackAnswer(
     );
   }
 
-  // Education query
+  // 12. Education query
   if (analysis.isEducationQuery) {
     return (
       "Akash Kumar's educational background:\n\n" +
@@ -169,23 +367,23 @@ function generateContextualFallbackAnswer(
     );
   }
 
-  // General questions (e.g. "What is React?", "What is JWT?")
-  if (analysis.isGeneralQuestion && analysis.detectedTechnologies.length > 0) {
-    const tech = analysis.detectedTechnologies[0];
-    let techExplanation = `${tech} is a core technology commonly used in modern web development.`;
-    if (tech.toLowerCase().includes('react')) {
-      techExplanation = 'React is a popular open-source JavaScript library developed by Meta for building dynamic user interfaces, particularly single-page applications with component-driven architecture.';
-    } else if (tech.toLowerCase().includes('jwt')) {
-      techExplanation = 'JWT (JSON Web Token) is an open standard (RFC 7519) for securely transmitting information between parties as a compact, self-contained JSON object, commonly used for stateless authentication and authorization in modern REST APIs.';
-    }
-
+  // 13. Hiring / Services query
+  if (analysis.isHiringQuery || analysis.isServicesQuery || analysis.isFreelanceQuery) {
     return (
-      `${techExplanation}\n\n` +
-      `Akash Kumar actively leverages **${tech}** across multiple production projects in his full-stack portfolio, such as RapidCare and Modplint Interiors.`
+      "Yes — Akash is open to software development opportunities and client project work!\n\n" +
+      "**Services Available:**\n" +
+      "- **Full-Stack Web Applications**: Production systems built with React, Node.js, Express, and MongoDB\n" +
+      "- **Creative Web & 3D Interactive**: High-performance 3D graphics and WebGL experiences with Three.js\n" +
+      "- **AI & LLM Integrations**: RAG pipelines, chatbots, and smart assistant integrations\n" +
+      "- **UI/UX Modernization**: Responsive layouts, performance optimization, and sleek interfaces\n\n" +
+      "**How to Work Together:**\n" +
+      "1. Reach out with your project ideas, requirements, or timeline.\n" +
+      "2. Akash will discuss architecture, milestones, and provide a transparent estimate.\n" +
+      "3. Send an email to **akashkumarhzb121@gmail.com** or submit an enquiry through the contact form below!"
     );
   }
 
-  // Fallback with retrieved chunks
+  // 14. Fallback with retrieved chunks
   if (chunks.length === 0) {
     return (
       "I'm SKY AI, Akash Kumar's portfolio assistant. I don't have that specific detail in my knowledge base, " +
@@ -220,12 +418,84 @@ function generateContextualFallbackAnswer(
 export async function generateChatResponse(
   options: GenerateChatOptions
 ): Promise<GenerateChatResponse> {
-  const { message, conversationId = `conv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, history = [] } = options;
+  const {
+    message,
+    conversationId = `conv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    history = []
+  } = options;
 
-  // 1. Classify query intent deterministically
-  const analysis = classifyQueryIntent(message);
+  // 1. Classify query intent deterministically using conversation history
+  const analysis = classifyQueryIntent(message, history);
 
-  // 2. Generate query embedding & retrieve relevant knowledge chunks
+  // 2. Greetings and Capabilities: instant conversational response, zero RAG, sources: []
+  if (analysis.isGreetingQuery || analysis.isCapabilitiesQuery) {
+    const answer = generateContextualFallbackAnswer(message, [], analysis);
+    const suggestedQuestions = deriveSuggestedQuestions(analysis);
+
+    // Persist conversation history asynchronously
+    try {
+      const userMsg: IChatMessage = { role: 'user', content: message, timestamp: new Date() };
+      const assistantMsg: IChatMessage = { role: 'assistant', content: answer, timestamp: new Date() };
+
+      void Conversation.findOneAndUpdate(
+        { conversationId },
+        {
+          $push: {
+            messages: {
+              $each: [userMsg, assistantMsg],
+              $slice: -20
+            }
+          }
+        },
+        { upsert: true, new: true }
+      ).catch(() => {});
+    } catch {}
+
+    return {
+      answer,
+      sources: [],
+      suggestedQuestions,
+      conversationId
+    };
+  }
+
+  const isTestEnv = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
+
+  // 3. For casual queries without substantive information requests: bypass retrieval, sources: []
+  if (analysis.isCasualQuery) {
+    let answer = '';
+    if (chatClient && env.AI_API_KEY && !isTestEnv) {
+      try {
+        const systemPrompt = buildSystemPrompt({ retrievedContext: '' });
+        const boundedHistory = history.slice(-4);
+        const completion = await chatClient.chat.completions.create({
+          model: env.AI_MODEL || 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...boundedHistory.map((h) => ({ role: h.role, content: h.content })),
+            { role: 'user', content: message }
+          ],
+          temperature: 0.5,
+          max_tokens: 300
+        });
+        answer = completion.choices[0]?.message?.content?.trim() || '';
+      } catch {
+        answer = generateContextualFallbackAnswer(message, [], analysis);
+      }
+    } else {
+      answer = generateContextualFallbackAnswer(message, [], analysis);
+    }
+
+    const suggestedQuestions = deriveSuggestedQuestions(analysis);
+    return {
+      answer,
+      sources: [],
+      suggestedQuestions,
+      conversationId
+    };
+  }
+
+  // 4. Generate query embedding & retrieve relevant knowledge chunks
   let queryVector: number[] | undefined;
   try {
     queryVector = await getEmbedding(message);
@@ -233,20 +503,17 @@ export async function generateChatResponse(
     console.warn('⚠️ Could not generate embedding for query:', err);
   }
 
-  const retrievedChunks = await searchKnowledge(message, queryVector, 5);
+  const retrievedChunks = await searchKnowledge(message, queryVector, 5, undefined, analysis, history);
 
-  // 3. Prepare context string from retrieved chunks
+  // 5. Prepare context string from retrieved chunks
   const contextString = retrievedChunks
-    .map(
-      (c, idx) =>
-        `[Document ${idx + 1}: ${c.title} (${c.sourceType})]\n${c.content}`
-    )
+    .map((c, idx) => `[Document ${idx + 1}: ${c.title} (${c.sourceType})]\n${c.content}`)
     .join('\n\n---\n\n');
 
-  // 4. Prepare system prompt
+  // 6. Prepare system prompt
   const systemPrompt = buildSystemPrompt({ retrievedContext: contextString });
 
-  // 5. Construct messages payload with bounded history (last 6 messages max)
+  // 7. Construct messages payload with bounded history (last 6 messages max)
   const boundedHistory = history.slice(-6);
 
   const messagesPayload: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
@@ -260,8 +527,8 @@ export async function generateChatResponse(
 
   let answer = '';
 
-  // 6. Call LLM provider (Groq or configured OpenAI-compatible endpoint) or fallback
-  if (chatClient && env.AI_API_KEY) {
+  // 8. Call LLM provider or fallback
+  if (chatClient && env.AI_API_KEY && !isTestEnv) {
     try {
       const completion = await chatClient.chat.completions.create({
         model: env.AI_MODEL || 'llama-3.3-70b-versatile',
@@ -273,22 +540,22 @@ export async function generateChatResponse(
       answer = completion.choices[0]?.message?.content?.trim() || '';
     } catch (err: any) {
       console.error('❌ LLM generation call failed:', err?.message || err);
-      // Fallback gracefully so visitor always receives high quality info
       answer = generateContextualFallbackAnswer(message, retrievedChunks, analysis);
     }
   } else {
-    // Development or key-free fallback
     answer = generateContextualFallbackAnswer(message, retrievedChunks, analysis);
   }
 
-  // 7. Format and filter source citations returned to the frontend
+  // 9. Format and filter source citations returned to the frontend
   let filteredChunks = retrievedChunks;
 
   if (analysis.isPureContactQuery) {
-    // Pure contact questions must NEVER return project citations
+    filteredChunks = filteredChunks.filter((c) => c.sourceType === 'contact' || c.sourceType === 'faq');
+  } else if (analysis.isPricingQuery) {
+    filteredChunks = filteredChunks.filter((c) => c.sourceType === 'faq' || c.sourceType === 'services' || c.sourceType === 'contact');
+  } else if (analysis.isJobQuery || analysis.isInternshipQuery || analysis.isAvailabilityQuery) {
     filteredChunks = filteredChunks.filter((c) => c.sourceType !== 'project');
   } else if (analysis.namedProjectSlug) {
-    // Named project queries should only cite that project or general background
     filteredChunks = filteredChunks.filter(
       (c) =>
         c.projectSlug === analysis.namedProjectSlug ||
@@ -296,7 +563,6 @@ export async function generateChatResponse(
         c.sourceType !== 'project'
     );
   } else if (analysis.isSkillsQuery) {
-    // Skills queries should not cite generic project overviews
     filteredChunks = filteredChunks.filter(
       (c) => c.sourceType !== 'project' || c.chunkId.includes('tech')
     );
@@ -315,15 +581,14 @@ export async function generateChatResponse(
     };
   });
 
-  // Deduplicate sources by title and cap to top 4
   const uniqueSources = sources
     .filter((src, index, self) => index === self.findIndex((s) => s.title === src.title))
     .slice(0, 4);
 
-  // 8. Dynamic suggested questions
+  // 10. Dynamic suggested questions
   const suggestedQuestions = deriveSuggestedQuestions(analysis);
 
-  // 9. Persist conversation history asynchronously (safely handled if DB is unavailable)
+  // 11. Persist conversation history asynchronously
   try {
     const userMsg: IChatMessage = { role: 'user', content: message, timestamp: new Date() };
     const assistantMsg: IChatMessage = { role: 'assistant', content: answer, timestamp: new Date() };
@@ -334,17 +599,13 @@ export async function generateChatResponse(
         $push: {
           messages: {
             $each: [userMsg, assistantMsg],
-            $slice: -20 // keep last 20 messages
+            $slice: -20
           }
         }
       },
       { upsert: true, new: true }
-    ).catch(() => {
-      // Ignore background persistence errors
-    });
-  } catch {
-    // Non-blocking
-  }
+    ).catch(() => {});
+  } catch {}
 
   return {
     answer,

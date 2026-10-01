@@ -115,38 +115,35 @@ export function computeLexicalScore(
   const tokenCoverage = matchedTokens / queryTokens.length;
   rawScore += tokenCoverage * 0.3;
 
-  // 3. Synonym / Keyword category expansion
-  // Hiring & Services terms
+  // 3. Category term expansion
   if (
-    (analysis.isHiringQuery || analysis.isServicesQuery) &&
+    (analysis.isHiringQuery || analysis.isServicesQuery || analysis.isFreelanceQuery) &&
     (chunk.sourceType === 'services' || chunk.sourceType === 'contact')
   ) {
     rawScore += 0.35;
   }
 
-  // Contact terms
-  if (
-    analysis.isPureContactQuery &&
-    chunk.sourceType === 'contact'
-  ) {
+  if (analysis.isPureContactQuery && chunk.sourceType === 'contact') {
     rawScore += 0.50;
   }
 
-  // Skills terms
-  if (
-    analysis.isSkillsQuery &&
-    (chunk.sourceType === 'skills' || chunk.chunkId.includes('tech'))
-  ) {
+  if (analysis.isSkillsQuery && (chunk.sourceType === 'skills' || chunk.chunkId.includes('tech'))) {
     rawScore += 0.40;
   }
 
-  // Explicit project match
   if (
     analysis.namedProjectSlug &&
     (chunk.projectSlug === analysis.namedProjectSlug ||
       chunk.chunkId.includes(analysis.namedProjectSlug))
   ) {
     rawScore += 0.60;
+  }
+
+  if (
+    (analysis.isJobQuery || analysis.isInternshipQuery || analysis.isAvailabilityQuery) &&
+    (chunk.sourceType === 'faq' || chunk.sourceType === 'contact' || chunk.sourceType === 'profile')
+  ) {
+    rawScore += 0.45;
   }
 
   return Math.min(1.0, Math.max(0.0, rawScore));
@@ -161,7 +158,12 @@ export function computeMetadataIntentScore(
 ): number {
   const st = chunk.sourceType;
 
-  // 1. User named a specific project (e.g. "Tell me about RapidCare")
+  // 0. Greeting, Casual, Capabilities
+  if (analysis.isGreetingQuery || analysis.isCasualQuery || analysis.isCapabilitiesQuery) {
+    return 0.05;
+  }
+
+  // 1. User named or context-referenced a specific project (e.g. "Tell me about RapidCare")
   if (analysis.namedProjectSlug) {
     if (
       chunk.projectSlug === analysis.namedProjectSlug ||
@@ -169,7 +171,7 @@ export function computeMetadataIntentScore(
     ) {
       return 1.0;
     }
-    // Strongly downrank unrelated projects when a specific project was asked
+    // Strongly suppress unrelated projects when a specific project was asked
     if (st === 'project') {
       return 0.05;
     }
@@ -188,8 +190,27 @@ export function computeMetadataIntentScore(
     return 0.1;
   }
 
-  // 3. Hiring or Client service query (e.g. "How do I hire Akash?", "What services does Akash offer?", "I want a website for my company")
-  if (analysis.isHiringQuery || analysis.isServicesQuery) {
+  // 3. Pricing query (e.g. "How much does Akash charge?")
+  if (analysis.isPricingQuery) {
+    if (st === 'faq') return 1.0;
+    if (st === 'services') return 0.95;
+    if (st === 'contact') return 0.85;
+    if (st === 'project') return 0.05;
+    return 0.2;
+  }
+
+  // 4. Job, Internship, Availability inquiries
+  if (analysis.isJobQuery || analysis.isInternshipQuery || analysis.isAvailabilityQuery) {
+    if (st === 'faq') return 1.0;
+    if (st === 'contact') return 0.95;
+    if (st === 'profile') return 0.90;
+    if (st === 'experience') return 0.80;
+    if (st === 'project') return 0.05;
+    return 0.2;
+  }
+
+  // 5. Hiring or Client service query (e.g. "How do I hire Akash?", "What services does Akash offer?", "I want a website for my company")
+  if (analysis.isHiringQuery || analysis.isServicesQuery || analysis.isFreelanceQuery) {
     if (st === 'services') return 1.0;
     if (st === 'contact') return 0.95;
     if (st === 'faq') return 0.75;
@@ -199,30 +220,30 @@ export function computeMetadataIntentScore(
     return 0.2;
   }
 
-  // 4. Skills & Tech Stack query (e.g. "What are things Akash knows?", "What is Akash's tech stack?")
+  // 6. Skills & Tech Stack query (e.g. "What are things Akash knows?", "What is Akash's tech stack?")
   if (analysis.isSkillsQuery) {
     if (st === 'skills') return 1.0;
-    if (st === 'experience') return 0.8;
+    if (st === 'experience') return 0.85;
     if (st === 'education') return 0.7;
     if (st === 'profile') return 0.6;
     if (st === 'project') {
-      return chunk.chunkId.includes('tech') ? 0.75 : 0.2;
+      return chunk.chunkId.includes('tech') ? 0.75 : 0.15;
     }
     return 0.2;
   }
 
-  // 5. Profile query (e.g. "Tell me about Akash")
+  // 7. Profile query (e.g. "Tell me about Akash")
   if (analysis.isProfileQuery) {
     if (st === 'profile') return 1.0;
     if (st === 'skills') return 0.85;
     if (st === 'experience') return 0.8;
     if (st === 'services') return 0.75;
     if (st === 'education') return 0.7;
-    if (st === 'project') return 0.3;
+    if (st === 'project') return 0.25;
     return 0.2;
   }
 
-  // 6. Education query (e.g. "What is Akash's education?")
+  // 8. Education query (e.g. "What is Akash's education?")
   if (analysis.isEducationQuery) {
     if (st === 'education') return 1.0;
     if (st === 'experience') return 0.5;
@@ -231,15 +252,25 @@ export function computeMetadataIntentScore(
     return 0.1;
   }
 
-  // 7. DSA query (e.g. "What is Akash's DSA practice?")
+  // 9. DSA query (e.g. "Does Akash know DSA?")
   if (analysis.isDSAQuery) {
     if (st === 'dsa') return 1.0;
-    if (st === 'skills') return 0.6;
-    if (st === 'project') return 0.1;
+    if (st === 'skills') return 0.7;
+    if (st === 'project') return 0.05;
     return 0.1;
   }
 
-  // 8. General project list query (e.g. "What projects has Akash built?")
+  // 10. Resume query
+  if (analysis.isResumeQuery) {
+    if (st === 'profile') return 1.0;
+    if (st === 'experience') return 0.9;
+    if (st === 'skills') return 0.85;
+    if (st === 'education') return 0.8;
+    if (st === 'project') return 0.1;
+    return 0.2;
+  }
+
+  // 11. General project list query (e.g. "What projects has Akash built?")
   if (analysis.isGeneralProjectListQuery) {
     if (st === 'project' && chunk.chunkId.includes('overview')) return 1.0;
     if (st === 'profile') return 0.8;
@@ -247,7 +278,7 @@ export function computeMetadataIntentScore(
     return 0.2;
   }
 
-  // 9. General technical question (e.g. "What is React?", "What is JWT?")
+  // 12. General technical question (e.g. "What is React?", "What is JWT?")
   if (analysis.isGeneralQuestion) {
     const techMatches = analysis.detectedTechnologies.some((tech) => {
       const lower = tech.toLowerCase();
@@ -258,7 +289,7 @@ export function computeMetadataIntentScore(
     });
 
     if (techMatches) {
-      if (st === 'skills') return 0.95;
+      if (st === 'skills') return 1.0;
       if (st === 'project' && chunk.chunkId.includes('tech')) return 0.85;
       if (st === 'experience') return 0.75;
       return 0.5;
@@ -266,7 +297,7 @@ export function computeMetadataIntentScore(
     return 0.2;
   }
 
-  // 10. Default Intent Overlap fallback
+  // 13. Default Intent Overlap fallback
   let score = 0.2;
   for (const intent of analysis.intents) {
     if (st === intent || (intent === 'services' && st === 'services') || (intent === 'skills' && st === 'skills')) {
@@ -311,6 +342,11 @@ export function enforceDiversity(
   analysis: QueryAnalysis,
   limit: number = 5
 ): SearchResult[] {
+  // Case 0: Greeting, Casual, Capabilities -> no retrieval
+  if (analysis.isGreetingQuery || analysis.isCasualQuery || analysis.isCapabilitiesQuery) {
+    return [];
+  }
+
   // Case A: Specific project named (e.g. "Tell me about RapidCare")
   if (analysis.namedProjectSlug) {
     const targetProjectChunks = scoredChunks.filter(
@@ -341,8 +377,24 @@ export function enforceDiversity(
     return contactChunks.slice(0, limit);
   }
 
-  // Case C: Hiring or Client inquiry (e.g. "How do I hire Akash?", "I need a website for my company", "What services does Akash offer?")
-  if (analysis.isHiringQuery || analysis.isServicesQuery) {
+  // Case C: Pricing query
+  if (analysis.isPricingQuery) {
+    const pricingChunks = scoredChunks.filter(
+      (c) => c.sourceType === 'faq' || c.sourceType === 'services' || c.sourceType === 'contact'
+    );
+    return pricingChunks.slice(0, limit);
+  }
+
+  // Case D: Job / Internship / Availability inquiries
+  if (analysis.isJobQuery || analysis.isInternshipQuery || analysis.isAvailabilityQuery) {
+    const careerChunks = scoredChunks.filter(
+      (c) => c.sourceType === 'faq' || c.sourceType === 'contact' || c.sourceType === 'profile' || c.sourceType === 'experience'
+    );
+    return careerChunks.slice(0, limit);
+  }
+
+  // Case E: Hiring or Client inquiry (e.g. "How do I hire Akash?", "I need a website for my company", "What services does Akash offer?")
+  if (analysis.isHiringQuery || analysis.isServicesQuery || analysis.isFreelanceQuery) {
     const selected: SearchResult[] = [];
     const services = scoredChunks.filter((c) => c.sourceType === 'services');
     const contact = scoredChunks.filter((c) => c.sourceType === 'contact');
@@ -351,7 +403,6 @@ export function enforceDiversity(
     const projects = scoredChunks.filter((c) => c.sourceType === 'project');
 
     if (analysis.isServicesQuery) {
-      // For pure services inquiries, place all matching services chunks first
       for (const s of services) {
         if (selected.length < limit) selected.push(s);
       }
@@ -359,23 +410,17 @@ export function enforceDiversity(
       if (faq.length > 0 && selected.length < limit) selected.push(faq[0]);
       if (experience.length > 0 && selected.length < limit) selected.push(experience[0]);
     } else {
-      // 1. Primary service chunk
       if (services.length > 0) selected.push(services[0]);
-      // 2. Primary contact chunk
       if (contact.length > 0) selected.push(contact[0]);
-      // 3. Additional service or FAQ
       if (services.length > 1) selected.push(services[1]);
       else if (faq.length > 0) selected.push(faq[0]);
-      // 4. Experience or FAQ
       if (experience.length > 0 && selected.length < limit) selected.push(experience[0]);
       else if (faq.length > 0 && !selected.includes(faq[0]) && selected.length < limit) {
         selected.push(faq[0]);
       }
-      // 5. At most 1 relevant project example
       if (projects.length > 0 && selected.length < limit) selected.push(projects[0]);
     }
 
-    // Fill remaining if needed
     for (const c of scoredChunks) {
       if (selected.length >= limit) break;
       if (!selected.some((s) => s.chunkId === c.chunkId)) {
@@ -385,7 +430,7 @@ export function enforceDiversity(
     return selected.slice(0, limit);
   }
 
-  // Case D: Skills & Tech stack query (e.g. "What are things Akash knows?")
+  // Case F: Skills & Tech stack query (e.g. "What are things Akash knows?")
   if (analysis.isSkillsQuery) {
     const selected: SearchResult[] = [];
     const skills = scoredChunks.filter((c) => c.sourceType === 'skills');
@@ -411,7 +456,7 @@ export function enforceDiversity(
     return selected.slice(0, limit);
   }
 
-  // Case E: Education query
+  // Case G: Education query
   if (analysis.isEducationQuery) {
     const education = scoredChunks.filter((c) => c.sourceType === 'education');
     const experience = scoredChunks.filter((c) => c.sourceType === 'experience');
@@ -429,7 +474,38 @@ export function enforceDiversity(
     return selected.slice(0, limit);
   }
 
-  // Case F: General project list query (e.g. "What projects has Akash built?")
+  // Case H: DSA query
+  if (analysis.isDSAQuery) {
+    const dsaChunks = scoredChunks.filter((c) => c.sourceType === 'dsa');
+    const skillsChunks = scoredChunks.filter((c) => c.sourceType === 'skills');
+    const selected: SearchResult[] = [...dsaChunks];
+    for (const s of skillsChunks) {
+      if (selected.length < limit) selected.push(s);
+    }
+    return selected.slice(0, limit);
+  }
+
+  // Case I: General Technical Question (e.g. "What is React?")
+  if (analysis.isGeneralQuestion) {
+    const selected: SearchResult[] = [];
+    const skills = scoredChunks.filter((c) => c.sourceType === 'skills');
+    const techProjects = scoredChunks.filter(
+      (c) => c.sourceType === 'project' && c.chunkId.includes('tech')
+    );
+
+    if (skills.length > 0) selected.push(skills[0]);
+    if (techProjects.length > 0) selected.push(techProjects[0]);
+
+    for (const c of scoredChunks) {
+      if (selected.length >= limit) break;
+      if (c.sourceType !== 'project' && !selected.some((s) => s.chunkId === c.chunkId)) {
+        selected.push(c);
+      }
+    }
+    return selected.slice(0, limit);
+  }
+
+  // Case J: General project list query (e.g. "What projects has Akash built?")
   if (analysis.isGeneralProjectListQuery) {
     const selected: SearchResult[] = [];
     const seenProjects = new Set<string>();
@@ -445,14 +521,13 @@ export function enforceDiversity(
       }
     }
 
-    // Include profile or skills if available
     const profile = scoredChunks.find((c) => c.sourceType === 'profile');
     if (profile && selected.length < limit) selected.push(profile);
 
     return selected.slice(0, limit);
   }
 
-  // Case G: General query with project capping (max 2 project chunks)
+  // Case K: Default Diversity with project capping (max 2 project chunks)
   const selected: SearchResult[] = [];
   let projectCount = 0;
   const maxProjects = 2;
@@ -469,7 +544,6 @@ export function enforceDiversity(
     }
   }
 
-  // If still room, fill with next best
   for (const c of scoredChunks) {
     if (selected.length >= limit) break;
     if (!selected.some((s) => s.chunkId === c.chunkId)) {
@@ -489,16 +563,23 @@ export async function searchKnowledge(
   query: string,
   queryVector?: number[],
   limit: number = 5,
-  sourceTypeFilter?: string
+  sourceTypeFilter?: string,
+  existingAnalysis?: QueryAnalysis,
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>
 ): Promise<SearchResult[]> {
-  const analysis = classifyQueryIntent(query);
+  const analysis = existingAnalysis || classifyQueryIntent(query, history);
+
+  // Instant bypass for greetings, casual pleasantries, or capability menu requests
+  if (analysis.isGreetingQuery || analysis.isCasualQuery || analysis.isCapabilitiesQuery) {
+    return [];
+  }
 
   const matchFilter: Record<string, unknown> = {};
   if (sourceTypeFilter) {
     matchFilter.sourceType = sourceTypeFilter;
   }
 
-  // Fetch all candidate documents from MongoDB
+  // Fetch candidate documents from MongoDB
   const candidates = await KnowledgeChunk.find(matchFilter).lean().exec();
   if (!candidates || candidates.length === 0) {
     return [];
@@ -506,22 +587,15 @@ export async function searchKnowledge(
 
   // Compute hybrid scores for all candidates
   const scoredChunks: ScoredChunk[] = candidates.map((chunk: any) => {
-    // 1. Semantic score (0.45 weight)
     let semanticScore = 0;
     if (queryVector && queryVector.length > 0 && chunk.embedding && chunk.embedding.length === queryVector.length) {
       semanticScore = cosineSimilarity(queryVector, chunk.embedding);
     }
 
-    // 2. Lexical score (0.30 weight)
     const lexicalScore = computeLexicalScore(analysis.normalizedQuery, chunk, analysis);
-
-    // 3. Metadata Intent score (0.20 weight)
     const intentScore = computeMetadataIntentScore(analysis, chunk);
-
-    // 4. Source Quality score (0.05 weight)
     const qualityScore = computeSourceQualityScore(chunk);
 
-    // Hybrid formula
     const finalScore =
       semanticScore * 0.45 +
       lexicalScore * 0.30 +
