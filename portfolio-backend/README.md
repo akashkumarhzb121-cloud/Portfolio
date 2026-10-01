@@ -1,146 +1,320 @@
-# Portfolio Backend Service
+# Portfolio Backend & SKY AI Assistant Service
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-green?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.0-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Express](https://img.shields.io/badge/Express-5.2-black?logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-Mongoose-emerald?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![Groq AI](https://img.shields.io/badge/Groq_AI-Llama_3.3_70B-orange?logo=fastapi&logoColor=white)](https://groq.com/)
 [![Render Ready](https://img.shields.io/badge/Render-Configured-46E3B7?logo=render&logoColor=white)](https://render.com)
+[![Tests Passing](https://img.shields.io/badge/Vitest-109%20Passed-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 
-A small contact API that validates enquiries, stores them in MongoDB, and sends inbox notifications through Resend.
+The backend microservice for Akash Kumar's portfolio, hosting the **SKY AI RAG (Retrieval-Augmented Generation) Conversational Assistant**, contact enquiry validation, MongoDB Atlas persistence, and Resend email notifications.
 
 ---
 
 ## Table of Contents
+
 - [Architecture & Tech Stack](#architecture--tech-stack)
-- [Project Separation & Independence](#project-separation--independence)
-- [Endpoint Specifications](#endpoint-specifications)
+- [How SKY AI (RAG Chatbot) Works](#how-sky-ai-rag-chatbot-works)
+- [Chatbot Flowchart](#chatbot-flowchart)
+- [Complete File-by-File Guide & Roles](#complete-file-by-file-guide--roles)
+- [Structured Knowledge Base (`ai-knowledge/`)](#structured-knowledge-base-ai-knowledge)
+- [API Endpoint Specifications](#api-endpoint-specifications)
 - [Environment Variables](#environment-variables)
 - [Local Setup & Development](#local-setup--development)
-- [Automated Testing](#automated-testing)
+- [Automated Testing Suite (109 Tests)](#automated-testing-suite-109-tests)
 - [MongoDB Atlas Setup Guide](#mongodb-atlas-setup-guide)
-- [Resend Setup](#resend-email-setup)
+- [Resend Email Setup](#resend-email-setup)
 - [Render Deployment Guide](#render-deployment-guide)
-- [Failure & Duplicate Submission Policy](#failure--duplicate-submission-policy)
 
 ---
 
 ## Architecture & Tech Stack
 
-- **Runtime**: Node.js (>= 20) with ESM (`"type": "module"`)
-- **Language**: TypeScript with strict types (`NodeNext` resolution)
-- **Framework**: Express 5
+### Core Runtime & Framework
+- **Runtime**: Node.js (>= 20) with native ECMAScript Modules (`"type": "module"`)
+- **Language**: TypeScript with strict typing (`NodeNext` module resolution)
+- **Web Framework**: Express 5
 - **Database & ODM**: MongoDB Atlas with Mongoose
-- **Validation**: Zod schema validation
-- **Email**: Resend HTTP API
-- **Security & Protection**:
-  - `helmet`: Secure HTTP response headers
-  - `cors`: Strict origin whitelisting (`FRONTEND_ORIGINS`) with no wildcards
-  - `express-rate-limit`: IP-based rate limiting (5 requests per 15 minutes)
-  - Request body payload size cap (`32kb`) to prevent memory exhaustion attacks
-- **Testing**: Vitest + Supertest
+- **Validation**: Zod schema validation for strict payload validation
+
+### AI & RAG Engine
+- **LLM Provider**: Groq Cloud LPUs executing **`llama-3.3-70b-versatile`** via an OpenAI-compatible API interface.
+- **Intent Classifier**: Zero-latency deterministic engine classifying 22 distinct intent categories (`intent.ts`).
+- **Context Resolution Engine**: Inspects multi-turn conversation history to resolve pronouns (*"he"*, *"it"*, *"similar"*) and bind active project slugs (*RapidCare*, etc.).
+- **Hybrid Retrieval System**: Combines vector cosine similarity with lexical keyword matching, category intent affinity, and diversity post-processing (`search.ts`).
+- **Offline / Test Synthesizer**: Fully deterministic fallback synthesizer enabling zero-cost offline development and sub-second automated testing (`generate.ts`).
+
+### Communications & Security
+- **Email Service**: Resend HTTP API for automated contact notifications.
+- **Security & Headers**: Helmet for secure HTTP headers, strict CORS whitelisting (`FRONTEND_ORIGINS`), and per-IP rate limiting (`express-rate-limit`).
 
 ---
 
-## Project Separation & Independence
+## How SKY AI (RAG Chatbot) Works
 
-- **Backend (`portfolio-backend`)**: Deployed as an independent Web Service on **Render**.
-- **Frontend (`portfolio-frontend`)**: Deployed as a static application on **Vercel**.
-- **Root Directory Rule**:
-  - Render must be pointed to `portfolio-backend` as its Root Directory.
-  - Vercel must be pointed to `portfolio-frontend` as its Root Directory.
-  - Backend secrets (`MONGODB_URI`, `RESEND_API_KEY`) must **never** be placed in frontend code or Vercel environment variables.
+Rather than relying on a raw LLM that lacks knowledge of Akash's projects and personal details, **SKY AI uses Retrieval-Augmented Generation (RAG)**:
+
+1. **Deterministic Intent Classification**:
+   - The user query is normalized and scanned for 22 intent categories (`greeting`, `casual`, `capabilities`, `profile`, `skills`, `experience`, `education`, `services`, `hiring`, `job`, `internship`, `freelance`, `pricing`, `contact`, `project`, `technology`, `general`, `faq`, `availability`, `resume`, `dsa`, `mixed`).
+   - **Instant Fast-Path**: Greetings and capabilities requests bypass vector search completely and return in `< 1ms` with empty sources (`sources: []`).
+
+2. **Multi-Turn Context Resolution**:
+   - Follow-up questions like *"What technologies did he use?"* or *"Can Akash build something similar?"* inspect prior conversation turns to carry over the active project slug (e.g., `rapidcare`).
+
+3. **Hybrid Retrieval Scoring**:
+   - Verified chunks from the knowledge base are scored using a weighted hybrid formula:
+     $$\text{finalScore} = 0.45 \cdot \text{semantic} + 0.30 \cdot \text{lexical} + 0.20 \cdot \text{intentAffinity} + 0.05 \cdot \text{quality}$$
+   - **Diversity & Penalty Filter**: Pure contact, job, internship, or pricing queries strictly suppress project chunks so random project files (e.g. *Modplint Interiors*) never displace contact info.
+
+4. **Grounded Prompt Assembly**:
+   - The system prompt enforces a natural, conversational tone that answers the user's question in the first sentence, eliminates robotic phrases (*"According to retrieved documents"*), and handles pricing transparently without hallucinating rates.
+
+5. **LLM Generation & Delivery**:
+   - The assembled context is streamed through Groq's high-speed LPU infrastructure, formatted with verified source citations and clickable follow-up suggestions, and returned to the client.
 
 ---
 
-## Endpoint Specifications
+## Chatbot Flowchart
 
-### 1. Health Check
-- **Method**: `GET /health` (also available at `/api/health`)
-- **Purpose**: Render health check probe and uptime monitoring.
-- **Response**: `200 OK`
-```json
-{
-  "status": "healthy",
-  "service": "portfolio-backend",
-  "timestamp": "2026-09-27T12:00:00.000Z",
-  "uptime": 128
-}
+```mermaid
+flowchart TD
+    User(["Visitor on Portfolio"]) -->|"Types Query (POST /api/ai/chat)"| Router["ai.routes.ts"]
+    Router --> RateLimit["aiRateLimiter.ts (Rate Limiting)"]
+    RateLimit --> Controller["ai.controller.ts (Zod Validation)"]
+    
+    Controller --> Intent["classifyQueryIntent (intent.ts)"]
+    
+    Intent --> IntentSwitch{"Query Intent?"}
+    
+    %% Fast path
+    IntentSwitch -- "Greeting / Casual / Capabilities" --> FastPath["Instant Fast-Path Generator"]
+    FastPath -->|"Empty sources: [] (< 1ms)"| Respond["JSON Response"]
+    
+    %% RAG path
+    IntentSwitch -- "Factual / Project / Hiring / Skills" --> Context["resolveContextFromHistory (Resolves pronouns & projects)"]
+    
+    Context --> Search["searchKnowledge (search.ts)"]
+    
+    subgraph KnowledgeStore["ai-knowledge / MongoDB"]
+        K1["profile.json · skills.json"]
+        K2["services.json · contact.json"]
+        K3["faq.json · experience.json"]
+        K4["education.json · dsa-summary.json"]
+        K5["projects/*.json (11 Projects)"]
+    end
+    
+    KnowledgeStore --> Search
+    Search --> HybridScore["Compute Hybrid Score (0.45 Semantic + 0.30 Lexical + 0.20 Intent + 0.05 Quality)"]
+    HybridScore --> Diversity["enforceDiversity (Penalize unrelated projects on contact/pricing/jobs)"]
+    
+    Diversity --> Prompt["buildSystemPrompt (systemPrompt.ts)"]
+    Prompt --> Groq["Groq Cloud API (Llama 3.3-70B)"]
+    
+    Groq --> PostFilter["Format Sources & Suggestion Chips"]
+    PostFilter --> Respond
+    
+    Respond --> User
 ```
 
 ---
 
-### 2. Contact Inquiry Submission
-- **Method**: `POST /api/contact`
-- **Rate Limit**: 5 submissions per 15 minutes per IP address.
-- **Request Headers**:
-  - `Content-Type: application/json`
-  - `Accept: application/json`
+## Complete File-by-File Guide & Roles
+
+```
+portfolio-backend/
+├── ai-knowledge/                         # Ground-truth structured knowledge base
+│   ├── profile.json                      # Akash's background, bio, location, philosophy
+│   ├── skills.json                       # Categorized technical competencies & tools
+│   ├── services.json                     # Client deliverables, services, and engagement steps
+│   ├── contact.json                      # Direct channels (email, LinkedIn, GitHub, response times)
+│   ├── faq.json                          # Frequently asked questions for recruiters and clients
+│   ├── experience.json                   # Work history, roles, and software accomplishments
+│   ├── education.json                    # B.Tech Computer Science (UCET, VBU), coursework, CGPA
+│   ├── dsa-summary.json                  # Data structures & algorithms problem-solving metrics
+│   └── projects/                         # 11 In-depth project dossiers
+│       ├── rapidcare.json                # AI healthcare triage & ambulance dispatch platform
+│       ├── modplint-interiors.json       # Commercial interior design web platform
+│       ├── mern-docs.json                # Developer documentation platform
+│       ├── devsync.json                  # Real-time developer collaboration system
+│       ├── student-management.json       # Enterprise university ERP & student portal
+│       ├── netflix-clone.json            # Streaming service frontend clone with TMDB
+│       ├── weather-app.json              # Dynamic meteorological weather application
+│       ├── task-manager.json             # Kanban task orchestration system
+│       ├── portfolio-v1.json             # Early portfolio iteration
+│       ├── e-commerce-store.json         # Full-stack e-commerce catalog & cart
+│       └── premier.json                  # Industrial client showcase
+├── src/
+│   ├── ai/
+│   │   ├── llm/
+│   │   │   └── generate.ts               # Groq LLM client, fast-path generator & fallback synthesizer
+│   │   ├── prompts/
+│   │   │   └── systemPrompt.ts           # Natural persona prompt & strict grounding guardrails
+│   │   ├── rag/
+│   │   │   ├── chunker.ts                # Deterministic semantic chunking & canonical source typing
+│   │   │   ├── ingest.ts                 # Knowledge chunk ingestion & MongoDB index upserting
+│   │   │   └── index.ts                  # Module exports
+│   │   └── retrieval/
+│   │       ├── intent.ts                 # 22-category intent classifier & history context resolver
+│   │       └── search.ts                 # Hybrid vector/lexical retrieval & diversity enforcement
+│   ├── config/
+│   │   ├── database.ts                   # Mongoose connection management with auto-reconnect
+│   │   ├── env.ts                        # Type-safe environment variable parsing & validation
+│   │   └── resend.ts                     # Resend email client configuration
+│   ├── controllers/
+│   │   ├── ai.controller.ts              # Handlers for /api/ai/chat and /api/ai/lead
+│   │   └── contact.controller.ts         # Handlers for /api/contact
+│   ├── middleware/
+│   │   ├── aiRateLimiter.ts              # IP-based rate limiting for AI endpoints
+│   │   ├── errorHandler.ts               # Global error handler with development/production stack traces
+│   │   ├── notFoundHandler.ts            # Standardized 404 JSON response
+│   │   └── rateLimiter.ts                # IP-based rate limiting for contact submissions
+│   ├── models/
+│   │   ├── contactEnquiry.model.ts       # Mongoose model for client contact submissions
+│   │   ├── conversation.model.ts         # Mongoose model for chat history & sessions
+│   │   └── knowledgeChunk.model.ts       # Mongoose model for vector-searchable knowledge chunks
+│   ├── routes/
+│   │   ├── ai.routes.ts                  # Routes for /api/ai/chat and /api/ai/lead
+│   │   ├── contact.route.ts              # Routes for /api/contact
+│   │   └── health.route.ts               # Routes for /health and /api/health
+│   ├── schemas/
+│   │   ├── ai.schema.ts                  # Zod validation schemas for AI chat & lead payloads
+│   │   └── contact.schema.ts             # Zod validation schemas for contact submissions
+│   ├── services/
+│   │   └── email.service.ts              # Resend email notification service
+│   ├── app.ts                            # Express application setup, security middleware, and routes
+│   └── server.ts                         # Server entry point (starts HTTP listener and DB connection)
+├── tests/
+│   ├── ai.test.ts                        # 94 AI tests: chunkers, 22 intents, 30 queries, 5 conversations
+│   ├── contact.test.ts                   # 12 Contact API tests (validation, persistence, rate limiting)
+│   └── email.service.test.ts             # 3 Resend email service unit tests
+├── index.js                              # Root launcher delegating to dist/server.js for Render
+├── tsconfig.json                         # TypeScript configuration (NodeNext, strict, ES2022)
+└── package.json                          # Dependencies, scripts, and engine specifications
+```
+
+---
+
+## Structured Knowledge Base (`ai-knowledge/`)
+
+The assistant draws verified facts from structured JSON documents located in [`ai-knowledge/`](file:///c:/Users/akash/Desktop/Website_References/portfolio-backend/ai-knowledge):
+
+| File | Content Covered | Primary Chunks Generated |
+| :--- | :--- | :--- |
+| `profile.json` | Akash's identity, full-stack title, location, background, philosophy | Profile Overview, Philosophy |
+| `skills.json` | Frontend, Backend, 3D/Creative, Database, DevOps, and AI competencies | Skills Matrix, Core Technologies |
+| `services.json` | Web applications, 3D interactive, AI integrations, UI modernization | Services Overview, Engagement Steps |
+| `contact.json` | Email, LinkedIn, GitHub, response times, inquiry guidelines | Direct Contact Channels |
+| `faq.json` | Work availability, remote preferences, hiring process, pricing scoping | Frequently Asked Questions |
+| `experience.json` | Production track record, open-source work, architectural highlights | Professional Experience |
+| `education.json` | B.Tech in CSE (UCET, VBU), academic coursework, core subjects | Education Background |
+| `dsa-summary.json` | Data Structures & Algorithms problem-solving metrics (LeetCode, C++) | Algorithmic Problem Solving |
+| `projects/*.json` | 11 Project dossiers (RapidCare, Modplint, MERN Docs, etc.) | Overview, Architecture, Tech Stack |
+
+---
+
+## API Endpoint Specifications
+
+### 1. AI Chat Assistant
+- **Method**: `POST /api/ai/chat`
+- **Rate Limit**: 20 requests per minute per IP.
 - **Request Body**:
-```json
-{
-  "name": "Jane Doe",
-  "email": "jane@company.com",
-  "service": "Full-Stack Web Development",
-  "message": "We would like to discuss building an AI-powered SaaS product."
-}
-```
-
-#### Field Validation Rules
-| Field | Type | Rules | Example |
-| :--- | :--- | :--- | :--- |
-| `name` | string | Trimmed, min 2 chars, max 100 chars | `"Akash Kumar"` |
-| `email` | string | Trimmed, valid email format, max 255 chars | `"contact@example.com"` |
-| `service` | string | Trimmed, min 1 char, max 100 chars | `"Full-Stack Web Development"` |
-| `message` | string | Trimmed, min 10 chars, max 5000 chars | `"Project details..."` |
-
-#### Responses
-- **`201 Created`**: The enquiry was saved to MongoDB. Resend notification is dispatched asynchronously and may fail independently.
-```json
-{
-  "success": true,
-  "message": "Message received successfully! I will reply shortly."
-}
-```
-- **`400 Bad Request`**: Validation failed or malformed JSON payload.
-```json
-{
-  "success": false,
-  "message": "Validation failed. Please check your submission.",
-  "errors": {
-    "email": ["Please provide a valid email address"]
+  ```json
+  {
+    "message": "What technologies were used in RapidCare?",
+    "conversationId": "sky_1720000000_abcde",
+    "history": [
+      { "role": "user", "content": "Tell me about RapidCare." },
+      { "role": "assistant", "content": "RapidCare is an AI-driven healthcare platform..." }
+    ]
   }
-}
-```
-- **`429 Too Many Requests`**: Rate limit exceeded for this IP.
-```json
-{
-  "success": false,
-  "message": "Too many contact requests from this network. Please wait 15 minutes before retrying or reach out directly via email."
-}
-```
-- **`500 Internal Server Error`**: MongoDB database persistence failed.
-```json
-{
-  "success": false,
-  "message": "Database error: unable to save your enquiry. Please try again or email directly."
-}
-```
-Email notification failures are logged by the backend and do not change the response after the enquiry has been saved.
+  ```
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "answer": "RapidCare was built with React, Node.js, Express, MongoDB, Socket.IO for real-time dispatch, and Groq AI for clinical triage.",
+    "sources": [
+      {
+        "chunkId": "project:rapidcare:tech",
+        "title": "RapidCare - Technologies & Architecture",
+        "type": "project",
+        "projectSlug": "rapidcare",
+        "url": "https://rapidcare.vercel.app"
+      }
+    ],
+    "suggestedQuestions": [
+      "Can Akash build something similar?",
+      "What is Akash's tech stack?",
+      "How do I hire Akash?"
+    ],
+    "conversationId": "sky_1720000000_abcde"
+  }
+  ```
+
+### 2. AI Lead Capture
+- **Method**: `POST /api/ai/lead`
+- **Purpose**: Directly persists client contact enquiries initiated from the AI chatbot and triggers an inbox alert via Resend.
+- **Payload & Behavior**: Shares identical validation and persistence rules with `POST /api/contact`.
+
+### 3. Contact Form Submission
+- **Method**: `POST /api/contact`
+- **Rate Limit**: 5 submissions per 15 minutes per IP.
+- **Request Body**:
+  ```json
+  {
+    "name": "Jane Doe",
+    "email": "jane@company.com",
+    "service": "Full-Stack Web Development",
+    "message": "We would like to hire Akash for a custom web application."
+  }
+  ```
+- **Response (`201 Created`)**:
+  ```json
+  {
+    "success": true,
+    "message": "Message received successfully! I will reply shortly."
+  }
+  ```
+
+### 4. Health Check
+- **Method**: `GET /health` (or `GET /api/health`)
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "status": "healthy",
+    "service": "portfolio-backend",
+    "timestamp": "2026-10-01T22:00:00.000Z",
+    "uptime": 1420
+  }
+  ```
 
 ---
 
 ## Environment Variables
 
-| Variable | Required | Default / Example | Purpose |
-| :--- | :--- | :--- | :--- |
-| `PORT` | Optional | `5000` | Port for Express server (assigned automatically on Render) |
-| `NODE_ENV` | Optional | `development` | Runtime environment (`development`, `production`, `test`) |
-| `MONGODB_URI` | **Required** | `mongodb+srv://<user>:<password>@cluster0.mongodb.net/portfolio` | Connection URI for MongoDB Atlas database |
-| `FRONTEND_ORIGINS`| **Required** | `http://localhost:5173,https://your-portfolio.vercel.app` | Comma-separated whitelist of allowed frontend origins (CORS) |
-| `RESEND_API_KEY` | **Required** | `re_...` | Resend API key |
-| `CONTACT_EMAIL` | Optional | `akashkumarhzb121@gmail.com` | Inbox that receives contact notifications |
+Create `.env` in `portfolio-backend`:
 
-Create a `.env` file in this directory for local development and set `RESEND_API_KEY`. Contact notifications are sent from `onboarding@resend.dev` until a sender domain is verified.
+```bash
+# Server & Port
+PORT=5000
+NODE_ENV=development
+
+# Database Connection
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/portfolio?retryWrites=true&w=majority
+
+# CORS Allowed Origins (Comma-separated)
+FRONTEND_ORIGINS=http://localhost:5173,https://skykumar.vercel.app
+
+# Resend Email Configuration
+RESEND_API_KEY=re_your_api_key_here
+CONTACT_EMAIL=akashkumarhzb121@gmail.com
+
+# Groq LLM Configuration (OpenAI-compatible)
+AI_API_KEY=gsk_your_groq_api_key_here
+AI_MODEL=llama-3.3-70b-versatile
+AI_BASE_URL=https://api.groq.com/openai/v1
+```
 
 ---
 
@@ -152,119 +326,74 @@ cd portfolio-backend
 npm install
 ```
 
-### 2. Configure Environment
-Create `.env` using `.env.example` as a template and fill in your real credentials.
-
-### 3. Run Development Server
+### 2. Run Development Server
 ```bash
 npm run dev
 ```
-Starts server with `tsx watch` for auto-reloading upon file changes.
+Starts the server with `tsx watch` for instant hot-reload on TypeScript changes.
 
-### 4. Build Production Bundle
+### 3. Run Production Build
 ```bash
 npm run build
 ```
-Compiles TypeScript into `dist/`.
+Compiles TypeScript cleanly into the `dist/` directory.
 
-### 5. Start Production Server
+### 4. Start Production Server
 ```bash
 npm start
 ```
-Runs `node dist/server.js`.
+Executes `node dist/server.js`.
 
 ---
 
-## Automated Testing
+## Automated Testing Suite (109 Tests)
 
-The backend includes a complete test suite powered by Vitest and Supertest testing all happy and edge paths:
-- Health check endpoints (`/health` and `/api/health`)
-- Input validation (name, email, service, message lengths & formats)
-- MongoDB save failure handling (`500`)
-- Email failure handling (`502` with enquiry record saved)
-- Centralized error and 404 handlers
+The backend features a comprehensive test suite in Vitest testing all routes, edge cases, vector search, chunkers, intent classification, and multi-turn conversations:
 
-Run tests once:
 ```bash
 npm test
 ```
 
-Run tests in watch mode:
-```bash
-npm run test:watch
-```
-
-Run TypeScript type check without emitting:
-```bash
-npm run typecheck
-```
-
----
-
-## Resend Email Setup
-
-1. Create an API key in your [Resend dashboard](https://resend.com/api-keys).
-2. Set `RESEND_API_KEY` in the backend environment.
-3. Set `CONTACT_EMAIL` to the inbox that should receive portfolio enquiries.
-4. Until your sending domain is verified, the backend uses `onboarding@resend.dev` as the sender. Resend sandbox restrictions may limit recipients to the account owner.
+### Test Coverage Highlights:
+- **`tests/email.service.test.ts` (3 tests)**: Resend API dispatch, timeout handling, and connection error handling.
+- **`tests/contact.test.ts` (12 tests)**: Zod validation, rate limits, MongoDB persistence, and error handling.
+- **`tests/ai.test.ts` (94 tests)**:
+  - Chunker validation for all 9 data types.
+  - Classification for **all 22 intent categories**.
+  - Verification of **the 15 Golden Retrieval Ranking Cases** (confirming 0 projects returned for pure contact/pricing/jobs).
+  - Verification of **all 30 single-turn queries** from Section 27.
+  - Multi-turn state persistence across **5 conversational flows** (TEST A through TEST E).
 
 ---
 
 ## MongoDB Atlas Setup Guide
 
 1. Log in to [MongoDB Atlas](https://cloud.mongodb.com/).
-2. Create a free **M0 Sandbox** or production cluster.
-3. Under **Database Access**, create a user with `Read and write to any database` privileges.
-4. Under **Network Access**, add an IP Access entry:
-   - For Render deployment, add `0.0.0.0/0` (Allow access from anywhere) since Render instances use dynamic outbound IPs.
-5. In your cluster dashboard, click **Connect** -> **Drivers** -> **Node.js**.
-6. Copy the connection string into `MONGODB_URI`, replacing `<username>` and `<password>`.
-   *(Note: If you accidentally keep `<>` in your password, the backend automatically sanitizes it).*
+2. Create a free cluster (e.g. M0 Sandbox).
+3. Under **Database Access**, create a user with read/write privileges to the `portfolio` database.
+4. Under **Network Access**, add `0.0.0.0/0` (Render allocates dynamic outbound IPs).
+5. Copy your connection string into `MONGODB_URI` in `.env`.
 
 ---
 
-## Render Deployment Guide & Troubleshooting
+## Resend Email Setup
 
-### Why the Initial Deploy Error Occurred:
-If you encountered:
-```
-Error: Cannot find module '/opt/render/project/src/portfolio-backend/index.js'
-```
-This happens when Render uses its default Web Service settings:
-- Default Build Command: `npm install` (which skipped building TypeScript `dist/`)
-- Default Start Command: `node index.js` (which looked for `index.js` in root)
+1. Create a free API key at [Resend](https://resend.com/api-keys).
+2. Set `RESEND_API_KEY` in your environment.
+3. Configure `CONTACT_EMAIL` with your personal email address.
+4. Until you verify a custom domain, notifications originate from `onboarding@resend.dev`.
 
-### Build and Start Commands:
-1. **Added `index.js` Launcher**: Root `index.js` delegates directly to `./dist/server.js`.
-2. **Updated `"main"`**: Points to `dist/server.js`.
-3. TypeScript and its type definitions are build-time dependencies. Don't compile from `postinstall`: Render may set `NODE_ENV=production`, which can cause npm to omit dev dependencies during install.
+---
 
-### Render Web Service Settings:
-1. Log in to the [Render Dashboard](https://dashboard.render.com/).
-2. Click **New +** -> **Web Service** (or edit your existing service).
-3. Configure the Web Service settings:
-   - **Name**: `portfolio-backend`
-   - **Root Directory**: `portfolio-backend` *(crucial!)*
+## Render Deployment Guide
+
+1. Create a new **Web Service** on [Render](https://dashboard.render.com/).
+2. Connect your GitHub repository and set:
+   - **Root Directory**: `portfolio-backend`
    - **Environment**: `Node`
    - **Branch**: `main`
    - **Build Command**: `npm ci --include=dev && npm run build`
    - **Start Command**: `npm start`
-   - **Plan**: `Free`
-4. In **Advanced** -> **Health Check Path**:
-   - Set to `/health`
-5. Under **Environment Variables**, add:
-   - `NODE_ENV`: `production`
-   - `MONGODB_URI`: `<your MongoDB Atlas connection string>`
-   - `FRONTEND_ORIGINS`: `https://your-portfolio.vercel.app,http://localhost:5173`
-   - `RESEND_API_KEY`: `<your Resend API key>`
-   - `CONTACT_EMAIL`: `<inbox for notifications>`
-6. Click **Manual Deploy** -> **Deploy latest commit**.
-7. Once deployed, verify `https://your-service.onrender.com/health` returns status `200 OK`.
-
----
-
-## Failure & Duplicate Submission Policy
-
-- **Persistence First**: The API returns `201 Created` as soon as an enquiry is saved. Resend notifications run asynchronously; a success response confirms persistence, not inbox delivery.
-- **Delivery Diagnostics**: Resend failures are logged server-side with the enquiry ID and delivery error.
-- **Retry Handling**: If a visitor retries after an uncertain network failure, a fresh enquiry record is created in MongoDB with its own unique `_id` and timestamp. The site owner can retrieve all enquiries directly from MongoDB Atlas at any time.
+3. Under **Health Check Path**, enter `/health`.
+4. Add all required **Environment Variables** (`NODE_ENV`, `MONGODB_URI`, `FRONTEND_ORIGINS`, `RESEND_API_KEY`, `CONTACT_EMAIL`, `AI_API_KEY`, `AI_MODEL`, `AI_BASE_URL`).
+5. Trigger deployment. Verify deployment status by visiting `https://your-service.onrender.com/health`.
