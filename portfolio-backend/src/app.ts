@@ -4,6 +4,7 @@ import cors, { type CorsOptions } from 'cors';
 import { env } from './config/env.js';
 import contactRouter from './routes/contact.route.js';
 import healthRouter from './routes/health.route.js';
+import aiRouter from './routes/ai.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 export function createApp(): Express {
@@ -63,6 +64,7 @@ export function createApp(): Express {
   app.use('/', healthRouter); // GET /health
   app.use('/api', healthRouter); // GET /api/health
   app.use('/api', contactRouter); // POST /api/contact
+  app.use('/api/ai', aiRouter); // POST /api/ai/chat & POST /api/ai/lead
 
   // 404 Handler
   app.use((req, res) => {

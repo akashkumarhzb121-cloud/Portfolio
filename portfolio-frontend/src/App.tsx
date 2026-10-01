@@ -10,6 +10,7 @@ import About from "@/components/sections/About";
 import Contact from "@/components/sections/Contact";
 import Footer from "@/components/layout/Footer";
 import GlowCursor from "@/components/effects/GlowCursor";
+import Chatbot from "@/components/ai/Chatbot";
 import "@/styles/design-tokens.css";
 import "@/styles/globals.css";
 
@@ -68,6 +69,7 @@ export default function App() {
             <Contact />
           </main>
           <Footer />
+          <Chatbot />
           <Toaster richColors position="bottom-right" />
         </div>
       </GlowCursor>

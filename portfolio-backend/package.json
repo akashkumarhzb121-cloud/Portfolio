@@ -6,6 +6,7 @@
   "scripts": {
     "test": "vitest run",
     "dev": "tsx watch src/server.ts",
+    "ai:ingest": "tsx src/ai/rag/ingest.ts",
     "postinstall": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
@@ -27,6 +28,7 @@
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
     "mongoose": "^9.10.2",
+    "openai": "^7.25.0",
     "resend": "^6.30.0",
     "zod": "^4.6.5"
   },

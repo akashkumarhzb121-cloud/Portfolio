@@ -36,7 +36,32 @@ const envSchema = z.object({
   CONTACT_EMAIL: z
     .string()
     .email('CONTACT_EMAIL must be a valid email address')
-    .default('akashkumarhzb121@gmail.com')
+    .default('akashkumarhzb121@gmail.com'),
+  // LLM Chat Provider (Defaults to Groq free tier, fully configurable)
+  AI_API_KEY: z.string().default(process.env.AI_API_KEY || process.env.GROQ_API_KEY || ''),
+  AI_MODEL: z.string().default(process.env.AI_MODEL || 'llama-3.3-70b-versatile'),
+  AI_BASE_URL: z.string().default(process.env.AI_BASE_URL || 'https://api.groq.com/openai/v1'),
+
+  // Separate Embeddings Provider Configuration (Do not use Groq chat models for embeddings)
+  EMBEDDING_API_KEY: z.string().default(process.env.EMBEDDING_API_KEY || ''),
+  EMBEDDING_BASE_URL: z.string().default(process.env.EMBEDDING_BASE_URL || 'https://api.openai.com/v1'),
+  EMBEDDING_MODEL: z.string().default(
+    process.env.EMBEDDING_MODEL || process.env.AI_EMBEDDING_MODEL || 'text-embedding-3-small'
+  ),
+  AI_RATE_LIMIT_WINDOW_MINUTES: z
+    .union([z.string(), z.number()])
+    .default('15')
+    .transform((val) => (typeof val === 'number' ? val : parseInt(val, 10)))
+    .refine((val) => !isNaN(val) && val > 0, {
+      message: 'AI_RATE_LIMIT_WINDOW_MINUTES must be a positive number'
+    }),
+  AI_RATE_LIMIT_MAX_REQUESTS: z
+    .union([z.string(), z.number()])
+    .default('30')
+    .transform((val) => (typeof val === 'number' ? val : parseInt(val, 10)))
+    .refine((val) => !isNaN(val) && val > 0, {
+      message: 'AI_RATE_LIMIT_MAX_REQUESTS must be a positive number'
+    })
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
