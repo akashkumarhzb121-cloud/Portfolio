@@ -234,10 +234,10 @@ This happens when Render uses its default Web Service settings:
 - Default Build Command: `npm install` (which skipped building TypeScript `dist/`)
 - Default Start Command: `node index.js` (which looked for `index.js` in root)
 
-### How We Fixed It (100% Fail-Safe):
+### Build and Start Commands:
 1. **Added `index.js` Launcher**: Root `index.js` delegates directly to `./dist/server.js`.
-2. **Added `postinstall` Script**: `npm install` now automatically triggers `tsc -p tsconfig.json`, building `dist/` even if you leave the default build command as `npm install`.
-3. **Updated `"main"`**: Points to `dist/server.js`.
+2. **Updated `"main"`**: Points to `dist/server.js`.
+3. TypeScript and its type definitions are build-time dependencies. Don't compile from `postinstall`: Render may set `NODE_ENV=production`, which can cause npm to omit dev dependencies during install.
 
 ### Render Web Service Settings:
 1. Log in to the [Render Dashboard](https://dashboard.render.com/).
@@ -247,8 +247,8 @@ This happens when Render uses its default Web Service settings:
    - **Root Directory**: `portfolio-backend` *(crucial!)*
    - **Environment**: `Node`
    - **Branch**: `main`
-   - **Build Command**: `npm install && npm run build` (or `npm run build`)
-   - **Start Command**: `npm start` (or `node dist/server.js`)
+   - **Build Command**: `npm ci --include=dev && npm run build`
+   - **Start Command**: `npm start`
    - **Plan**: `Free`
 4. In **Advanced** -> **Health Check Path**:
    - Set to `/health`
