@@ -4,6 +4,8 @@ export interface RawChunk {
   chunkId: string;
   source: string;
   sourceType: KnowledgeSourceType;
+  projectSlug?: string;
+  url?: string;
   title: string;
   content: string;
   metadata: IKnowledgeChunkMetadata;
@@ -15,8 +17,14 @@ export interface RawChunk {
  */
 export function chunkProject(filename: string, data: Record<string, any>): RawChunk[] {
   const chunks: RawChunk[] = [];
-  const projectId = data.id || filename.replace('.json', '');
+  const projectSlug = filename.replace('.json', '').toLowerCase();
+  const projectId = data.id || projectSlug;
   const projectName = data.name || projectId;
+  const primaryUrl =
+    data.links?.live_demo ||
+    data.links?.portfolio ||
+    data.links?.github_repo ||
+    undefined;
 
   // 1. Overview chunk: Core problem, solution, role, metrics
   const overviewContent = [
@@ -39,16 +47,20 @@ export function chunkProject(filename: string, data: Record<string, any>): RawCh
     chunkId: `project:${projectId}:overview`,
     source: `projects/${filename}`,
     sourceType: 'project',
+    projectSlug,
+    url: primaryUrl,
     title: `${projectName} - Overview & Highlights`,
     content: overviewContent,
     metadata: {
       category: data.category,
+      projectSlug,
+      url: primaryUrl,
       role: data.role,
       timeline: data.timeline,
       featured: Boolean(data.featured),
       links: data.links || {}
     },
-    tags: [projectName.toLowerCase(), projectId, data.category || '', 'overview'].filter(Boolean)
+    tags: [projectName.toLowerCase(), projectId, projectSlug, data.category || '', 'overview'].filter(Boolean)
   });
 
   // 2. Architecture & Core Modules chunk
@@ -68,13 +80,17 @@ export function chunkProject(filename: string, data: Record<string, any>): RawCh
         chunkId: `project:${projectId}:architecture`,
         source: `projects/${filename}`,
         sourceType: 'project',
+        projectSlug,
+        url: primaryUrl,
         title: `${projectName} - Architecture & Core Modules`,
         content: `Project: ${projectName} Technical Architecture:\n\n${modules.join('\n\n')}`,
         metadata: {
           category: data.category,
+          projectSlug,
+          url: primaryUrl,
           featured: Boolean(data.featured)
         },
-        tags: [projectName.toLowerCase(), projectId, 'architecture', 'modules']
+        tags: [projectName.toLowerCase(), projectId, projectSlug, 'architecture', 'modules']
       });
     }
   }
@@ -108,14 +124,18 @@ export function chunkProject(filename: string, data: Record<string, any>): RawCh
     chunkId: `project:${projectId}:tech`,
     source: `projects/${filename}`,
     sourceType: 'project',
+    projectSlug,
+    url: primaryUrl,
     title: `${projectName} - Tech Stack & Links`,
     content: techContent,
     metadata: {
       category: data.category,
+      projectSlug,
+      url: primaryUrl,
       technologies: techList,
       links: data.links || {}
     },
-    tags: [projectName.toLowerCase(), projectId, 'technologies', 'links']
+    tags: [projectName.toLowerCase(), projectId, projectSlug, 'technologies', 'tech stack', 'links']
   });
 
   return chunks;
@@ -127,6 +147,7 @@ export function chunkProject(filename: string, data: Record<string, any>): RawCh
 export function chunkProfile(filename: string, data: Record<string, any>): RawChunk[] {
   const chunks: RawChunk[] = [];
   const b = data.basics || {};
+  const url = data.social_links?.portfolio || 'https://skykumar.vercel.app';
 
   const bioContent = [
     `Name: ${b.name || 'Akash Kumar'}`,
@@ -145,12 +166,14 @@ export function chunkProfile(filename: string, data: Record<string, any>): RawCh
     chunkId: 'profile:basics:bio',
     source: filename,
     sourceType: 'profile',
+    url,
     title: 'Akash Kumar - Profile & Bio',
     content: bioContent,
     metadata: {
+      url,
       links: data.social_links || {}
     },
-    tags: ['profile', 'bio', 'akash kumar', 'about', 'availability']
+    tags: ['profile', 'bio', 'akash kumar', 'about', 'who is akash', 'background', 'availability', 'location']
   });
 
   return chunks;
@@ -162,6 +185,7 @@ export function chunkProfile(filename: string, data: Record<string, any>): RawCh
 export function chunkServices(filename: string, data: Record<string, any>): RawChunk[] {
   const chunks: RawChunk[] = [];
   const services = data.services || [];
+  const servicesUrl = 'https://skykumar.vercel.app/#services';
 
   for (const s of services) {
     const sId = s.id || s.name.toLowerCase().replace(/\s+/g, '-');
@@ -182,14 +206,16 @@ export function chunkServices(filename: string, data: Record<string, any>): RawC
     chunks.push({
       chunkId: `service:${sId}:details`,
       source: filename,
-      sourceType: 'service',
+      sourceType: 'services',
+      url: servicesUrl,
       title: `Service: ${s.name}`,
       content,
       metadata: {
         category: s.name,
+        url: servicesUrl,
         technologies: s.technologies || []
       },
-      tags: ['service', sId, s.name.toLowerCase(), 'hire', 'consultation']
+      tags: ['services', 'service', sId, s.name.toLowerCase(), 'hire', 'consultation', 'client', 'pricing', 'offer']
     });
   }
 
@@ -220,13 +246,25 @@ export function chunkSkills(filename: string, data: Record<string, any>): RawChu
   chunks.push({
     chunkId: 'skills:technical:master',
     source: filename,
-    sourceType: 'skill',
-    title: 'Technical Skills & Proficiency',
-    content: `Akash Kumar - Technical Skills Matrix:\n\n${formatted.join('\n\n')}`,
+    sourceType: 'skills',
+    url: 'https://skykumar.vercel.app/#tech-stack',
+    title: 'Technical Skills & Proficiency Matrix',
+    content: `Akash Kumar - Technical Skills Matrix & Stack:\n\n${formatted.join('\n\n')}`,
     metadata: {
+      url: 'https://skykumar.vercel.app/#tech-stack',
       technologies: allSkills
     },
-    tags: ['skills', 'tech stack', 'technologies', 'languages', 'tools']
+    tags: [
+      'skills',
+      'skill',
+      'tech stack',
+      'technologies',
+      'languages',
+      'tools',
+      'what akash knows',
+      'what does akash know',
+      'what are things akash knows'
+    ]
   });
 
   return chunks;
@@ -263,7 +301,7 @@ export function chunkDSA(filename: string, data: Record<string, any>): RawChunk[
       totalSolved: data.total_problems_solved,
       platforms: data.platforms || {}
     },
-    tags: ['dsa', 'leetcode', 'algorithms', 'problem solving', 'data structures']
+    tags: ['dsa', 'leetcode', 'algorithms', 'problem solving', 'data structures', 'codeforces', 'competitive programming']
   });
 
   return chunks;
@@ -306,7 +344,7 @@ export function chunkExperience(filename: string, data: Record<string, any>): Ra
         company,
         timeline: exp.period || exp.timeline
       },
-      tags: ['experience', 'work', role.toLowerCase(), company.toLowerCase()]
+      tags: ['experience', 'work', role.toLowerCase(), company.toLowerCase(), 'career', 'employment']
     });
   }
 
@@ -350,7 +388,7 @@ export function chunkEducation(filename: string, data: Record<string, any>): Raw
         institution,
         timeline: edu.timeline || edu.period
       },
-      tags: ['education', 'degree', 'college', 'university', degree.toLowerCase()]
+      tags: ['education', 'degree', 'college', 'university', degree.toLowerCase(), 'academics', 'cgpa']
     });
   }
 
@@ -391,6 +429,7 @@ export function chunkFAQ(filename: string, data: Record<string, any>): RawChunk[
  */
 export function chunkContact(filename: string, data: Record<string, any>): RawChunk[] {
   const chunks: RawChunk[] = [];
+  const contactUrl = 'https://skykumar.vercel.app/#contact';
   const content = [
     'Akash Kumar Contact Channels & Consultation Details:',
     data.primary_email ? `Email: ${data.primary_email}` : 'Email: akashkumarhzb121@gmail.com',
@@ -406,13 +445,25 @@ export function chunkContact(filename: string, data: Record<string, any>): RawCh
     chunkId: 'contact:channels:details',
     source: filename,
     sourceType: 'contact',
+    url: contactUrl,
     title: 'Contact Information & Inquiries',
     content,
     metadata: {
+      url: contactUrl,
       email: data.primary_email || 'akashkumarhzb121@gmail.com',
       links: data.links || {}
     },
-    tags: ['contact', 'email', 'reach out', 'hire', 'message']
+    tags: [
+      'contact',
+      'email',
+      'reach out',
+      'hire',
+      'message',
+      'how to contact',
+      'how to reach',
+      'contact akash',
+      'email address'
+    ]
   });
 
   return chunks;

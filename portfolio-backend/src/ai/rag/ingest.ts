@@ -122,9 +122,15 @@ export async function ingestKnowledgeBase(customBaseDir?: string): Promise<{
             chunkId: chunk.chunkId,
             source: chunk.source,
             sourceType: chunk.sourceType,
+            projectSlug: chunk.projectSlug,
+            url: chunk.url,
             title: chunk.title,
             content: chunk.content,
-            metadata: chunk.metadata,
+            metadata: {
+              ...chunk.metadata,
+              projectSlug: chunk.projectSlug,
+              url: chunk.url
+            },
             tags: chunk.tags,
             embedding
           },

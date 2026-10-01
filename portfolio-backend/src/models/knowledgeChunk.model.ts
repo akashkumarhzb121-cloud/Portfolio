@@ -3,7 +3,9 @@ import { Schema, model, type Document } from 'mongoose';
 export type KnowledgeSourceType =
   | 'project'
   | 'profile'
+  | 'skills'
   | 'skill'
+  | 'services'
   | 'service'
   | 'experience'
   | 'education'
@@ -13,6 +15,8 @@ export type KnowledgeSourceType =
 
 export interface IKnowledgeChunkMetadata {
   category?: string;
+  projectSlug?: string;
+  url?: string;
   links?: Record<string, string>;
   technologies?: string[];
   role?: string;
@@ -25,6 +29,8 @@ export interface IKnowledgeChunk extends Document {
   chunkId: string;
   source: string;
   sourceType: KnowledgeSourceType;
+  projectSlug?: string;
+  url?: string;
   title: string;
   content: string;
   metadata: IKnowledgeChunkMetadata;
@@ -54,7 +60,9 @@ const knowledgeChunkSchema = new Schema<IKnowledgeChunk>(
       enum: [
         'project',
         'profile',
+        'skills',
         'skill',
+        'services',
         'service',
         'experience',
         'education',
@@ -63,6 +71,15 @@ const knowledgeChunkSchema = new Schema<IKnowledgeChunk>(
         'contact'
       ],
       index: true
+    },
+    projectSlug: {
+      type: String,
+      trim: true,
+      index: true
+    },
+    url: {
+      type: String,
+      trim: true
     },
     title: {
       type: String,
@@ -94,5 +111,6 @@ const knowledgeChunkSchema = new Schema<IKnowledgeChunk>(
 
 // Compound index for quick source lookups
 knowledgeChunkSchema.index({ sourceType: 1, source: 1 });
+knowledgeChunkSchema.index({ projectSlug: 1 });
 
 export const KnowledgeChunk = model<IKnowledgeChunk>('KnowledgeChunk', knowledgeChunkSchema);
