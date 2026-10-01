@@ -241,6 +241,15 @@ const ScrollStack = ({
 
   const setupLenis = useCallback(() => {
     if (useWindowScroll) {
+      // Connect to master Lenis instance if available to avoid duplicate RAF loops and frame collision
+      const masterLenis = (window as any).lenis as Lenis | undefined;
+      if (masterLenis) {
+        masterLenis.on('scroll', handleScroll);
+        lenisRef.current = masterLenis;
+        return masterLenis;
+      }
+
+      // Standalone fallback: only instantiate if no root Lenis is present
       const lenis = new Lenis({
         duration: 1.0,
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -339,11 +348,15 @@ const ScrollStack = ({
     window.addEventListener('resize', handleResize);
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
+      if (useWindowScroll && (window as any).lenis && lenisRef.current === (window as any).lenis) {
+        (window as any).lenis.off('scroll', handleScroll);
+      } else {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+        if (lenisRef.current) {
+          lenisRef.current.destroy();
+        }
       }
       window.removeEventListener('resize', handleResize);
       stackCompletedRef.current = false;

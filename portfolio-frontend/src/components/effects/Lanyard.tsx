@@ -1,4 +1,5 @@
-import { useState, useRef, type MouseEvent } from 'react';
+import { useState, useRef, type MouseEvent, type ReactNode } from 'react';
+import { Canvas } from '@react-three/fiber';
 import { Download, FileText, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import './Lanyard.css';
@@ -6,11 +7,43 @@ import './Lanyard.css';
 export interface LanyardProps {
   resumeUrl?: string;
   className?: string;
+  children?: ReactNode;
+}
+
+/**
+ * Step 2: Optimized React Three Fiber Canvas Wrapper
+ * - frameloop="demand": stops the GPU from rendering heavy off-screen physics cycles when scrolling
+ * - gl={{ powerPreference: "high-performance", antialias: true }}: locks to high-performance GPU context
+ */
+export function LanyardCanvas({
+  children,
+  className = '',
+  camera = { position: [0, 0, 13], fov: 25 },
+  ...props
+}: {
+  children?: ReactNode;
+  className?: string;
+  camera?: any;
+  [key: string]: any;
+}) {
+  return (
+    <div className={`lanyard-canvas-container ${className}`}>
+      <Canvas
+        frameloop="demand"
+        gl={{ powerPreference: "high-performance", antialias: true }}
+        camera={camera}
+        {...props}
+      >
+        {children}
+      </Canvas>
+    </div>
+  );
 }
 
 export default function Lanyard({
   resumeUrl = '/resume/AKASH_KUMAR_RESUME.pdf',
-  className = ''
+  className = '',
+  children
 }: LanyardProps) {
   const reducedMotion = useReducedMotion();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -36,6 +69,16 @@ export default function Lanyard({
     setDownloaded(true);
     setTimeout(() => setDownloaded(false), 3000);
   };
+
+  if (children && !reducedMotion) {
+    return (
+      <div className={`lanyard-wrapper ${className}`}>
+        <LanyardCanvas>
+          {children}
+        </LanyardCanvas>
+      </div>
+    );
+  }
 
   return (
     <div className={`lanyard-wrapper ${className}`}>

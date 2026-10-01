@@ -1,3 +1,7 @@
+import { useEffect } from "react";
+import Lenis from "lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import Header from "@/components/layout/Header";
@@ -14,7 +18,44 @@ import Chatbot from "@/components/ai/Chatbot";
 import "@/styles/design-tokens.css";
 import "@/styles/globals.css";
 
+// Register ScrollTrigger plugin with GSAP
+gsap.registerPlugin(ScrollTrigger);
+
 export default function App() {
+  useEffect(() => {
+    // 1. Initialize Root Lenis smooth scroller
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      touchMultiplier: 1.5,
+      infinite: false,
+    });
+
+    // Expose root instance globally so nested components can sync without starting duplicate RAF loops
+    (window as any).lenis = lenis;
+
+    // 2. Intercept Lenis scroll events and route straight to ScrollTrigger.update
+    lenis.on("scroll", ScrollTrigger.update);
+
+    // 3. Hook Lenis directly into the GSAP ticker loop (convert seconds to ms)
+    const updateTicker = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(updateTicker);
+
+    // 4. Inject lagSmoothing(0) to keep Lenis and GSAP frame-locked without stutter
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      gsap.ticker.remove(updateTicker);
+      lenis.destroy();
+      delete (window as any).lenis;
+    };
+  }, []);
+
   return (
     <TooltipProvider>
       <GlowCursor

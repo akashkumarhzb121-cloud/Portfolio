@@ -10,6 +10,29 @@ html {
   color-scheme: dark;
 }
 
+/* Prevent native CSS smooth scroll from fighting programmatic Lenis interpolation */
+html.lenis,
+html.lenis body {
+  height: auto;
+  scroll-behavior: auto !important;
+}
+
+/* ==========================================================================
+   Step 3: CSS Scroll-Isolation
+   Disable pointer-events globally only during active scroll events to kill
+   layout-recalculation lag and hover thrashing under the custom cursor trail.
+   ========================================================================== */
+html.lenis-scrolling *,
+.lenis-scrolling * {
+  pointer-events: none !important;
+}
+
+/* Maintain interactivity for data-lenis-prevent containers (e.g. Chatbot window) */
+.lenis-scrolling [data-lenis-prevent],
+.lenis-scrolling [data-lenis-prevent] * {
+  pointer-events: auto !important;
+}
+
 body {
   margin: 0;
   min-width: 320px;
