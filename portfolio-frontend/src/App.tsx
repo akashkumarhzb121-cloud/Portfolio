@@ -56,6 +56,22 @@ export default function App() {
     };
   }, []);
 
+  // Background ping to wake up backend container immediately when visitor arrives
+  useEffect(() => {
+    const rawEndpoint =
+      import.meta.env.VITE_CONTACT_FORM_ENDPOINT ||
+      import.meta.env.VITE_AI_CHAT_ENDPOINT;
+
+    if (rawEndpoint) {
+      const base = rawEndpoint.replace(/\/api\/(contact|ai\/chat)\/?$/, '');
+      const healthUrl = `${base}/health`;
+      const timer = setTimeout(() => {
+        void fetch(healthUrl, { method: 'GET', cache: 'no-store' }).catch(() => {});
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <TooltipProvider>
       <GlowCursor

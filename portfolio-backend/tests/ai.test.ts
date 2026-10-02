@@ -1,23 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import request from 'supertest';
-import { createApp } from '../src/app.js';
-import path from 'path';
-import fs from 'fs';
-import { chunkProject, chunkServices, chunkProfile, chunkKnowledgeFile } from '../src/ai/rag/chunker.js';
-import { collectKnowledgeFiles, getEmbedding, generateDeterministicEmbedding } from '../src/ai/rag/ingest.js';
-import { cosineSimilarity, searchKnowledge } from '../src/ai/retrieval/search.js';
-import { classifyQueryIntent } from '../src/ai/retrieval/intent.js';
-import { generateChatResponse } from '../src/ai/llm/generate.js';
-import {
-  loadAkashIndex,
-  loadProjectBySlug,
-  loadAllProjects,
-  detectStructuredQuery,
-  executeStructuredQuery
-} from '../src/ai/knowledge/index.js';
-import { env } from '../src/config/env.js';
-import { ContactEnquiry } from '../src/models/enquiry.model.js';
-import * as emailService from '../src/services/email.service.js';
+
+
 
 // Mock Resend email service
 vi.mock('../src/services/email.service.js', () => ({
@@ -42,6 +25,27 @@ vi.mock('../src/models/enquiry.model.js', () => {
     }
   };
 });
+
+import request from 'supertest';
+import { createApp } from '../src/app.js';
+import path from 'path';
+import fs from 'fs';
+import { chunkProject, chunkServices, chunkProfile, chunkKnowledgeFile } from '../src/ai/rag/chunker.js';
+import { collectKnowledgeFiles, getEmbedding, generateDeterministicEmbedding } from '../src/ai/rag/ingest.js';
+import { cosineSimilarity, searchKnowledge } from '../src/ai/retrieval/search.js';
+import { classifyQueryIntent } from '../src/ai/retrieval/intent.js';
+import { generateChatResponse } from '../src/ai/llm/generate.js';
+import {
+  loadAkashIndex,
+  loadProjectBySlug,
+  loadAllProjects,
+  detectStructuredQuery,
+  executeStructuredQuery
+} from '../src/ai/knowledge/index.js';
+import { env } from '../src/config/env.js';
+import { ContactEnquiry } from '../src/models/enquiry.model.js';
+import { Conversation } from '../src/models/conversation.model.js';
+import * as emailService from '../src/services/email.service.js';
 
 const { mockKnowledgeBase } = vi.hoisted(() => {
   const mockKnowledgeBase = [
@@ -1241,4 +1245,120 @@ describe('AI API Endpoints (/api/ai)', () => {
       expect(res.answer).not.toContain('Here is what I found regarding your query');
     });
   });
+
+  describe('Admin Conversation Management API', () => {
+    const adminApp = createApp();
+
+    beforeEach(() => {
+      const mockQueryChain = {
+        sort: vi.fn().mockReturnThis(),
+        skip: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        lean: vi.fn().mockResolvedValue([
+          {
+            conversationId: 'test_conv_1',
+            messages: [
+              { role: 'user', content: 'What is Akash tech stack?', timestamp: new Date('2026-10-01T10:00:00Z') },
+              { role: 'assistant', content: 'Akash specializes in React, Node.js, and Three.js.', timestamp: new Date('2026-10-01T10:00:02Z') }
+            ],
+            createdAt: new Date('2026-10-01T10:00:00Z'),
+            updatedAt: new Date('2026-10-01T10:00:02Z')
+          }
+        ])
+      };
+
+      (Conversation as any).find = vi.fn().mockReturnValue(mockQueryChain);
+      (Conversation as any).countDocuments = vi.fn().mockResolvedValue(1);
+      (Conversation as any).findOne = vi.fn().mockImplementation(({ conversationId }: any) => ({
+        lean: vi.fn().mockResolvedValue(
+          conversationId === 'test_conv_1'
+            ? {
+                conversationId: 'test_conv_1',
+                messages: [
+                  { role: 'user', content: 'What is Akash tech stack?', timestamp: new Date('2026-10-01T10:00:00Z') },
+                  { role: 'assistant', content: 'Akash specializes in React, Node.js, and Three.js.', timestamp: new Date('2026-10-01T10:00:02Z') }
+                ],
+                createdAt: new Date('2026-10-01T10:00:00Z'),
+                updatedAt: new Date('2026-10-01T10:00:02Z')
+              }
+            : null
+        )
+      }));
+      (Conversation as any).findOneAndDelete = vi.fn().mockImplementation(({ conversationId }: any) =>
+        Promise.resolve(conversationId === 'test_conv_2' ? { conversationId: 'test_conv_2' } : null)
+      );
+      (Conversation as any).deleteMany = vi.fn().mockResolvedValue({ deletedCount: 2 });
+    });
+
+    it('rejects unauthenticated requests to GET /api/ai/admin/conversations with 401', async () => {
+      const res = await request(adminApp).get('/api/ai/admin/conversations');
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toContain('Unauthorized');
+    });
+
+    it('rejects invalid key to GET /api/ai/admin/conversations with 401', async () => {
+      const res = await request(adminApp)
+        .get('/api/ai/admin/conversations')
+        .set('x-admin-key', 'wrong_passcode');
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+    });
+
+    it('allows valid admin key in x-admin-key header and returns conversations', async () => {
+      const res = await request(adminApp)
+        .get('/api/ai/admin/conversations')
+        .set('x-admin-key', 'akash_admin_2026');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.conversations)).toBe(true);
+      expect(res.body.conversations.length).toBeGreaterThanOrEqual(1);
+      expect(res.body.conversations[0]).toHaveProperty('conversationId');
+      expect(res.body.conversations[0]).toHaveProperty('messageCount');
+    });
+
+    it('allows valid admin key via query parameter ?key=', async () => {
+      const res = await request(adminApp)
+        .get('/api/ai/admin/conversations?key=akash_admin_2026');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+    });
+
+    it('returns full transcript for a specific conversation via GET /api/ai/admin/conversations/:id', async () => {
+      const res = await request(adminApp)
+        .get('/api/ai/admin/conversations/test_conv_1')
+        .set('x-admin-key', 'akash_admin_2026');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.conversation.conversationId).toBe('test_conv_1');
+      expect(res.body.conversation.messages.length).toBe(2);
+    });
+
+    it('returns 404 for nonexistent conversation ID', async () => {
+      const res = await request(adminApp)
+        .get('/api/ai/admin/conversations/nonexistent_id')
+        .set('x-admin-key', 'akash_admin_2026');
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+    });
+
+    it('deletes a conversation via DELETE /api/ai/admin/conversations/:id', async () => {
+      const res = await request(adminApp)
+        .delete('/api/ai/admin/conversations/test_conv_2')
+        .set('x-admin-key', 'akash_admin_2026');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.conversationId).toBe('test_conv_2');
+    });
+
+    it('clears all conversations via DELETE /api/ai/admin/conversations', async () => {
+      const res = await request(adminApp)
+        .delete('/api/ai/admin/conversations')
+        .set('x-admin-key', 'akash_admin_2026');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body).toHaveProperty('deletedCount');
+    });
+  });
 });
+

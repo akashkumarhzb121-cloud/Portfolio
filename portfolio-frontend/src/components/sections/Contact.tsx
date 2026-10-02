@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Mail, Copy, Check, Send, Sparkles, Clock, Globe } from 'lucide-react';
+import { Mail, Copy, Check, SendHorizontal, Loader2, Sparkles, Clock, Globe } from 'lucide-react';
 import TextScatter from '@/components/effects/TextScatter';
 import BendingMarquee from '@/components/effects/BendingMarquee';
 
@@ -18,6 +18,7 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 
 export default function Contact() {
   const [copied, setCopied] = useState(false);
+  const [slowSubmitting, setSlowSubmitting] = useState(false);
   const directEmail = 'akashkumarhzb121@gmail.com';
 
   const {
@@ -31,6 +32,19 @@ export default function Contact() {
       service: 'Full-Stack Web Development'
     }
   });
+
+  // Track if submission is taking longer than usual (e.g. Render server cold-start)
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (isSubmitting) {
+      timer = setTimeout(() => {
+        setSlowSubmitting(true);
+      }, 2500);
+    } else {
+      setSlowSubmitting(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isSubmitting]);
 
   const handleCopyEmail = async () => {
     try {
@@ -55,6 +69,25 @@ export default function Contact() {
     }
     return trimmed;
   };
+
+  // Proactively ping backend health endpoint to wake up Render free tier container
+  const warmBackend = useCallback(() => {
+    try {
+      const endpoint = getNormalizedEndpoint(import.meta.env.VITE_CONTACT_FORM_ENDPOINT);
+      if (!endpoint) return;
+      const base = endpoint.replace(/\/api\/contact\/?$/, '');
+      const healthUrl = `${base}/health`;
+      void fetch(healthUrl, { method: 'GET', cache: 'no-store' }).catch(() => {});
+    } catch {
+      // Ignore background pre-warm failures
+    }
+  }, []);
+
+  // Pre-warm on component mount
+  useEffect(() => {
+    const timer = setTimeout(warmBackend, 1000);
+    return () => clearTimeout(timer);
+  }, [warmBackend]);
 
   const onSubmit = async (values: ContactFormValues) => {
     const endpoint = getNormalizedEndpoint(import.meta.env.VITE_CONTACT_FORM_ENDPOINT);
@@ -254,6 +287,7 @@ export default function Contact() {
                     type="text"
                     placeholder="e.g. Akash Kumar"
                     {...register('name')}
+                    onFocus={warmBackend}
                     className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-slate-500 transition-all focus:outline-none shadow-sm ${
                       errors.name ? 'border-rose-500 focus:border-rose-400' : 'border-white/[0.12] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40'
                     }`}
@@ -273,6 +307,7 @@ export default function Contact() {
                     type="email"
                     placeholder="akash@company.com"
                     {...register('email')}
+                    onFocus={warmBackend}
                     className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-slate-500 transition-all focus:outline-none shadow-sm ${
                       errors.email ? 'border-rose-500 focus:border-rose-400' : 'border-white/[0.12] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40'
                     }`}
@@ -292,6 +327,7 @@ export default function Contact() {
                 <select
                   id="contact-service"
                   {...register('service')}
+                  onFocus={warmBackend}
                   className="w-full px-4 py-3 rounded-xl bg-[#0c0c0e] border border-white/[0.12] text-sm text-white transition-all focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 shadow-sm font-medium"
                 >
                   <option value="Full-Stack Web Development">Full-Stack Web Development (React / Node.js / Express / MongoDB)</option>
@@ -317,6 +353,7 @@ export default function Contact() {
                   rows={4}
                   placeholder="Tell me about your project, target dates, or what you are aiming to build..."
                   {...register('message')}
+                  onFocus={warmBackend}
                   className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border text-sm text-white placeholder-slate-500 transition-all focus:outline-none resize-y shadow-sm ${
                     errors.message ? 'border-rose-500 focus:border-rose-400' : 'border-white/[0.12] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40'
                   }`}
@@ -335,11 +372,14 @@ export default function Contact() {
                   className="px-8 py-3.5 rounded-full bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-slate-950 font-bold text-sm tracking-wide shadow-[0_0_20px_rgba(103,232,249,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {isSubmitting ? (
-                    <span>Submitting...</span>
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>{slowSubmitting ? 'Connecting to server...' : 'Submitting...'}</span>
+                    </span>
                   ) : (
                     <>
                       <span>Submit Inquiry</span>
-                      <Send className="w-4 h-4 text-slate-950" />
+                      <SendHorizontal className="w-4 h-4 text-slate-950" />
                     </>
                   )}
                 </button>

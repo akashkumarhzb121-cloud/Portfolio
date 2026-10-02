@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bot, X, Trash2, Sparkles, AlertCircle } from 'lucide-react';
+import { Bot, X, Trash2, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react';
 import ChatMessage, { type ChatSource } from './ChatMessage';
 import ChatInput from './ChatInput';
 import SuggestedQuestions from './SuggestedQuestions';
@@ -22,6 +22,7 @@ interface ChatWindowProps {
   onClearHistory: () => void;
   suggestedQuestions: string[];
   onOpenContact?: () => void;
+  onOpenAdminHistory?: () => void;
 }
 
 export default function ChatWindow({
@@ -33,7 +34,8 @@ export default function ChatWindow({
   onSendMessage,
   onClearHistory,
   suggestedQuestions,
-  onOpenContact
+  onOpenContact,
+  onOpenAdminHistory
 }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const messagesListRef = useRef<HTMLDivElement>(null);
@@ -92,6 +94,16 @@ export default function ChatWindow({
         </div>
 
         <div className="flex items-center gap-1">
+          {onOpenAdminHistory && (
+            <button
+              type="button"
+              onClick={onOpenAdminHistory}
+              title="Admin: View conversation history"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-[#67E8F9] hover:bg-zinc-800/60 transition-colors"
+            >
+              <ShieldCheck className="w-4 h-4" />
+            </button>
+          )}
           {messages.length > 0 && (
             <button
               type="button"

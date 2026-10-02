@@ -51,7 +51,7 @@ const conversationSchema = new Schema<IConversation>(
   }
 );
 
-// Auto-expire conversations inactive for 24 hours (86400 seconds)
-conversationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 86400 });
+// Standard descending index on updatedAt for fast conversation history listing
+conversationSchema.index({ updatedAt: -1 });
 
 export const Conversation = model<IConversation>('Conversation', conversationSchema);

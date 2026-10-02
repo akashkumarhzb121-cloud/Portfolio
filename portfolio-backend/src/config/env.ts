@@ -61,7 +61,8 @@ const envSchema = z.object({
     .transform((val) => (typeof val === 'number' ? val : parseInt(val, 10)))
     .refine((val) => !isNaN(val) && val > 0, {
       message: 'AI_RATE_LIMIT_MAX_REQUESTS must be a positive number'
-    })
+    }),
+  ADMIN_API_KEY: z.string().default(process.env.ADMIN_API_KEY || 'akash_admin_2026')
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

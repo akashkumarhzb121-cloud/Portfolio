@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bot, Sparkles, X } from 'lucide-react';
 import ChatWindow, { type ChatMessageData } from './ChatWindow';
+import AdminHistoryModal from './AdminHistoryModal';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,16 +16,22 @@ export default function Chatbot() {
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Close modal on Escape key
+  // Close modals on Escape key or toggle admin via Ctrl+Shift+H
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
+      if (e.key === 'Escape') {
+        if (isAdminOpen) setIsAdminOpen(false);
+        else if (isOpen) setIsOpen(false);
+      }
+      // Secret admin shortcut: Ctrl+Shift+H
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        setIsAdminOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, isAdminOpen]);
 
   // Light dismiss on outside click
   useEffect(() => {
@@ -169,6 +177,13 @@ export default function Chatbot() {
         onClearHistory={handleClearHistory}
         suggestedQuestions={suggestedQuestions}
         onOpenContact={handleOpenContact}
+        onOpenAdminHistory={() => setIsAdminOpen(true)}
+      />
+
+      {/* 2. Admin Conversation History Modal */}
+      <AdminHistoryModal
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
       />
 
       {/* 2. Floating Launcher Button */}
