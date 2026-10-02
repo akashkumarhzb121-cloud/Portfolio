@@ -1,0 +1,310 @@
+{
+  "schemaVersion": "1.0",
+  "type": "portfolio_knowledge_index",
+
+  "identity": {
+    "name": "Akash Kumar",
+    "displayName": "Akash",
+    "role": "Creative Technologist & Full-Stack Engineer",
+    "portfolioUrl": "https://skykumar.vercel.app/",
+    "description": "Akash Kumar is a Creative Technologist and Full-Stack Engineer focused on building modern web applications, interactive digital experiences, full-stack products, and visually polished interfaces.",
+    "primaryFocus": [
+      "Full-stack web development",
+      "Modern frontend development",
+      "Interactive web experiences",
+      "3D web experiences",
+      "UI/UX implementation",
+      "Backend development",
+      "MERN applications",
+      "Custom software development"
+    ]
+  },
+
+  "knowledgeSources": {
+    "profile": "profile.json",
+    "skills": "skills.json",
+    "services": "services.json",
+    "experience": "experience.json",
+    "education": "education.json",
+    "contact": "contact.json",
+    "faq": "faq.json",
+    "dsa": "dsa-summary.json",
+    "projectsDirectory": "projects/"
+  },
+
+  "skills": {
+    "source": "skills.json",
+    "categories": [
+      "programming languages",
+      "frontend development",
+      "backend development",
+      "databases",
+      "3D and creative development",
+      "tools",
+      "frameworks and libraries"
+    ],
+
+    "knownTechnologies": [
+      "C",
+      "C++",
+      "Java",
+      "JavaScript",
+      "TypeScript",
+      "HTML",
+      "CSS",
+      "React",
+      "Next.js",
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "Mongoose",
+      "SQL",
+      "Tailwind CSS",
+      "Bootstrap",
+      "Three.js",
+      "React Three Fiber",
+      "Drei",
+      "OGL",
+      "GSAP",
+      "Motion",
+      "Lenis",
+      "Redux",
+      "Redux Toolkit",
+      "Vite",
+      "Git",
+      "GitHub"
+    ]
+  },
+
+  "services": {
+    "source": "services.json",
+    "categories": [
+      "Business websites",
+      "Full-stack web applications",
+      "Modern UI/UX development",
+      "Interactive and 3D websites",
+      "Custom software development",
+      "Frontend development",
+      "Backend development",
+      "MERN applications"
+    ],
+
+    "pricingPolicy": {
+      "available": true,
+      "fixedPrice": false,
+      "rule": "Pricing depends on project requirements, scope, features, complexity, and timeline.",
+      "source": "services.json"
+    }
+  },
+
+  "projects": {
+    "source": "projects/",
+
+    "count": 11,
+
+    "items": [
+      {
+        "name": "Dribbble",
+        "slug": "dribbble",
+        "source": "projects/dribbble.json"
+      },
+      {
+        "name": "Kanban",
+        "slug": "kanban",
+        "source": "projects/kanban.json"
+      },
+      {
+        "name": "MERN Docs",
+        "slug": "mern-docs",
+        "source": "projects/mern-docs.json"
+      },
+      {
+        "name": "Modplint Interiors",
+        "slug": "modplint-interiors",
+        "source": "projects/modplint-interiors.json"
+      },
+      {
+        "name": "Netflix Clone",
+        "slug": "netflix-clone",
+        "source": "projects/Netflix-Clone.json"
+      },
+      {
+        "name": "Portfolio",
+        "slug": "portfolio",
+        "source": "projects/Portfolio.json"
+      },
+      {
+        "name": "Premier",
+        "slug": "premier",
+        "source": "projects/premier.json"
+      },
+      {
+        "name": "RapidCare",
+        "slug": "rapidcare",
+        "source": "projects/rapidcare.json"
+      },
+      {
+        "name": "Rock Paper Scissors",
+        "slug": "rock-paper-scissors",
+        "source": "projects/rock-paper-scissors.json"
+      },
+      {
+        "name": "Sharma Interior",
+        "slug": "sharma-interior",
+        "source": "projects/sharma-interior.json"
+      },
+      {
+        "name": "Student Management System",
+        "slug": "student-management",
+        "source": "projects/student-management.json"
+      }
+    ]
+  },
+
+  "experience": {
+    "source": "experience.json"
+  },
+
+  "education": {
+    "source": "education.json"
+  },
+
+  "contact": {
+    "source": "contact.json"
+  },
+
+  "faq": {
+    "source": "faq.json"
+  },
+
+  "dsa": {
+    "source": "dsa-summary.json"
+  },
+
+  "queryCapabilities": {
+    "supportedOperations": [
+      "GET",
+      "COUNT",
+      "LIST",
+      "CHECK",
+      "FILTER",
+      "COMPARE",
+      "AGGREGATE",
+      "SUMMARY"
+    ],
+
+    "examples": [
+      {
+        "query": "Does Akash know React?",
+        "operation": "CHECK",
+        "target": "skills",
+        "field": "knownTechnologies"
+      },
+      {
+        "query": "Does Akash know Python?",
+        "operation": "CHECK",
+        "target": "skills",
+        "field": "knownTechnologies",
+        "unknownPolicy": "Do not infer. Return unknown if the technology is not documented."
+      },
+      {
+        "query": "How many projects does Akash have?",
+        "operation": "COUNT",
+        "target": "projects"
+      },
+      {
+        "query": "List Akash's projects",
+        "operation": "LIST",
+        "target": "projects"
+      },
+      {
+        "query": "Which projects use React?",
+        "operation": "FILTER",
+        "target": "projects",
+        "field": "technologies"
+      },
+      {
+        "query": "What technologies does Akash use?",
+        "operation": "AGGREGATE",
+        "target": "skills"
+      },
+      {
+        "query": "Compare RapidCare and MERN Docs",
+        "operation": "COMPARE",
+        "target": "projects"
+      },
+      {
+        "query": "Tell me about Akash",
+        "operation": "SUMMARY",
+        "target": "identity"
+      }
+    ]
+  },
+
+  "queryRouting": {
+    "hiring": [
+      "services",
+      "contact",
+      "experience",
+      "projects"
+    ],
+    "contact": [
+      "contact",
+      "faq"
+    ],
+    "skills": [
+      "skills",
+      "experience",
+      "projects"
+    ],
+    "technology": [
+      "skills",
+      "projects"
+    ],
+    "services": [
+      "services",
+      "projects",
+      "contact"
+    ],
+    "projects": [
+      "projects"
+    ],
+    "experience": [
+      "experience",
+      "projects"
+    ],
+    "education": [
+      "education"
+    ],
+    "profile": [
+      "identity",
+      "skills",
+      "experience",
+      "services"
+    ],
+    "pricing": [
+      "services",
+      "faq",
+      "contact"
+    ],
+    "technicalQuestion": [
+      "skills",
+      "projects"
+    ]
+  },
+
+  "groundingRules": [
+    "Only state portfolio facts that are supported by the knowledge base.",
+    "Do not invent technologies, projects, clients, companies, job titles, experience, pricing, salary, availability, or contact information.",
+    "If a fact is not documented, explicitly say that it is not currently documented.",
+    "Do not assume that a technology is known just because it is commonly used with another technology.",
+    "Do not use project information to answer unrelated questions unless the project is relevant.",
+    "Use exact structured data for counts, lists, checks, filters, comparisons, and aggregations.",
+    "Use detailed project JSON files when answering detailed questions about a specific project.",
+    "Use services.json for service and pricing-related questions.",
+    "Use contact.json for contact information.",
+    "Use skills.json for questions about Akash's skills and technologies.",
+    "Use experience.json for professional experience questions.",
+    "Use education.json for education-related questions."
+  ]
+}

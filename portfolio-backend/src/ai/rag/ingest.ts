@@ -73,6 +73,10 @@ export function collectKnowledgeFiles(baseDir: string): { relativePath: string; 
       if (entry.isDirectory()) {
         walk(fullPath);
       } else if (entry.isFile() && entry.name.endsWith('.json')) {
+        // akash.json is the structured index/router consumed by the structured knowledge layer
+        if (entry.name === 'akash.json') {
+          continue;
+        }
         const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
         files.push({ relativePath, fullPath });
       }

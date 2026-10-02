@@ -1,5 +1,56 @@
+import mongoose from 'mongoose';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { KnowledgeChunk, type IKnowledgeChunk } from '../../models/knowledgeChunk.model.js';
 import { classifyQueryIntent, type QueryAnalysis } from './intent.js';
+import { collectKnowledgeFiles, generateDeterministicEmbedding } from '../rag/ingest.js';
+import { chunkKnowledgeFile } from '../rag/chunker.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const KNOWLEDGE_DIR = path.resolve(__dirname, '../../../ai-knowledge');
+
+let memoryChunksCache: any[] | null = null;
+
+export function getInMemoryKnowledgeChunks(sourceTypeFilter?: string): any[] {
+  if (!memoryChunksCache) {
+    if (fs.existsSync(KNOWLEDGE_DIR)) {
+      const files = collectKnowledgeFiles(KNOWLEDGE_DIR);
+      const allChunks: any[] = [];
+      for (const file of files) {
+        if (file.relativePath.replace(/\\/g, '/') === 'akash.json') continue;
+        try {
+          const content = fs.readFileSync(file.fullPath, 'utf-8');
+          const data = JSON.parse(content);
+          const chunks = chunkKnowledgeFile(file.relativePath, data);
+          for (const c of chunks) {
+            allChunks.push({
+              chunkId: c.chunkId,
+              source: c.source,
+              sourceType: c.sourceType,
+              projectSlug: c.metadata?.projectSlug,
+              url: c.metadata?.url,
+              title: c.title,
+              content: c.content,
+              metadata: c.metadata || {},
+              tags: c.tags || [],
+              embedding: generateDeterministicEmbedding(c.content)
+            });
+          }
+        } catch {}
+      }
+      memoryChunksCache = allChunks;
+    } else {
+      memoryChunksCache = [];
+    }
+  }
+
+  if (sourceTypeFilter) {
+    return memoryChunksCache.filter((c) => c.sourceType === sourceTypeFilter);
+  }
+  return memoryChunksCache;
+}
 
 export interface SearchResult {
   chunkId: string;
@@ -579,8 +630,20 @@ export async function searchKnowledge(
     matchFilter.sourceType = sourceTypeFilter;
   }
 
-  // Fetch candidate documents from MongoDB
-  const candidates = await KnowledgeChunk.find(matchFilter).lean().exec();
+  // Fetch candidate documents from MongoDB or in-memory fallback
+  let candidates: any[] = [];
+  try {
+    if (mongoose.connection.readyState === 1) {
+      candidates = await KnowledgeChunk.find(matchFilter).lean().exec();
+    }
+  } catch (err) {
+    console.warn('⚠️ MongoDB retrieval query failed, using in-memory knowledge store:', err);
+  }
+
+  if (!candidates || candidates.length === 0) {
+    candidates = getInMemoryKnowledgeChunks(sourceTypeFilter);
+  }
+
   if (!candidates || candidates.length === 0) {
     return [];
   }

@@ -20,6 +20,8 @@ export type IntentType =
   | 'availability'
   | 'resume'
   | 'dsa'
+  | 'differentiator'
+  | 'gibberish'
   | 'mixed';
 
 export interface ProjectMetadata {
@@ -115,6 +117,9 @@ export interface QueryAnalysis {
   isHiringQuery: boolean;
   isServicesQuery: boolean;
   isSkillsQuery: boolean;
+  isExperienceQuery: boolean;
+  isDifferentiatorQuery: boolean;
+  isGibberishQuery: boolean;
   isProfileQuery: boolean;
   isGeneralQuestion: boolean;
   isGeneralProjectListQuery: boolean;
@@ -130,6 +135,82 @@ export interface QueryAnalysis {
   isResumeQuery: boolean;
   isAvailabilityQuery: boolean;
   isFollowUp: boolean;
+}
+
+const COMMON_VALID_WORDS = new Set([
+  // Question & helper words
+  'what', 'who', 'where', 'when', 'why', 'how', 'which', 'whose', 'whom',
+  'is', 'are', 'am', 'was', 'were', 'be', 'been', 'being',
+  'do', 'does', 'did', 'doing', 'done',
+  'have', 'has', 'had', 'having',
+  'can', 'could', 'would', 'should', 'will', 'shall', 'may', 'might', 'must',
+  'the', 'a', 'an', 'this', 'that', 'these', 'those',
+  'i', 'me', 'my', 'mine', 'myself',
+  'you', 'your', 'yours', 'yourself',
+  'he', 'him', 'his', 'himself',
+  'she', 'her', 'hers', 'herself',
+  'it', 'its', 'itself',
+  'we', 'us', 'our', 'ours', 'ourselves',
+  'they', 'them', 'their', 'theirs', 'themselves',
+  'in', 'on', 'at', 'to', 'for', 'with', 'by', 'from', 'about', 'into', 'over', 'after', 'under', 'between', 'through', 'during',
+  'and', 'or', 'but', 'nor', 'so', 'yet', 'if', 'because', 'as', 'until', 'while', 'of', 'off', 'out', 'up', 'down',
+  // Common conversation & portfolio vocabulary
+  'hi', 'hey', 'hello', 'hii', 'heyy', 'yo', 'sup', 'bye', 'goodbye', 'thanks', 'thank', 'welcome',
+  'yes', 'no', 'yeah', 'yep', 'nope', 'ok', 'okay', 'sure', 'fine', 'great', 'good', 'cool', 'nice', 'awesome',
+  'tell', 'show', 'give', 'list', 'explain', 'help', 'know', 'see', 'find', 'make', 'built', 'build', 'create',
+  'work', 'works', 'worked', 'working', 'experience', 'experiences', 'projects', 'project', 'skill', 'skills', 'stack', 'tech',
+  'technologies', 'technology', 'contact', 'email', 'hire', 'hiring', 'job', 'jobs', 'intern', 'interns', 'internship', 'internships',
+  'resume', 'cv', 'education', 'college', 'degree', 'university', 'btech', 'about', 'bio', 'profile', 'different', 'difference',
+  'unique', 'special', 'stand', 'apart', 'better', 'best', 'cost', 'price', 'pricing', 'charge', 'rate', 'rates', 'services',
+  'service', 'offer', 'portfolio', 'developer', 'engineer', 'frontend', 'backend', 'fullstack', 'dsa', 'algorithm', 'algorithms',
+  'code', 'coding', 'links', 'link', 'github', 'linkedin', 'demo', 'live', 'site', 'website', 'app', 'apps',
+  'akash', 'kumar', 'sky', 'ai', 'rapidcare', 'modplint', 'interiors', 'mern', 'docs', 'premier', 'student',
+  'react', 'node', 'express', 'mongo', 'mongodb', 'javascript', 'typescript', 'three', 'threejs', 'webgl', 'tailwind',
+  'python', 'java', 'c', 'cpp', 'html', 'css', 'socket', 'io', 'redux', 'next', 'nextjs', 'docker', 'graphql',
+  'much', 'many', 'more', 'all', 'any', 'some', 'other', 'others', 'things', 'thing', 'stuff', 'rthings', 'thigns', 'tings',
+  'call', 'message', 'reach', 'phone', 'mail', 'looking', 'view', 'overview', 'details', 'detail', 'summary',
+  'like', 'want', 'need', 'collaborate', 'contract', 'freelance', 'part', 'time', 'full', 'remote', 'hybrid',
+  'questions', 'question', 'answer', 'role', 'roles', 'background', 'study', 'studied', 'qualities'
+]);
+
+/**
+ * Detects if a user input is random keyboard mash, gibberish, or nonsense
+ * (e.g. "guhoio", "abcd gioho", "hioihohh", "asdfghjk")
+ */
+export function isGibberishQuery(text: string): boolean {
+  const cleaned = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!cleaned) return false;
+
+  const tokens = cleaned.split(' ').filter(Boolean);
+  if (tokens.length === 0) return false;
+
+  // Keyboard row mash detection
+  const keyboardMashing = /(?:asdf|sdfg|dfgh|fghj|ghjk|hjkl|qwerty|werty|ertyu|rtyui|tyuio|yuio|uiop|zxcv|xcvb|cvbn|vbnm)/i;
+  if (keyboardMashing.test(cleaned)) return true;
+
+  // 4+ repeated consecutive letters (e.g. "aaaaa", "hhhhh")
+  if (/(.)\1{3,}/.test(cleaned)) return true;
+
+  let recognizedCount = 0;
+  for (const token of tokens) {
+    if (COMMON_VALID_WORDS.has(token)) {
+      recognizedCount++;
+    } else if (/^\d+$/.test(token)) {
+      recognizedCount++;
+    }
+  }
+
+  // If none of the words exist in valid English or portfolio vocabulary
+  if (recognizedCount === 0) {
+    return true;
+  }
+
+  // For 3+ words, if recognized words are very few (< 30%)
+  if (tokens.length >= 3 && recognizedCount / tokens.length < 0.3) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -400,11 +481,13 @@ export function classifyQueryIntent(
   const isCanBuildQuery = /\b(can (akash|he) (build|create|make)|want to (build|make|create)|build a|create a|make a)\b/i.test(normalized);
   const skillsPatterns = [
     /\b(skills?|tech stack|technologies|tools?|languages?|proficiency|frameworks?)\b/i,
-    /\bwhat (does|are things) akash know\b/i,
-    /\bwhat does (he|akash) know\b/i,
+    /\bwhat (?:does|do|is|are)?\s*(?:r?things?|thigns?|tings?|stuff|tech|skills?|technologies)?\s*(?:does)?\s*(?:he|akash)\s*(?:know|do|use|have|work with)\b/i,
+    /\bwhat\s+(?:does|can)\s+(?:he|akash)\s+(?:know|do|build)\b/i,
     /\bwhat (programming )?languages does (he|akash) (use|know)\b/i,
     /\bdoes (akash|he) (know|use|work with)\b/i,
-    /\bwhat about his backend skills\b/i
+    /\bwhat about his backend skills\b/i,
+    /\bthings\s+(?:he|akash)\s+(?:knows?|can do)\b/i,
+    /\bwhat\s+(?:he|akash)\s+(?:knows?|is good at)\b/i
   ];
   if (!isCanBuildQuery && (skillsPatterns.some((p) => p.test(normalized)) || (/\bstack\b/i.test(normalized) && !normalized.includes('full-stack') && !normalized.includes('full stack')))) {
     intents.add('skills');
@@ -438,7 +521,9 @@ export function classifyQueryIntent(
 
   // 17. Experience Intent
   const experiencePatterns = [
-    /\b(experience|work experience|work history|career|past roles?|worked at|what has akash worked on)\b/i
+    /\b(experience|experiences|work experience|work history|career|past roles?|worked at|what has akash worked on)\b/i,
+    /\b(give|tell me|what is|what are|does akash have|does he have|share|show)\s+(?:akash'?s?\s+|his\s+)?(?:work\s+)?experiences?\b/i,
+    /\bwhere has (?:akash|he) worked\b/i
   ];
   if (experiencePatterns.some((p) => p.test(normalized))) {
     intents.add('experience');
@@ -473,7 +558,22 @@ export function classifyQueryIntent(
     intents.add('resume');
   }
 
-  // 21. General Technical Question Detection
+  // 21. Differentiator Intent ("How is he different from others", "Why hire Akash", "What makes him unique")
+  const differentiatorPatterns = [
+    /\b(how is (?:akash|he) different|what makes (?:akash|he|him) different|what makes (?:akash|he|him) unique)\b/i,
+    /\b(why should (?:i|we) hire (?:akash|him)|why hire (?:akash|him)|why choose (?:akash|him))\b/i,
+    /\b(what sets (?:akash|him) apart|how does (?:akash|he) stand out|why is (?:akash|he) better)\b/i,
+    /\b(different from others|different from other (?:developers|engineers|candidates))\b/i,
+    /\bwhat makes (?:akash|him) special\b/i
+  ];
+  const isDifferentiatorQuery = differentiatorPatterns.some((p) => p.test(normalized));
+  if (isDifferentiatorQuery) {
+    intents.add('differentiator');
+    intents.add('profile');
+    intents.add('skills');
+  }
+
+  // 22. General Technical Question Detection
   const isDefinitionQuestion =
     /^(what is|what are|explain|how does .+ work|difference between)\s+([a-z0-9\s.-]+)\??$/i.test(
       normalized
@@ -493,7 +593,13 @@ export function classifyQueryIntent(
     }
   }
 
-  // 22. Specific Boolean Flags for Retrieval Steering
+  // 23. Gibberish / Nonsense Detection
+  const isGibberish = isGibberishQuery(query) && !isGreetingQuery && !isCasualQuery && !isCapabilitiesQuery;
+  if (isGibberish) {
+    intents.add('gibberish');
+  }
+
+  // 24. Specific Boolean Flags for Retrieval Steering
   const isPureContactQuery =
     !isGreetingQuery &&
     !isCasualQuery &&
@@ -519,10 +625,15 @@ export function classifyQueryIntent(
     (/\b(what projects? has (akash|he) (built|made)|show me (his )?projects?|what has akash built|tell me about (akash|his)(?:'|\s)?s? projects|list (of )?projects)\b/i.test(
       normalized
     ) ||
+      /\b(?:give|show|list|tell me about)\s+(?:all\s+)?(?:akash'?s?\s+|his\s+)?projects?(?:\s+details)?\b/i.test(
+        normalized
+      ) ||
+      /\b(?:all|every)\s+projects?(?:\s+details)?\b/i.test(normalized) ||
+      /\bdetails\s+of\s+all\s+projects\b/i.test(normalized) ||
       (normalized.includes('projects') && !intents.has('contact') && !isPureContactQuery));
 
   const isProfileQuery =
-    (intents.has('profile') && !isGeneralProjectListQuery) ||
+    (intents.has('profile') && !isGeneralProjectListQuery && !isDifferentiatorQuery) ||
     (/\btell me about akash\b/i.test(normalized) && !normalized.includes('project'));
 
   const isDSAQuery = intents.has('dsa');
@@ -531,10 +642,17 @@ export function classifyQueryIntent(
     !isDSAQuery &&
     !isDefinitionQuestion &&
     !isCanBuildQuery &&
+    !isDifferentiatorQuery &&
     ((intents.has('skills') && !namedProjectSlug) ||
-      /\b(what does akash know|what are things akash knows|what is akash(?:'|\s)?s? tech stack|what technologies does akash know|does akash know|does he know)\b/i.test(
+      /\b(what does akash know|what are (?:r?things?|thigns?|tings?|stuff) (?:akash|he) know|what is akash(?:'|\s)?s? tech stack|what technologies does akash know|does akash know|does he know)\b/i.test(
         normalized
       ));
+
+  const isExperienceQuery =
+    !isDifferentiatorQuery &&
+    !isGeneralProjectListQuery &&
+    !isPureContactQuery &&
+    (intents.has('experience') || experiencePatterns.some((p) => p.test(normalized)));
 
   const isEducationQuery =
     intents.has('education') && !namedProjectSlug;
@@ -570,6 +688,9 @@ export function classifyQueryIntent(
     isHiringQuery,
     isServicesQuery,
     isSkillsQuery,
+    isExperienceQuery,
+    isDifferentiatorQuery,
+    isGibberishQuery: isGibberish,
     isProfileQuery,
     isGeneralQuestion: isDefinitionQuestion,
     isGeneralProjectListQuery,

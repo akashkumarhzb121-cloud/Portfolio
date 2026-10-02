@@ -498,6 +498,9 @@ export function chunkKnowledgeFile(relativePath: string, rawData: Record<string,
       return chunkFAQ(basename, rawData);
     case 'contact.json':
       return chunkContact(basename, rawData);
+    case 'akash.json':
+      // akash.json is an index/router consumed by the structured knowledge layer, not chunked for vector search
+      return [];
     default:
       // Fallback generic chunk
       return [

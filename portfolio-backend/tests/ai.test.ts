@@ -8,6 +8,13 @@ import { collectKnowledgeFiles, getEmbedding, generateDeterministicEmbedding } f
 import { cosineSimilarity, searchKnowledge } from '../src/ai/retrieval/search.js';
 import { classifyQueryIntent } from '../src/ai/retrieval/intent.js';
 import { generateChatResponse } from '../src/ai/llm/generate.js';
+import {
+  loadAkashIndex,
+  loadProjectBySlug,
+  loadAllProjects,
+  detectStructuredQuery,
+  executeStructuredQuery
+} from '../src/ai/knowledge/index.js';
 import { env } from '../src/config/env.js';
 import { ContactEnquiry } from '../src/models/enquiry.model.js';
 import * as emailService from '../src/services/email.service.js';
@@ -109,12 +116,12 @@ const { mockKnowledgeBase } = vi.hoisted(() => {
       embedding: [0.45, 0.45, 0.45]
     },
     {
-      chunkId: 'education:degree:ucet',
+      chunkId: 'education:degree:rtu',
       source: 'education.json',
       sourceType: 'education',
       title: 'Education: B.Tech in Computer Science',
-      content: 'Bachelor of Technology (B.Tech) in Computer Science & Engineering from UCET, VBU, Hazaribagh. Coursework: Data Structures, Algorithms, DBMS, Operating Systems, Computer Networks.',
-      metadata: { institution: 'UCET, VBU' },
+      content: 'Bachelor of Technology (B.Tech) in Computer Science & Engineering from RTU, GIT, Jaipur. Coursework: Data Structures, Algorithms, DBMS, Operating Systems, Computer Networks.',
+      metadata: { institution: 'RTU, GIT' },
       tags: ['education', 'degree', 'btech', 'college', 'coursework'],
       embedding: [0.5, 0.5, 0.5]
     },
@@ -353,7 +360,7 @@ describe('Vector Retrieval & Math Tests', () => {
 
   it('configures Groq as default LLM provider and decouples embeddings', () => {
     expect(env.AI_BASE_URL).toContain('groq.com');
-    expect(env.AI_MODEL).toBe('llama-3.3-70b-versatile');
+    expect(['llama-3.3-70b-versatile', 'openai/gpt-oss-120b']).toContain(env.AI_MODEL);
     expect(env.EMBEDDING_MODEL).toBe('text-embedding-3-small');
   });
 
@@ -911,9 +918,9 @@ describe('AI API Endpoints (/api/ai)', () => {
       expect(res.sources.some((s) => s.type === 'services')).toBe(true);
     });
 
-    it('26. "Where did Akash study?" mentions UCET / B.Tech Computer Science', async () => {
+    it('26. "Where did Akash study?" mentions RTU / B.Tech Computer Science', async () => {
       const res = await generateChatResponse({ message: 'Where did Akash study?' });
-      expect(res.answer).toContain('UCET');
+      expect(res.answer).toContain('RTU');
       expect(res.sources.some((s) => s.type === 'education')).toBe(true);
     });
 
@@ -1095,6 +1102,143 @@ describe('AI API Endpoints (/api/ai)', () => {
         history: historyTurn2
       });
       expect(turn2.answer).toContain('React');
+    });
+  });
+
+  describe('Structured Knowledge Layer (akash.json) Operations', () => {
+    it('loads akash.json index properly with 11 projects and knowledge sources', () => {
+      const index = loadAkashIndex();
+      expect(index.schemaVersion).toBe('1.0');
+      expect(index.identity.name).toBe('Akash Kumar');
+      expect(index.projects.items.length).toBeGreaterThanOrEqual(11);
+      expect(index.skills.knownTechnologies).toContain('React');
+      expect(index.skills.knownTechnologies).not.toContain('Python');
+    });
+
+    it('1. "Does Akash know React?" executes structured CHECK with verified confirmation', async () => {
+      const res = await generateChatResponse({ message: 'Does Akash know React?' });
+      expect(res.answer.toLowerCase()).toContain('yes');
+      expect(res.answer).toContain('React');
+      expect(res.sources.some((s) => s.type === 'skills')).toBe(true);
+    });
+
+    it('2. "Does Akash know Python?" executes structured CHECK and safely states unknown without hallucinating', async () => {
+      const res = await generateChatResponse({ message: 'Does Akash know Python?' });
+      expect(res.answer).toContain('Python');
+      expect(res.answer.toLowerCase()).toContain('not currently listed');
+      expect(res.answer.toLowerCase()).not.toContain('no, akash');
+    });
+
+    it('3. "How many projects does Akash have?" executes structured COUNT and returns dynamic project count', async () => {
+      const allProjects = loadAllProjects();
+      const res = await generateChatResponse({ message: 'How many projects does Akash have?' });
+      expect(res.answer).toContain(`${allProjects.length} documented projects`);
+      expect(res.sources.some((s) => s.type === 'project')).toBe(true);
+    });
+
+    it('4. "List Akash\'s projects" executes structured LIST returning project names from the index', async () => {
+      const res = await generateChatResponse({ message: "List Akash's projects" });
+      expect(res.answer).toContain('RapidCare');
+      expect(res.answer).toContain('Modplint Interiors');
+      expect(res.answer).toContain('MERN Docs');
+      expect(res.sources.some((s) => s.type === 'project')).toBe(true);
+    });
+
+    it('5. "Which projects use React?" executes structured FILTER checking actual project JSON technology fields', async () => {
+      const res = await generateChatResponse({ message: 'Which projects use React?' });
+      expect(res.answer).toContain('RapidCare');
+      expect(res.answer).toContain('MERN Docs');
+      expect(res.answer).toContain('React');
+      expect(res.sources.some((s) => s.type === 'project')).toBe(true);
+    });
+
+    it('6. "What technologies does Akash use?" executes structured AGGREGATE across skills and projects', async () => {
+      const res = await generateChatResponse({ message: 'What technologies does Akash use?' });
+      expect(res.answer).toContain('React');
+      expect(res.answer).toContain('Node.js');
+      expect(res.answer).toContain('Three.js');
+      expect(res.sources.some((s) => s.type === 'skills')).toBe(true);
+    });
+
+    it('7. "Compare RapidCare and MERN Docs" executes structured COMPARE comparing documented fields', async () => {
+      const res = await generateChatResponse({ message: 'Compare RapidCare and MERN Docs' });
+      expect(res.answer).toContain('RapidCare');
+      expect(res.answer).toContain('MERN Docs');
+      expect(res.answer).toContain('Category');
+      expect(res.sources.length).toBeGreaterThanOrEqual(2);
+      expect(res.sources.some((s) => s.title.includes('RapidCare'))).toBe(true);
+      expect(res.sources.some((s) => s.title.includes('MERN Docs'))).toBe(true);
+    });
+
+    it('8. "Tell me about Akash" executes structured SUMMARY combining profile, skills, and experience', async () => {
+      const res = await generateChatResponse({ message: 'Tell me about Akash' });
+      expect(res.answer).toContain('Akash Kumar');
+      expect(res.answer).toContain('Full-Stack');
+      expect(res.sources.some((s) => s.type === 'profile')).toBe(true);
+    });
+
+    it('9. "Where did Akash study?" mentions RTU / GIT / Jaipur and never old UCET / VBU', async () => {
+      const res = await generateChatResponse({ message: 'Where did Akash study?' });
+      expect(res.answer).toContain('RTU');
+      expect(res.answer).toContain('Jaipur');
+      expect(res.answer).not.toContain('UCET');
+      expect(res.answer).not.toContain('VBU');
+      expect(res.sources.some((s) => s.type === 'education')).toBe(true);
+    });
+  });
+
+  describe('Natural Persona, Differentiator, Experience & Gibberish Handling', () => {
+    it('handles gibberish / nonsense inputs ("guhoio", "abcd gioho", "hioihohh") with friendly clarification and empty sources', async () => {
+      const gibberishQueries = ['guhoio', 'abcd gioho', 'hioihohh'];
+      for (const query of gibberishQueries) {
+        const res = await generateChatResponse({ message: query });
+        expect(res.answer.toLowerCase()).toContain('not sure i understood');
+        expect(res.sources.length).toBe(0);
+        expect(res.answer).not.toContain('Akash Kumar - Profile & Bio');
+        expect(res.answer).not.toContain('Name: Akash Kumar');
+      }
+    });
+
+    it('answers "how is he different from others" with a compelling logical synthesis of 3D, full-stack, product ownership, and DSA', async () => {
+      const res = await generateChatResponse({ message: 'how is he different from others' });
+      expect(res.answer).toContain('Akash Kumar');
+      expect(res.answer.toLowerCase()).toContain('3d');
+      expect(res.answer.toLowerCase()).toContain('full-stack');
+      expect(res.answer).toContain('RapidCare');
+      expect(res.answer).toContain('500+');
+      expect(res.sources.length).toBeGreaterThan(0);
+    });
+
+    it('answers "give all projects details" by returning all documented projects in the portfolio', async () => {
+      const res = await generateChatResponse({ message: 'give all projects details' });
+      expect(res.answer).toContain('documented projects');
+      expect(res.answer).toContain('RapidCare');
+      expect(res.answer).toContain('Modplint Interiors');
+      expect(res.answer).toContain('MERN Docs');
+      expect(res.answer).toContain('Student Management System');
+      expect(res.answer).toContain('Creative Portfolio');
+      expect(res.sources.some((s) => s.type === 'project')).toBe(true);
+    });
+
+    it('correctly handles typos like "What are rthings he know" as a skills inquiry', async () => {
+      const res = await generateChatResponse({ message: 'What are rthings he know' });
+      expect(res.answer).toContain('React');
+      expect(res.answer).toContain('Node.js');
+      expect(res.sources.some((s) => s.type === 'skills')).toBe(true);
+    });
+
+    it('answers "give akash experiences" with Novitech internship and freelance production deliveries', async () => {
+      const res = await generateChatResponse({ message: 'give akash experiences' });
+      expect(res.answer).toContain('Novitech Pvt. Ltd.');
+      expect(res.answer).toContain('Modplint Interiors');
+      expect(res.answer).toContain('RapidCare');
+      expect(res.sources.some((s) => s.type === 'experience' || s.type === 'project')).toBe(true);
+    });
+
+    it('answers "does akash have experience" by detailing his real experience rather than generic profile dump', async () => {
+      const res = await generateChatResponse({ message: 'does akash have experience' });
+      expect(res.answer).toContain('Novitech Pvt. Ltd.');
+      expect(res.answer).not.toContain('Here is what I found regarding your query');
     });
   });
 });

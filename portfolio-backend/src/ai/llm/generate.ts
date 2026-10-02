@@ -5,6 +5,7 @@ import { searchKnowledge, type SearchResult } from '../retrieval/search.js';
 import { classifyQueryIntent, type QueryAnalysis } from '../retrieval/intent.js';
 import { getEmbedding } from '../rag/ingest.js';
 import { Conversation, type IChatMessage } from '../../models/conversation.model.js';
+import { detectStructuredQuery, executeStructuredQuery } from '../knowledge/index.js';
 
 // Initialize OpenAI-compatible LLM client (defaults to Groq free tier)
 export const chatClient = env.AI_API_KEY
@@ -13,6 +14,46 @@ export const chatClient = env.AI_API_KEY
       baseURL: env.AI_BASE_URL || 'https://api.groq.com/openai/v1'
     })
   : null;
+
+/**
+ * Executes chat completion with resilient model fallback (e.g. if llama-3.3-70b-versatile returns 404 on Groq,
+ * gracefully retries with active models like openai/gpt-oss-120b or openai/gpt-oss-20b)
+ */
+async function callChatCompletion(
+  client: OpenAI,
+  payload: {
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+    temperature?: number;
+    max_tokens?: number;
+  }
+): Promise<string> {
+  const preferredModel = env.AI_MODEL || 'openai/gpt-oss-120b';
+  const fallbackModels = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+  const modelsToTry = [preferredModel, ...fallbackModels.filter((m) => m !== preferredModel)];
+
+  let lastError: unknown;
+  for (const model of modelsToTry) {
+    try {
+      const completion = await client.chat.completions.create({
+        model,
+        messages: payload.messages,
+        temperature: payload.temperature ?? 0.3,
+        max_tokens: payload.max_tokens ?? 800
+      });
+      const content = completion.choices[0]?.message?.content?.trim();
+      if (content) return content;
+    } catch (err: any) {
+      lastError = err;
+      if (err?.status === 404 || err?.message?.includes('does not exist') || err?.message?.includes('not found')) {
+        console.warn(`⚠️ Model ${model} not available on Groq, retrying with fallback model...`);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError || new Error('All model completions failed');
+}
 
 export interface GenerateChatOptions {
   message: string;
@@ -159,6 +200,14 @@ export function generateContextualFallbackAnswer(
     );
   }
 
+  // 1b. Gibberish / Nonsense
+  if (analysis.isGibberishQuery) {
+    return (
+      "I'm not sure I understood that! Could you please rephrase or let me know what you'd like to explore about Akash?\n\n" +
+      "For example, you can ask about his **technical skills**, **featured projects**, **experience**, **services**, or **how to contact him**."
+    );
+  }
+
   // 2. Capabilities
   if (analysis.isCapabilitiesQuery) {
     return (
@@ -198,6 +247,38 @@ export function generateContextualFallbackAnswer(
       return "Goodbye! Have a great day, and feel free to reach out to Akash whenever you're ready to collaborate.";
     }
     return "I'm here to help you navigate Akash Kumar's portfolio! Feel free to ask about his projects, technical skills, services, or how to get in touch.";
+  }
+
+  // 3b. Differentiator / Uniqueness ("How is he different from others?", "Why hire Akash?")
+  if (analysis.isDifferentiatorQuery) {
+    return (
+      "What sets **Akash Kumar** apart from typical developers is his unique combination of **creative engineering, production-grade architecture, and problem-solving rigor**:\n\n" +
+      "1. **Intersection of 3D Web & Full-Stack Systems**:\n" +
+      "   Unlike developers who specialize exclusively in frontend or backend, Akash seamlessly bridges both worlds: creating immersive 3D/WebGL experiences (Three.js, React Three Fiber, Rapier Physics, GSAP, OGL) while engineering robust, scalable backends (Node.js, Express, MongoDB, Socket.IO).\n\n" +
+      "2. **Real-World Product Ownership**:\n" +
+      "   He doesn't just build clone apps—he engineers real-world platforms. From architecting **RapidCare** (an AI clinical triage and live ambulance dispatch network) to building commercial production platforms like **Modplint Interiors** with custom CMS workflows.\n\n" +
+      "3. **Strong Algorithmic & Performance Mindset**:\n" +
+      "   With 500+ algorithmic problems solved across LeetCode and GeeksforGeeks, he writes clean, optimized, memory-efficient code and is relentless about performance (60fps animations, optimized asset loading, and fast API response times).\n\n" +
+      "4. **End-to-End Client & Team Execution**:\n" +
+      "   Proven capability to communicate directly with clients, translate high-level requirements into technical architectures, and ship production-ready software on time.\n\n" +
+      "Whether you need a high-impact interactive digital experience or a mission-critical web application, Akash brings both the creative vision and the technical muscle to deliver it."
+    );
+  }
+
+  // 3c. Experience query ("Give Akash experiences", "Does Akash have experience?")
+  if (analysis.isExperienceQuery) {
+    return (
+      "Akash Kumar's professional engineering experience & track record:\n\n" +
+      "- **Web Development Intern at Novitech Pvt. Ltd.** (Remote):\n" +
+      "  - Engineered and deployed two production client landing pages adhering to strict responsive design and cross-browser standards.\n" +
+      "  - Optimized asset loading and performance across mobile, tablet, and desktop viewports.\n" +
+      "  - Collaborated with engineering stakeholders for on-time delivery.\n\n" +
+      "- **Freelance Full-Stack & Creative Developer**:\n" +
+      "  - Architected and delivered end-to-end commercial client platforms such as **Modplint Interiors** (complete consultation pipeline and administrative CMS).\n" +
+      "  - Developed production full-stack systems like **RapidCare** (real-time emergency triage with AI integration and live ambulance dispatch tracking).\n" +
+      "  - Built immersive interactive 3D WebGL experiences using Three.js, React Three Fiber, Rapier Physics, and modern frontend tools.\n\n" +
+      "He has proven hands-on experience building, deploying, and maintaining production-grade applications. Feel free to ask about any specific project or role!"
+    );
   }
 
   // 4. Pricing query (Must precede pure contact and hiring)
@@ -321,12 +402,18 @@ export function generateContextualFallbackAnswer(
   // 10. General project list query (Must precede profile and skills)
   if (analysis.isGeneralProjectListQuery) {
     return (
-      "Here are featured projects built by Akash Kumar:\n\n" +
+      "Here is the complete list of Akash Kumar's **11 documented projects**:\n\n" +
       "1. **RapidCare**: AI-driven clinical triage & emergency dispatch network with real-time Socket.IO ambulance tracking.\n" +
       "2. **Modplint Interiors**: Production commercial interior design web platform with consultation scheduling and media gallery.\n" +
       "3. **MERN Docs**: Full-stack developer documentation portal with versioned markdown management.\n" +
       "4. **Student Management System**: Enterprise student portal with role-based access control and analytics.\n" +
-      "5. **3D Interactive Portfolio**: Modern portfolio with WebGL shaders, Three.js physics, and smooth Lenis scrolling.\n\n" +
+      "5. **Creative Portfolio & Digital Experience**: Modern portfolio with WebGL shaders, Three.js physics, and smooth Lenis scrolling.\n" +
+      "6. **Netflix Clone**: Video streaming UI with TMDB API integration and responsive previews.\n" +
+      "7. **Dribbble Clone**: Creative designer community showcase platform with media feeds.\n" +
+      "8. **Kanban Board**: Drag-and-drop task management workflow with state persistence.\n" +
+      "9. **Premier**: High-conversion landing page with modern typography and motion.\n" +
+      "10. **Rock Paper Scissors**: Interactive game featuring score persistence and physics.\n" +
+      "11. **Sharma Interior**: Digital studio showcase and consultation catalog for interior architecture.\n\n" +
       "Ask me about any specific project for details on its architecture and live demo!"
     );
   }
@@ -362,8 +449,8 @@ export function generateContextualFallbackAnswer(
     return (
       "Akash Kumar's educational background:\n\n" +
       "- **Degree**: Bachelor of Technology (B.Tech) in Computer Science & Engineering\n" +
-      "- **Institution**: University College of Engineering and Technology (UCET), VBU, Hazaribagh\n" +
-      "- **Core Subjects**: Data Structures & Algorithms, Database Management Systems (DBMS), Operating Systems, Computer Networks, Object-Oriented Programming (OOP), Software Engineering."
+      "- **Institution**: RTU, GIT (Global Institute of Technology), Jaipur\n" +
+      "- **Core Focus**: Data Structures & Algorithms, Object-Oriented Programming (OOP), Database Management Systems (DBMS), Operating Systems, System Design."
     );
   }
 
@@ -394,10 +481,19 @@ export function generateContextualFallbackAnswer(
   const primary = chunks[0];
   const secondary = chunks[1];
 
-  let answer = `Here is what I found regarding your query:\n\n**${primary.title}**\n${primary.content.slice(0, 600)}`;
+  let cleanPrimary = primary.content
+    .replace(/^Name:\s*.+$/gm, '')
+    .replace(/^Title:\s*.+$/gm, '')
+    .trim();
+
+  let answer = `**${primary.title}**\n\n${cleanPrimary.slice(0, 600)}`;
 
   if (secondary && secondary.title !== primary.title) {
-    answer += `\n\n**${secondary.title}**\n${secondary.content.slice(0, 400)}`;
+    let cleanSecondary = secondary.content
+      .replace(/^Name:\s*.+$/gm, '')
+      .replace(/^Title:\s*.+$/gm, '')
+      .trim();
+    answer += `\n\n**${secondary.title}**\n\n${cleanSecondary.slice(0, 400)}`;
   }
 
   if (primary.metadata?.links && typeof primary.metadata.links === 'object') {
@@ -427,6 +523,41 @@ export async function generateChatResponse(
   // 1. Classify query intent deterministically using conversation history
   const analysis = classifyQueryIntent(message, history);
 
+  // 1b. Gibberish / Nonsense detection: instant friendly clarification, zero RAG, sources: []
+  if (analysis.isGibberishQuery) {
+    const answer = generateContextualFallbackAnswer(message, [], analysis);
+    const suggestedQuestions = [
+      "What technologies does Akash know?",
+      "Tell me about Akash's projects",
+      "How can I contact Akash?"
+    ];
+
+    try {
+      const userMsg: IChatMessage = { role: 'user', content: message, timestamp: new Date() };
+      const assistantMsg: IChatMessage = { role: 'assistant', content: answer, timestamp: new Date() };
+
+      void Conversation.findOneAndUpdate(
+        { conversationId },
+        {
+          $push: {
+            messages: {
+              $each: [userMsg, assistantMsg],
+              $slice: -20
+            }
+          }
+        },
+        { upsert: true, returnDocument: 'after' }
+      ).catch(() => {});
+    } catch {}
+
+    return {
+      answer,
+      sources: [],
+      suggestedQuestions,
+      conversationId
+    };
+  }
+
   // 2. Greetings and Capabilities: instant conversational response, zero RAG, sources: []
   if (analysis.isGreetingQuery || analysis.isCapabilitiesQuery) {
     const answer = generateContextualFallbackAnswer(message, [], analysis);
@@ -447,7 +578,7 @@ export async function generateChatResponse(
             }
           }
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       ).catch(() => {});
     } catch {}
 
@@ -468,8 +599,7 @@ export async function generateChatResponse(
       try {
         const systemPrompt = buildSystemPrompt({ retrievedContext: '' });
         const boundedHistory = history.slice(-4);
-        const completion = await chatClient.chat.completions.create({
-          model: env.AI_MODEL || 'llama-3.3-70b-versatile',
+        answer = await callChatCompletion(chatClient, {
           messages: [
             { role: 'system', content: systemPrompt },
             ...boundedHistory.map((h) => ({ role: h.role, content: h.content })),
@@ -478,7 +608,6 @@ export async function generateChatResponse(
           temperature: 0.5,
           max_tokens: 300
         });
-        answer = completion.choices[0]?.message?.content?.trim() || '';
       } catch {
         answer = generateContextualFallbackAnswer(message, [], analysis);
       }
@@ -495,7 +624,56 @@ export async function generateChatResponse(
     };
   }
 
-  // 4. Generate query embedding & retrieve relevant knowledge chunks
+  // 4. Structured Knowledge Query Detection (akash.json routing & exact operations)
+  const structuredPlan = detectStructuredQuery(message, analysis);
+  if (structuredPlan) {
+    const structuredResult = executeStructuredQuery(structuredPlan);
+    if (structuredResult.handled) {
+      let answer = '';
+      if (chatClient && env.AI_API_KEY && !isTestEnv) {
+        try {
+          const systemPrompt = buildSystemPrompt({ retrievedContext: structuredResult.text });
+          const boundedHistory = history.slice(-4);
+          answer = await callChatCompletion(chatClient, {
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...boundedHistory.map((h) => ({ role: h.role, content: h.content })),
+              { role: 'user', content: message }
+            ],
+            temperature: 0.3,
+            max_tokens: 600
+          });
+        } catch {
+          answer = structuredResult.text;
+        }
+      } else {
+        answer = structuredResult.text;
+      }
+
+      const suggestedQuestions =
+        structuredResult.suggestedQuestions || deriveSuggestedQuestions(analysis);
+
+      // Persist conversation
+      try {
+        const userMsg: IChatMessage = { role: 'user', content: message, timestamp: new Date() };
+        const assistantMsg: IChatMessage = { role: 'assistant', content: answer, timestamp: new Date() };
+        void Conversation.findOneAndUpdate(
+          { conversationId },
+          { $push: { messages: { $each: [userMsg, assistantMsg], $slice: -20 } } },
+          { upsert: true, returnDocument: 'after' }
+        ).catch(() => {});
+      } catch {}
+
+      return {
+        answer,
+        sources: structuredResult.sources,
+        suggestedQuestions,
+        conversationId
+      };
+    }
+  }
+
+  // 5. Generate query embedding & retrieve relevant knowledge chunks
   let queryVector: number[] | undefined;
   try {
     queryVector = await getEmbedding(message);
@@ -530,14 +708,11 @@ export async function generateChatResponse(
   // 8. Call LLM provider or fallback
   if (chatClient && env.AI_API_KEY && !isTestEnv) {
     try {
-      const completion = await chatClient.chat.completions.create({
-        model: env.AI_MODEL || 'llama-3.3-70b-versatile',
+      answer = await callChatCompletion(chatClient, {
         messages: messagesPayload,
         temperature: 0.3,
         max_tokens: 800
       });
-
-      answer = completion.choices[0]?.message?.content?.trim() || '';
     } catch (err: any) {
       console.error('❌ LLM generation call failed:', err?.message || err);
       answer = generateContextualFallbackAnswer(message, retrievedChunks, analysis);
@@ -603,7 +778,7 @@ export async function generateChatResponse(
           }
         }
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     ).catch(() => {});
   } catch {}
 

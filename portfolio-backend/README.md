@@ -130,7 +130,7 @@ portfolio-backend/
 │   ├── contact.json                      # Direct channels (email, LinkedIn, GitHub, response times)
 │   ├── faq.json                          # Frequently asked questions for recruiters and clients
 │   ├── experience.json                   # Work history, roles, and software accomplishments
-│   ├── education.json                    # B.Tech Computer Science (UCET, VBU), coursework, CGPA
+│   ├── education.json                    # B.Tech in CSE (RTU, GIT, Jaipur), coursework, CGPA
 │   ├── dsa-summary.json                  # Data structures & algorithms problem-solving metrics
 │   └── projects/                         # 11 In-depth project dossiers
 │       ├── rapidcare.json                # AI healthcare triage & ambulance dispatch platform
@@ -207,7 +207,7 @@ The assistant draws verified facts from structured JSON documents located in [`a
 | `contact.json` | Email, LinkedIn, GitHub, response times, inquiry guidelines | Direct Contact Channels |
 | `faq.json` | Work availability, remote preferences, hiring process, pricing scoping | Frequently Asked Questions |
 | `experience.json` | Production track record, open-source work, architectural highlights | Professional Experience |
-| `education.json` | B.Tech in CSE (UCET, VBU), academic coursework, core subjects | Education Background |
+| `education.json` | B.Tech in CSE (RTU, GIT, Jaipur), academic coursework, core subjects | Education Background |
 | `dsa-summary.json` | Data Structures & Algorithms problem-solving metrics (LeetCode, C++) | Algorithmic Problem Solving |
 | `projects/*.json` | 11 Project dossiers (RapidCare, Modplint, MERN Docs, etc.) | Overview, Architecture, Tech Stack |
 

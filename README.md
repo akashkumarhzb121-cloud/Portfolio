@@ -115,7 +115,7 @@ Portfolio/
 │   │   ├── contact.json                  # Contact channels, email, response times
 │   │   ├── faq.json                      # Frequently asked questions for clients/recruiters
 │   │   ├── experience.json               # Work history and engineering achievements
-│   │   ├── education.json                # B.Tech in CSE (UCET, VBU) coursework
+│   │   ├── education.json                # B.Tech in CSE (RTU, GIT, Jaipur) coursework
 │   │   ├── dsa-summary.json              # Algorithmic problem-solving metrics (LeetCode)
 │   │   └── projects/                     # 11 In-depth technical project dossiers
 │   ├── src/
