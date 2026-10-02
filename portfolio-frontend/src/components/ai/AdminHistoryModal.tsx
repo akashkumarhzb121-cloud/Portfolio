@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Lock,
   Unlock,
@@ -60,6 +60,7 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [searchFilter, setSearchFilter] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
+  const transcriptListRef = useRef<HTMLDivElement>(null);
 
   const getAdminEndpoint = useCallback((): string => {
     const rawEndpoint =
@@ -165,6 +166,13 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
       setSelectedDetail(null);
     }
   }, [selectedConvId, adminKey, isAuthenticated, fetchConversationDetail]);
+
+  // Reset transcript scroll to top when opening a conversation
+  useEffect(() => {
+    if (selectedDetail && transcriptListRef.current) {
+      transcriptListRef.current.scrollTop = 0;
+    }
+  }, [selectedDetail]);
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,6 +280,19 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
     }
   };
 
+  // Pause Lenis and lock body scroll while Admin modal is open
+  useEffect(() => {
+    if (isOpen) {
+      (window as any).lenis?.stop();
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        (window as any).lenis?.start();
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -279,9 +300,13 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
       role="dialog"
       aria-modal="true"
       aria-label="SKY AI Conversation History Manager"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      data-lenis-prevent
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto overscroll-contain"
     >
-      <div className="relative w-full max-w-5xl h-[85vh] max-h-[800px] flex flex-col rounded-2xl border border-zinc-800 bg-[#0c0c12] shadow-2xl overflow-hidden text-zinc-100">
+      <div
+        data-lenis-prevent
+        className="relative w-full max-w-5xl h-[85vh] max-h-[800px] flex flex-col rounded-2xl border border-zinc-800 bg-[#0c0c12] shadow-2xl overflow-hidden text-zinc-100"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/90 bg-zinc-950/80">
           <div className="flex items-center gap-3">
@@ -401,9 +426,12 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
           /* Split View Dashboard */
           <div className="flex-1 flex flex-col sm:flex-row min-h-0 overflow-hidden">
             {/* Left Sidebar: Conversation List */}
-            <div className="w-full sm:w-80 md:w-96 flex flex-col border-b sm:border-b-0 sm:border-r border-zinc-800 bg-zinc-950/40">
+            <div
+              data-lenis-prevent
+              className="w-full sm:w-80 md:w-96 flex flex-col border-b sm:border-b-0 sm:border-r border-zinc-800 bg-zinc-950/40 min-h-0 max-h-[38vh] sm:max-h-none shrink-0"
+            >
               {/* Search filter */}
-              <div className="p-3 border-b border-zinc-800/80">
+              <div className="shrink-0 p-3 border-b border-zinc-800/80">
                 <div className="relative">
                   <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
                   <input
@@ -417,7 +445,10 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
               </div>
 
               {/* List */}
-              <div className="flex-1 overflow-y-auto divide-y divide-zinc-900 scrollbar-thin scrollbar-thumb-zinc-800">
+              <div
+                data-lenis-prevent
+                className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y divide-y divide-zinc-900 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
+              >
                 {isLoadingList && conversations.length === 0 ? (
                   <div className="p-8 text-center text-xs text-zinc-500 flex flex-col items-center gap-2">
                     <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
@@ -486,9 +517,12 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
             </div>
 
             {/* Right Pane: Conversation Transcript */}
-            <div className="flex-1 flex flex-col min-h-0 bg-[#0c0c12]">
+            <div
+              data-lenis-prevent
+              className="flex-1 flex flex-col min-h-0 bg-[#0c0c12] overflow-hidden"
+            >
               {selectedConvId && (
-                <div className="p-3 px-5 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-950/40 text-xs">
+                <div className="shrink-0 p-3 px-5 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-950/40 text-xs">
                   <div className="font-mono text-zinc-400 truncate max-w-sm">
                     ID: <span className="text-zinc-200 font-semibold">{selectedConvId}</span>
                   </div>
@@ -496,7 +530,7 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
                     type="button"
                     onClick={() => handleDeleteConversation(selectedConvId)}
                     disabled={isDeleting === selectedConvId}
-                    className="px-3 py-1.5 rounded-lg bg-rose-950/30 border border-rose-800/40 hover:bg-rose-900/50 text-rose-300 transition-colors text-xs flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-lg bg-rose-950/30 border border-rose-800/40 hover:bg-rose-900/50 text-rose-300 transition-colors text-xs flex items-center gap-1.5 cursor-pointer"
                   >
                     {isDeleting === selectedConvId ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -508,7 +542,11 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
                 </div>
               )}
 
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scrollbar-thin scrollbar-thumb-zinc-800">
+              <div
+                ref={transcriptListRef}
+                data-lenis-prevent
+                className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y p-4 sm:p-6 space-y-4 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
+              >
                 {isLoadingDetail ? (
                   <div className="h-full flex items-center justify-center text-xs text-zinc-500 gap-2">
                     <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
@@ -548,7 +586,7 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
                           </div>
 
                           <div
-                            className={`p-3.5 rounded-2xl whitespace-pre-wrap leading-relaxed text-xs sm:text-sm ${
+                            className={`p-3.5 rounded-2xl whitespace-pre-wrap leading-relaxed text-xs sm:text-sm break-words overflow-x-hidden ${
                               isUser
                                 ? 'bg-cyan-500/10 border border-cyan-400/30 text-cyan-100 rounded-tr-sm'
                                 : 'bg-zinc-900 border border-zinc-800 text-zinc-200 rounded-tl-sm'

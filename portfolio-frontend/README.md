@@ -98,6 +98,15 @@ flowchart LR
 - **Suggested Follow-up Questions ([`SuggestedQuestions.tsx`](file:///c:/Users/akash/Desktop/Website_References/portfolio-frontend/src/components/ai/SuggestedQuestions.tsx))**: Dynamic topic chips that allow visitors to explore projects, skills, or hiring workflows with a single tap.
 - **Direct Lead Capture**: Visitors can express hiring intent directly within the chat, which bridges to the backend enquiry and email notification pipeline.
 
+### Admin Conversation History Dashboard ([`AdminHistoryModal.tsx`](file:///c:/Users/akash/Desktop/Website_References/portfolio-frontend/src/components/ai/AdminHistoryModal.tsx))
+- **Owner Security**: Accessed via the Shield icon in the chat header, protected by the portfolio owner's passcode (`ADMIN_API_KEY`).
+- **Triple-Channel Auth Delivery**: Authenticates via `x-admin-key` header, `Authorization: Bearer <key>`, and `?key=<key>` query parameter fallback for maximum resilience against strict browser CORS rules or proxy header filtering.
+- **Split-View Dashboard**:
+  - **Left Pane (Outside)**: Search-filterable list of all visitor conversation sessions with message counts, first queries, latest updates, and timestamps.
+  - **Right Pane (Inside)**: Full message transcript with visitor/bot avatars, markdown-rendered text bubbles, and session identifiers.
+- **History Management**: Allows deleting individual conversation threads or clearing all session history with a single click.
+- **Isolated Dual Scrolling**: Both left conversation list and right message transcript are equipped with `data-lenis-prevent`, `min-h-0`, `touch-pan-y`, and `overscroll-y-contain`. While open, Lenis smooth scrolling is automatically paused and background body scrolling is locked, allowing smooth upward and downward scrolling on any device.
+
 ---
 
 ## Technology Stack & Roles
@@ -143,7 +152,8 @@ portfolio-frontend/
 │   │   │   ├── ChatWindow.tsx            # Chat container, message list, header & quick actions
 │   │   │   ├── ChatMessage.tsx           # Markdown message bubble, source badges & copy button
 │   │   │   ├── ChatInput.tsx             # Text input, send button, and keyboard shortcuts
-│   │   │   └── SuggestedQuestions.tsx    # Clickable suggestion chips
+│   │   │   ├── SuggestedQuestions.tsx    # Clickable suggestion chips
+│   │   │   └── AdminHistoryModal.tsx     # Admin conversation history dashboard & transcript viewer
 │   │   ├── effects/                      # Creative WebGL & kinetic motion components
 │   │   │   ├── AccordionGallery.tsx      # Parallax service accordion cards
 │   │   │   ├── BendingMarquee.tsx        # Curved text marquee following SVG paths
@@ -212,6 +222,9 @@ To eliminate scroll jitter, lag, and competing rendering loops, three critical p
    - When the user scrolls actively, `html.lenis-scrolling *, .lenis-scrolling * { pointer-events: none !important; }` disables pointer hit-testing and hover recalculations across all elements, saving valuable CPU cycles.
 3. **On-Demand 3D Canvas Rendering ([`src/components/effects/Lanyard.tsx`](file:///c:/Users/akash/Desktop/Website_References/portfolio-frontend/src/components/effects/Lanyard.tsx))**:
    - The Three.js canvas runs with `frameloop="demand"`, which pauses continuous WebGL rendering when the 3D lanyard is stationary or out of view.
+4. **Modal Scroll Isolation & Lenis Lifecycle Management**:
+   - Scrollable modals and drawers ([`ChatWindow.tsx`](file:///c:/Users/akash/Desktop/Website_References/portfolio-frontend/src/components/ai/ChatWindow.tsx) and [`AdminHistoryModal.tsx`](file:///c:/Users/akash/Desktop/Website_References/portfolio-frontend/src/components/ai/AdminHistoryModal.tsx)) utilize `data-lenis-prevent`, `min-h-0`, `touch-pan-y`, and `overscroll-y-contain`.
+   - When the Admin History modal opens, Lenis smooth scrolling is automatically paused (`lenis.stop()`) and background body scrolling is locked (`overflow: hidden`). This guarantees that both inside chat transcripts and outside conversation lists scroll naturally in both upward and downward directions.
 
 ---
 

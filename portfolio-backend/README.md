@@ -6,9 +6,9 @@
 [![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-Mongoose-emerald?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Groq AI](https://img.shields.io/badge/Groq_AI-Llama_3.3_70B-orange?logo=fastapi&logoColor=white)](https://groq.com/)
 [![Render Ready](https://img.shields.io/badge/Render-Configured-46E3B7?logo=render&logoColor=white)](https://render.com)
-[![Tests Passing](https://img.shields.io/badge/Vitest-109%20Passed-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests Passing](https://img.shields.io/badge/Vitest-116%20Passed-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 
-The backend microservice for Akash Kumar's portfolio, hosting the **SKY AI RAG (Retrieval-Augmented Generation) Conversational Assistant**, contact enquiry validation, MongoDB Atlas persistence, and Resend email notifications.
+The backend microservice for Akash Kumar's portfolio, hosting the **SKY AI RAG (Retrieval-Augmented Generation) Conversational Assistant**, conversation history analytics & admin management, contact enquiry validation, MongoDB Atlas persistence, and Resend email notifications.
 
 ---
 
@@ -22,7 +22,7 @@ The backend microservice for Akash Kumar's portfolio, hosting the **SKY AI RAG (
 - [API Endpoint Specifications](#api-endpoint-specifications)
 - [Environment Variables](#environment-variables)
 - [Local Setup & Development](#local-setup--development)
-- [Automated Testing Suite (109 Tests)](#automated-testing-suite-109-tests)
+- [Automated Testing Suite (116 Tests)](#automated-testing-suite-116-tests)
 - [MongoDB Atlas Setup Guide](#mongodb-atlas-setup-guide)
 - [Resend Email Setup](#resend-email-setup)
 - [Render Deployment Guide](#render-deployment-guide)
@@ -162,9 +162,10 @@ portfolio-backend/
 │   │   ├── env.ts                        # Type-safe environment variable parsing & validation
 │   │   └── resend.ts                     # Resend email client configuration
 │   ├── controllers/
-│   │   ├── ai.controller.ts              # Handlers for /api/ai/chat and /api/ai/lead
-│   │   └── contact.controller.ts         # Handlers for /api/contact
+│   │   ├── ai.controller.ts              # Handlers for /api/ai/chat, /api/ai/lead, and admin history management
+│   │   └── contact.controller.ts         # Handlers for /api/contact (with non-blocking email dispatch)
 │   ├── middleware/
+│   │   ├── adminAuth.ts                  # Protected admin auth (x-admin-key, Authorization Bearer, ?key= query)
 │   │   ├── aiRateLimiter.ts              # IP-based rate limiting for AI endpoints
 │   │   ├── errorHandler.ts               # Global error handler with development/production stack traces
 │   │   ├── notFoundHandler.ts            # Standardized 404 JSON response
@@ -174,7 +175,7 @@ portfolio-backend/
 │   │   ├── conversation.model.ts         # Mongoose model for chat history & sessions
 │   │   └── knowledgeChunk.model.ts       # Mongoose model for vector-searchable knowledge chunks
 │   ├── routes/
-│   │   ├── ai.routes.ts                  # Routes for /api/ai/chat and /api/ai/lead
+│   │   ├── ai.routes.ts                  # Public assistant routes + protected /api/ai/admin routes
 │   │   ├── contact.route.ts              # Routes for /api/contact
 │   │   └── health.route.ts               # Routes for /health and /api/health
 │   ├── schemas/
@@ -182,9 +183,10 @@ portfolio-backend/
 │   │   └── contact.schema.ts             # Zod validation schemas for contact submissions
 │   ├── services/
 │   │   └── email.service.ts              # Resend email notification service
-│   ├── app.ts                            # Express application setup, security middleware, and routes
+│   ├── app.ts                            # Express application setup, security middleware, CORS & routes
 │   └── server.ts                         # Server entry point (starts HTTP listener and DB connection)
 ├── tests/
+│   ├── adminAuth.test.ts                 # 7 Admin authentication unit tests (headers, Bearer, query params)
 │   ├── ai.test.ts                        # 94 AI tests: chunkers, 22 intents, 30 queries, 5 conversations
 │   ├── contact.test.ts                   # 12 Contact API tests (validation, persistence, rate limiting)
 │   └── email.service.test.ts             # 3 Resend email service unit tests
@@ -257,9 +259,10 @@ The assistant draws verified facts from structured JSON documents located in [`a
 - **Purpose**: Directly persists client contact enquiries initiated from the AI chatbot and triggers an inbox alert via Resend.
 - **Payload & Behavior**: Shares identical validation and persistence rules with `POST /api/contact`.
 
-### 3. Contact Form Submission
+### 3. Contact Form Submission (Optimized Non-Blocking)
 - **Method**: `POST /api/contact`
 - **Rate Limit**: 5 submissions per 15 minutes per IP.
+- **Latency Optimization**: The endpoint writes the enquiry to MongoDB Atlas and **immediately returns `201 Created`** without blocking on external Resend network latency. Email notifications are dispatched asynchronously in the background.
 - **Request Body**:
   ```json
   {
@@ -277,7 +280,22 @@ The assistant draws verified facts from structured JSON documents located in [`a
   }
   ```
 
-### 4. Health Check
+### 4. Protected Admin Conversation Management
+All admin endpoints are secured with `requireAdminAuth` and accept the key via:
+1. Header: `x-admin-key: <key>`
+2. Header: `Authorization: Bearer <key>`
+3. Query Param: `?key=<key>` (ideal fallback for proxies)
+
+- **List Conversations**: `GET /api/ai/admin/conversations`
+  - Returns array of conversation summaries with `conversationId`, `messageCount`, `firstUserQuery`, `lastUserQuery`, `createdAt`, and `updatedAt`.
+- **Get Transcript**: `GET /api/ai/admin/conversations/:conversationId`
+  - Returns complete transcript with all recorded user and assistant messages for that session.
+- **Delete Conversation**: `DELETE /api/ai/admin/conversations/:conversationId`
+  - Deletes the specified conversation from MongoDB.
+- **Clear All History**: `DELETE /api/ai/admin/conversations`
+  - Wipes all recorded conversation sessions.
+
+### 5. Health Check
 - **Method**: `GET /health` (or `GET /api/health`)
 - **Response (`200 OK`)**:
   ```json
@@ -314,6 +332,9 @@ CONTACT_EMAIL=akashkumarhzb121@gmail.com
 AI_API_KEY=gsk_your_groq_api_key_here
 AI_MODEL=llama-3.3-70b-versatile
 AI_BASE_URL=https://api.groq.com/openai/v1
+
+# Admin Security Key (For conversation history dashboard)
+ADMIN_API_KEY=Sonan@121
 ```
 
 ---
@@ -346,17 +367,18 @@ Executes `node dist/server.js`.
 
 ---
 
-## Automated Testing Suite (109 Tests)
+## Automated Testing Suite (116 Tests)
 
-The backend features a comprehensive test suite in Vitest testing all routes, edge cases, vector search, chunkers, intent classification, and multi-turn conversations:
+The backend features a comprehensive test suite in Vitest testing all routes, edge cases, vector search, chunkers, intent classification, multi-turn conversations, and admin authentication:
 
 ```bash
 npm test
 ```
 
 ### Test Coverage Highlights:
+- **`tests/adminAuth.test.ts` (7 tests)**: Validates `x-admin-key`, `Authorization: Bearer`, `?key=` query params, whitespace trimming, string array headers, and 401 rejections on missing or incorrect credentials.
 - **`tests/email.service.test.ts` (3 tests)**: Resend API dispatch, timeout handling, and connection error handling.
-- **`tests/contact.test.ts` (12 tests)**: Zod validation, rate limits, MongoDB persistence, and error handling.
+- **`tests/contact.test.ts` (12 tests)**: Zod validation, non-blocking asynchronous email dispatch, rate limits, MongoDB persistence, and error handling.
 - **`tests/ai.test.ts` (94 tests)**:
   - Chunker validation for all 9 data types.
   - Classification for **all 22 intent categories**.

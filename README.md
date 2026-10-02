@@ -8,9 +8,9 @@
 [![MongoDB Atlas](https://img.shields.io/badge/Database-MongoDB_Atlas-emerald?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Vercel Ready](https://img.shields.io/badge/Frontend_Deploy-Vercel-black?logo=vercel&logoColor=white)](https://skykumar.vercel.app/)
 [![Render Ready](https://img.shields.io/badge/Backend_Deploy-Render-46E3B7?logo=render&logoColor=white)](https://render.com/)
-[![Tests Passing](https://img.shields.io/badge/Vitest-109%20Passed-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests Passing](https://img.shields.io/badge/Vitest-116%20Passed-brightgreen?logo=vitest&logoColor=white)](https://vitest.dev/)
 
-Welcome to the source code repository for Akash Kumar's production developer portfolio. This system combines **creative frontend engineering** (WebGL shaders, real-time Rapier 3D physics, GSAP timelines, and Lenis smooth scrolling) with a **production backend** hosting **SKY AI**, a conversational assistant powered by **RAG (Retrieval-Augmented Generation)** on Groq Cloud LPUs.
+Welcome to the source code repository for Akash Kumar's production developer portfolio. This system combines **creative frontend engineering** (WebGL shaders, real-time Rapier 3D physics, GSAP timelines, and Lenis smooth scrolling) with a **production backend** hosting **SKY AI**, a conversational assistant powered by **RAG (Retrieval-Augmented Generation)** on Groq Cloud LPUs with an administrative conversation management dashboard.
 
 - **Live Frontend**: [skykumar.vercel.app](https://skykumar.vercel.app/)
 - **Backend API**: Hosted on Render (`https://portfolio-backend.onrender.com`)
@@ -44,23 +44,28 @@ flowchart TD
         Canvas3D["3D Canvas (Three.js + Rapier + OGL)"]
         Scroll["Lenis + GSAP Smooth Scroll Engine"]
         ChatWidget["SKY AI Chat Drawer (src/components/ai)"]
+        AdminModal["Admin History Dashboard (AdminHistoryModal)"]
         
         Browser <--> UI
         UI --- Canvas3D
         UI --- Scroll
         UI --- ChatWidget
+        ChatWidget --- AdminModal
     end
 
     subgraph ServerLayer["Backend Web Service (Render)"]
         API["Express 5 REST API"]
         RateLimits["Rate Limiters (IP-based)"]
+        AdminAuth["Admin Auth Middleware (x-admin-key / Bearer / ?key=)"]
         IntentEngine["Deterministic Intent Classifier (22 Intents)"]
         ContextResolver["Multi-Turn Context Resolver"]
         HybridSearch["RAG Hybrid Retrieval Engine"]
-        ContactService["Contact & Lead Pipeline"]
+        ContactService["Contact & Lead Pipeline (Non-blocking)"]
+        AdminAPI["Admin Conversation History APIs"]
         
         API --> RateLimits
         RateLimits --> IntentEngine
+        RateLimits --> AdminAuth --> AdminAPI
         IntentEngine --> ContextResolver
         ContextResolver --> HybridSearch
         RateLimits --> ContactService
@@ -73,16 +78,18 @@ flowchart TD
     end
 
     ChatWidget -->|"POST /api/ai/chat"| API
+    AdminModal -->|"GET / DELETE /api/ai/admin/conversations"| API
     UI -->|"POST /api/contact"| API
     
     HybridSearch <-->|"Vector / Chunks"| Mongo
     ContactService -->|"Save Enquiries"| Mongo
+    AdminAPI <-->|"Manage Transcripts"| Mongo
     ContextResolver -->|"Fetch Sessions"| Mongo
     
     HybridSearch -->|"Prompt + Chunks"| Groq
     Groq -->|"Answer Stream"| API
     
-    ContactService -->|"Email Alert"| Resend
+    ContactService -->|"Async Email Alert"| Resend
 ```
 
 ---
@@ -95,7 +102,7 @@ Portfolio/
 │   ├── public/                           # 3D models (.glb), profile images, resume PDF
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── ai/                       # SKY AI chat widget, window, and input components
+│   │   │   ├── ai/                       # SKY AI chat widget, window, inputs, and AdminHistoryModal
 │   │   │   ├── effects/                  # 3D Lanyard, Lightspeed, Cockpit HUD, OGL cylinder
 │   │   │   ├── layout/                   # Header and Footer layout chrome
 │   │   │   ├── sections/                 # Hero, TechStack, Projects, Services, About, Contact
@@ -130,10 +137,11 @@ Portfolio/
 │   │   ├── models/                       # Mongoose schemas (Enquiry, KnowledgeChunk, Conversation)
 │   │   ├── routes/                       # Express route declarations (/api/ai, /api/contact)
 │   │   ├── schemas/                      # Zod validation schemas
+│   │   ├── middleware/                   # Security, rate limiting, and adminAuth
 │   │   ├── services/                     # Resend email notifications
-│   │   ├── app.ts                        # Express server setup & CORS
+│   │   ├── app.ts                        # Express server setup, CORS & admin routes
 │   │   └── server.ts                     # HTTP listener & database connection
-│   ├── tests/                            # 109 Vitest unit and integration tests
+│   ├── tests/                            # 116 Vitest unit and integration tests
 │   ├── index.js                          # Root launcher delegating to dist/server.js
 │   └── package.json
 │
@@ -161,8 +169,8 @@ Portfolio/
 - **MongoDB Atlas & Mongoose**: Cloud document database for contact enquiries, chat sessions, and vector knowledge chunks.
 - **Groq Cloud LPUs**: Fast LLM inference executing `llama-3.3-70b-versatile` at ~500+ tokens/second.
 - **Resend**: Transactional HTTP email API for immediate inbox alerts on contact submissions.
-- **Helmet & CORS**: Strict security headers and origin whitelisting (`FRONTEND_ORIGINS`).
-- **Vitest & Supertest**: Fast test runner validating 109 test cases in under 3 seconds.
+- **Helmet & CORS**: Strict security headers, method allowlists, and origin whitelisting (`FRONTEND_ORIGINS`).
+- **Vitest & Supertest**: Fast test runner validating 116 test cases in under 3 seconds.
 
 ---
 
@@ -276,12 +284,13 @@ npm run dev
 | `AI_API_KEY` | **Yes** | Groq API key | `gsk_...` |
 | `AI_MODEL` | No | Groq LLM model name | `llama-3.3-70b-versatile` |
 | `AI_BASE_URL` | No | OpenAI-compatible endpoint | `https://api.groq.com/openai/v1` |
+| `ADMIN_API_KEY` | No | Secret key for conversation history dashboard | `Sonan@121` |
 
 ---
 
 ## Automated Testing Suite
 
-The repository includes a comprehensive, automated test suite with **109 passing tests** across 3 test suites:
+The repository includes a comprehensive, automated test suite with **116 passing tests** across 4 test suites:
 
 ```bash
 cd portfolio-backend
@@ -289,15 +298,16 @@ npm test
 ```
 
 ```
- Test Files  3 passed (3)
-      Tests  109 passed (109)
-   Duration  2.48s
+ Test Files  4 passed (4)
+      Tests  116 passed (116)
+   Duration  2.85s
 ```
 
 ### What Is Tested:
-1. **`tests/email.service.test.ts` (3 tests)**: Resend API dispatch, timeout handling, connection failure fallbacks.
-2. **`tests/contact.test.ts` (12 tests)**: Zod validation, payload limits, rate limits, MongoDB persistence, centralized error handling.
-3. **`tests/ai.test.ts` (94 tests)**:
+1. **`tests/adminAuth.test.ts` (7 tests)**: Validates `x-admin-key`, `Authorization: Bearer`, `?key=` query parameter fallback, whitespace trimming, string array headers, and 401 rejections on missing or incorrect credentials.
+2. **`tests/email.service.test.ts` (3 tests)**: Resend API dispatch, timeout handling, connection failure fallbacks.
+3. **`tests/contact.test.ts` (12 tests)**: Zod validation, payload limits, rate limits, non-blocking asynchronous email dispatch, MongoDB persistence, centralized error handling.
+4. **`tests/ai.test.ts` (94 tests)**:
    - Chunkers for all 9 data types.
    - Classification accuracy across **all 22 intent categories**.
    - The **15 Golden Retrieval Ranking Cases** (verifying that pure contact, job, or pricing queries return 0 project chunks).
