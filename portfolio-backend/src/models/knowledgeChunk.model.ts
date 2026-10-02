@@ -111,6 +111,5 @@ const knowledgeChunkSchema = new Schema<IKnowledgeChunk>(
 
 // Compound index for quick source lookups
 knowledgeChunkSchema.index({ sourceType: 1, source: 1 });
-knowledgeChunkSchema.index({ projectSlug: 1 });
 
 export const KnowledgeChunk = model<IKnowledgeChunk>('KnowledgeChunk', knowledgeChunkSchema);

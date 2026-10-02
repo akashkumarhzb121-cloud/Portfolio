@@ -78,11 +78,13 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
       setAuthError(null);
 
       try {
-        const endpoint = getAdminEndpoint();
+        const baseEndpoint = getAdminEndpoint();
+        const endpoint = `${baseEndpoint}?key=${encodeURIComponent(keyToUse)}`;
         const res = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${keyToUse}`,
             'x-admin-key': keyToUse
           }
         });
@@ -121,11 +123,13 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
     async (convId: string, keyToUse: string) => {
       setIsLoadingDetail(true);
       try {
-        const endpoint = `${getAdminEndpoint()}/${convId}`;
+        const baseEndpoint = `${getAdminEndpoint()}/${convId}`;
+        const endpoint = `${baseEndpoint}?key=${encodeURIComponent(keyToUse)}`;
         const res = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${keyToUse}`,
             'x-admin-key': keyToUse
           }
         });
@@ -174,11 +178,13 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
 
     setIsDeleting(convId);
     try {
-      const endpoint = `${getAdminEndpoint()}/${convId}`;
+      const baseEndpoint = `${getAdminEndpoint()}/${convId}`;
+      const endpoint = `${baseEndpoint}?key=${encodeURIComponent(adminKey)}`;
       const res = await fetch(endpoint, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`,
           'x-admin-key': adminKey
         }
       });
@@ -208,11 +214,13 @@ export default function AdminHistoryModal({ isOpen, onClose }: AdminHistoryModal
     }
 
     try {
-      const endpoint = getAdminEndpoint();
+      const baseEndpoint = getAdminEndpoint();
+      const endpoint = `${baseEndpoint}?key=${encodeURIComponent(adminKey)}`;
       const res = await fetch(endpoint, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`,
           'x-admin-key': adminKey
         }
       });

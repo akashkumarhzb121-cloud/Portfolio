@@ -10,14 +10,16 @@ export function requireAdminAuth(
   res: Response,
   next: NextFunction
 ): void {
-  const headerKey = req.headers['x-admin-key'];
+  const rawHeader = req.headers['x-admin-key'];
+  const headerKey = typeof rawHeader === 'string' ? rawHeader.trim() : Array.isArray(rawHeader) ? rawHeader[0]?.trim() : undefined;
   const authHeader = req.headers['authorization'];
   const bearerKey = authHeader?.startsWith('Bearer ') ? authHeader.substring(7).trim() : undefined;
-  const queryKey = typeof req.query.key === 'string' ? req.query.key : undefined;
+  const queryKey = typeof req.query.key === 'string' ? req.query.key.trim() : undefined;
 
   const providedKey = headerKey || bearerKey || queryKey;
+  const configuredKey = (env.ADMIN_API_KEY || '').trim();
 
-  if (!providedKey || providedKey !== env.ADMIN_API_KEY) {
+  if (!providedKey || !configuredKey || providedKey !== configuredKey) {
     res.status(401).json({
       success: false,
       message: 'Unauthorized: Invalid or missing admin credentials.'

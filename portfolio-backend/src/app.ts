@@ -48,8 +48,8 @@ export function createApp(): Express {
       // Origin not in whitelist
       return callback(null, false);
     },
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'x-admin-key', 'X-Admin-Key'],
     credentials: true,
     maxAge: 86400
   };
