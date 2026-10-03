@@ -153,8 +153,8 @@
     height: auto !important;
   }
   .ag-panel {
-    flex: 0 0 180px;
-    min-height: 180px;
+    flex: 0 0 108px;
+    min-height: 108px;
     transform: none !important;
   }
   .accordion-gallery .ag-panel__media {
