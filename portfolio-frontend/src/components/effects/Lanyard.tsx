@@ -1,6 +1,6 @@
 import { useState, useRef, type MouseEvent, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Download, FileText, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Download, FileText, CheckCircle2 } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import './Lanyard.css';
 
@@ -132,7 +132,6 @@ export default function Lanyard({
               A Software Engineer & Developer
             </p>
             <div className="flex items-center gap-1.5 mt-3 text-[11px] text-slate-400">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>Full-Stack UI · 3D Interactions · WebGL</span>
             </div>
           </div>

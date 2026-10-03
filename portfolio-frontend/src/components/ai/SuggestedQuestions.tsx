@@ -1,5 +1,3 @@
-import { Sparkles } from 'lucide-react';
-
 interface SuggestedQuestionsProps {
   questions: string[];
   onSelectQuestion: (question: string) => void;
@@ -16,7 +14,6 @@ export default function SuggestedQuestions({
   return (
     <div className="w-full flex flex-col gap-2 pt-2 pb-1">
       <div className="flex items-center gap-1.5 text-[11px] font-mono tracking-wider uppercase text-zinc-400">
-        <Sparkles className="w-3.5 h-3.5 text-[#67E8F9]" />
         <span>Suggested questions:</span>
       </div>
       <div className="flex flex-wrap gap-2">

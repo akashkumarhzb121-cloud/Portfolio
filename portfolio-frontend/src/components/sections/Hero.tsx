@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDown, Sparkles, FileText } from 'lucide-react';
+import { ArrowUpRight, ArrowDown, FileText } from 'lucide-react';
 import ParticleText from '@/components/effects/ParticleText';
 import Lightspeed from '@/components/effects/Lightspeed';
 import SpaceshipCockpitFrame from '@/components/effects/SpaceshipCockpitFrame';
@@ -76,7 +76,6 @@ export default function Hero() {
           <div className="flex items-center gap-6">
             <span>India · Remote worldwide</span>
             <div className="hidden sm:flex items-center gap-1.5 text-cyan-400">
-              <Sparkles className="w-3.5 h-3.5" />
               <span>Scroll ↓</span>
             </div>
           </div>

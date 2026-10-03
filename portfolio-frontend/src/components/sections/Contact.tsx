@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Mail, Copy, Check, SendHorizontal, Loader2, Sparkles, Clock, Globe } from 'lucide-react';
+import { Mail, Copy, Check, SendHorizontal, Loader2, Clock, Globe, CheckCircle2 } from 'lucide-react';
 import TextScatter from '@/components/effects/TextScatter';
 import BendingMarquee from '@/components/effects/BendingMarquee';
 
@@ -255,7 +255,7 @@ export default function Contact() {
                   <span>Response: within 24 hours</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-amber-400 flex-shrink-0" />
                   <span>Open to: Full-time SDE & client work</span>
                 </div>
               </div>

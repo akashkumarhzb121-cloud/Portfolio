@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Bot, Sparkles, X } from 'lucide-react';
+import { Bot, X } from 'lucide-react';
 import ChatWindow, { type ChatMessageData } from './ChatWindow';
 import AdminHistoryModal from './AdminHistoryModal';
 
@@ -209,7 +209,6 @@ export default function Chatbot() {
               <span className="text-xs font-mono font-medium tracking-wide text-zinc-200 group-hover:text-white">
                 Ask <span className="text-[#67E8F9] font-bold">SKY AI</span>
               </span>
-              <Sparkles className="w-3.5 h-3.5 text-[#A78BFA] opacity-80 group-hover:rotate-12 transition-transform duration-300" />
             </>
           )}
         </button>

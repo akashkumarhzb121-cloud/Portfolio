@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import TextScatter from '@/components/effects/TextScatter';
 import CircularGallery, { type CircularGalleryRef } from '@/components/effects/CircularGallery';
 import { techGalleryItems } from '@/data/techGalleryItems';
-import { Sparkles, MoveHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MoveHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function TechStack() {
   const galleryRef = useRef<CircularGalleryRef>(null);
@@ -28,7 +28,7 @@ export default function TechStack() {
           {/* Quick spin buttons on header right */}
           <div className="hidden md:flex items-center gap-2.5 pb-1">
             <button
-              onClick={() => galleryRef.current?.spin(-7)}
+              onClick={() => galleryRef.current?.spin(-1)}
               className="px-3 py-1.5 rounded-lg bg-slate-900/80 hover:bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 transition-all font-mono text-xs flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               aria-label="Spin 3D cylinder left"
             >
@@ -36,7 +36,7 @@ export default function TechStack() {
               <span>Spin Left</span>
             </button>
             <button
-              onClick={() => galleryRef.current?.spin(7)}
+              onClick={() => galleryRef.current?.spin(1)}
               className="px-3 py-1.5 rounded-lg bg-slate-900/80 hover:bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 transition-all font-mono text-xs flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               aria-label="Spin 3D cylinder right"
             >
@@ -63,7 +63,7 @@ export default function TechStack() {
 
         {/* Floating Side Spin Affordances */}
         <button
-          onClick={() => galleryRef.current?.spin(-3.2)}
+          onClick={() => galleryRef.current?.spin(-1)}
           className="hidden sm:flex absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-slate-950/80 hover:bg-cyan-950/90 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400/80 shadow-[0_0_20px_rgba(103,232,249,0.2)] items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
           aria-label="Spin cylinder left"
         >
@@ -71,7 +71,7 @@ export default function TechStack() {
         </button>
 
         <button
-          onClick={() => galleryRef.current?.spin(3.2)}
+          onClick={() => galleryRef.current?.spin(1)}
           className="hidden sm:flex absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-slate-950/80 hover:bg-cyan-950/90 text-cyan-400 border border-cyan-500/30 hover:border-cyan-400/80 shadow-[0_0_20px_rgba(103,232,249,0.2)] items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
           aria-label="Spin cylinder right"
         >
@@ -80,28 +80,30 @@ export default function TechStack() {
       </div>
 
       {/* Bottom hint and mobile controls */}
-      <div className="site-container relative z-10 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 font-mono">
-        <div className="flex items-center gap-2">
-          <MoveHorizontal className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+      <div className="site-container relative z-10 mt-6 flex flex-col items-center gap-3 text-xs text-slate-400 font-mono sm:flex-row sm:justify-between">
+        <div className="flex items-center justify-center gap-2 text-center">
           <span>Drag or scroll to rotate</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 sm:hidden">
+        <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
+          <div className="flex items-center justify-center gap-2 sm:hidden">
             <button
-              onClick={() => galleryRef.current?.spin(-3.2)}
-              className="px-2.5 py-1 rounded bg-slate-900 border border-cyan-500/30 text-cyan-300"
+              onClick={() => galleryRef.current?.spin(-1)}
+              className="px-3 py-1.5 rounded bg-slate-900 border border-cyan-500/30 text-cyan-300"
+              aria-label="Spin technology stack left"
             >
-              ← Spin
+              <ChevronLeft className="inline w-3.5 h-3.5 mr-1" />
+              Spin
             </button>
             <button
-              onClick={() => galleryRef.current?.spin(3.2)}
-              className="px-2.5 py-1 rounded bg-slate-900 border border-cyan-500/30 text-cyan-300"
+              onClick={() => galleryRef.current?.spin(1)}
+              className="px-3 py-1.5 rounded bg-slate-900 border border-cyan-500/30 text-cyan-300"
+              aria-label="Spin technology stack right"
             >
-              Spin →
+              Spin
+              <ChevronRight className="inline w-3.5 h-3.5 ml-1" />
             </button>
           </div>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          <div className="flex items-center justify-center">
             <span className="font-semibold text-slate-300">14+ Technologies</span>
           </div>
         </div>

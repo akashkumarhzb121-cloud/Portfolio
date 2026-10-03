@@ -611,7 +611,11 @@ class App {
   }
 
   spin(delta: number) {
-    this.scroll.target += delta;
+    const itemWidth = this.medias[0]?.width;
+    if (itemWidth) {
+      this.scroll.target += Math.sign(delta) * itemWidth;
+      this.onCheckDebounce();
+    }
   }
 
   onWindowScroll() {

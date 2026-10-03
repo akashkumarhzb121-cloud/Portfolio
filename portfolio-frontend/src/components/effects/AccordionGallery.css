@@ -153,12 +153,34 @@
     height: auto !important;
   }
   .ag-panel {
-    min-height: 110px;
+    flex: 0 0 180px;
+    min-height: 180px;
     transform: none !important;
   }
   .accordion-gallery .ag-panel__media {
     width: 100%;
-    height: var(--ag-media-size);
+    height: 100%;
+  }
+  .ag-panel .ag-panel__bar,
+  .ag-panel .ag-panel__text,
+  .ag-panel .ag-panel__desc {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .ag-panel__label {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+    gap: 7px;
+  }
+  .ag-panel__text {
+    white-space: normal;
+    font-size: 1.05rem;
+  }
+  .ag-panel__desc {
+    max-width: none;
+    font-size: 0.78rem;
+    -webkit-line-clamp: 3;
   }
 }
 

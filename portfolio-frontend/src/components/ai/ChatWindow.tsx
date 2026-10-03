@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bot, X, Trash2, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Bot, X, Trash2, AlertCircle, ShieldCheck } from 'lucide-react';
 import ChatMessage, { type ChatSource } from './ChatMessage';
 import ChatInput from './ChatInput';
 import SuggestedQuestions from './SuggestedQuestions';
@@ -133,9 +133,6 @@ export default function ChatWindow({
       >
         {messages.length === 0 ? (
           <div className="h-full flex flex-col justify-center items-center text-center p-4 space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-inner">
-              <Sparkles className="w-6 h-6 text-[#67E8F9]" />
-            </div>
             <div>
               <h3 className="text-zinc-100 font-semibold text-base">
                 Welcome to SKY AI
