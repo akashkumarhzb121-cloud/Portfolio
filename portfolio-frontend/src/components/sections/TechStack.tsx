@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import TextScatter from '@/components/effects/TextScatter';
 import CircularGallery, { type CircularGalleryRef } from '@/components/effects/CircularGallery';
 import { techGalleryItems } from '@/data/techGalleryItems';
-import { MoveHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function TechStack() {
   const galleryRef = useRef<CircularGalleryRef>(null);
