@@ -63,7 +63,7 @@ export default function Services() {
             >
               <div>
                 <span className="font-mono text-xs text-cyan-600 font-bold uppercase tracking-wider">
-                  Phase 0{service.number}
+                  0{service.number}
                 </span>
                 <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">
                   {service.title}
@@ -86,7 +86,7 @@ export default function Services() {
                   href="#contact"
                   className="text-xs font-semibold text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
                 >
-                  <span>Inquire for {service.title}</span>
+                  <span>Get in touch</span>
                   <span>→</span>
                 </a>
               </div>

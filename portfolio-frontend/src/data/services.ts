@@ -5,70 +5,70 @@ export const services: Service[] = [
     id: "web-development",
     number: "01",
     title: "Web Development",
-    description: "Production-grade frontend web applications built with React, TypeScript, and modern bundlers. Prioritizing Core Web Vitals, accessible semantic HTML, and bulletproof responsive architecture.",
+    description: "Modern, responsive web applications built with React, TypeScript, and clean architecture.",
     image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
     link: "#contact",
     deliverables: [
-      "Modern SPA & Static Architectures",
-      "Component Libraries & Design Systems",
-      "State Management & API Integration",
-      "Performance & Core Web Vitals Optimization"
+      "Custom React & SPA applications",
+      "Design systems & component libraries",
+      "API integration & state management",
+      "Performance & SEO optimization"
     ]
   },
   {
     id: "ui-ux-implementation",
     number: "02",
     title: "UI/UX Implementation",
-    description: "Translating sophisticated Figma systems into pixel-perfect, accessible, and responsive components. Crafting micro-interactions, delightful state feedback, and intuitive user workflows.",
+    description: "Turning Figma designs into pixel-perfect, accessible, and responsive web interfaces.",
     image: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1200&q=80",
     link: "#contact",
     deliverables: [
-      "Pixel-Perfect Responsive Layouts",
-      "Accessible WAI-ARIA Interactions",
-      "Fluid Typography & Color Tokens",
-      "Micro-interactions & State Feedback"
+      "Pixel-perfect responsive layouts",
+      "Accessible semantic HTML & ARIA",
+      "Design tokens & fluid typography",
+      "Micro-interactions & state feedback"
     ]
   },
   {
     id: "3d-interactive-ui",
     number: "03",
     title: "3D Interactive UI",
-    description: "Immersive WebGL, Three.js, and shader-driven experiences seamlessly integrated into standard web interfaces. Enhancing brand storytelling without degrading performance or mobile usability.",
+    description: "Interactive 3D scenes, WebGL shaders, and smooth canvas animations that enhance the experience.",
     image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
     link: "#contact",
     deliverables: [
-      "Custom WebGL & Shader Effects",
-      "Three.js & Canvas 3D Scenes",
-      "GSAP ScrollTrigger Choreography",
-      "Graceful Low-Power & Mobile Fallbacks"
+      "Three.js & Canvas 3D scenes",
+      "Custom WebGL shader effects",
+      "GSAP scroll-driven animations",
+      "Mobile & low-power fallbacks"
     ]
   },
   {
     id: "backend-architecture",
     number: "04",
     title: "Backend & REST APIs",
-    description: "Robust server-side architectures engineered with Node.js and Express.js. Designed for security, high concurrency, strict input validation, and clear API documentation.",
+    description: "Fast, secure REST APIs and backend services built with Node.js and Express.",
     image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
     link: "#contact",
     deliverables: [
-      "Scalable RESTful API Design & Versioning",
-      "JWT Authentication & RBAC Access Controls",
-      "Secure Middleware Pipelines & Rate Limiting",
-      "Postman API Documentation & Contract Testing"
+      "RESTful API design & architecture",
+      "JWT authentication & role controls",
+      "Input validation & rate limiting",
+      "Clear documentation & testing"
     ]
   },
   {
     id: "database-cloud",
     number: "05",
     title: "Databases & Cloud Deploy",
-    description: "Data layer engineering with MongoDB, Mongoose, and relational SQL databases. Complete with cloud cluster provisioning, media pipelines (Cloudinary), and automated deployment.",
+    description: "Database modeling with MongoDB & SQL, cloud hosting, and automated CI/CD pipelines.",
     image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80",
     link: "#contact",
     deliverables: [
-      "MongoDB Atlas & SQL Schema Architecture",
-      "Mongoose Data Models & Query Optimization",
-      "Cloudinary Media Processing & CDN Pipelines",
-      "Vercel & Render Automated CI/CD Deployments"
+      "MongoDB Atlas & SQL schema design",
+      "Mongoose data models & queries",
+      "Cloudinary media pipelines",
+      "Automated deploy (Vercel & Render)"
     ]
   }
 ];

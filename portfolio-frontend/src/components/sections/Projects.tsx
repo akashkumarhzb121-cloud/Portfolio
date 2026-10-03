@@ -24,7 +24,7 @@ export default function Projects() {
           </div>
 
           <div className="text-xs font-mono text-cyan-400 font-semibold uppercase tracking-widest hidden md:block pb-1">
-            Scroll to inspect stack (04 Full-Scale Systems)
+            Scroll to inspect stack
           </div>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function Projects() {
                         const target = e.currentTarget;
                         target.style.display = 'none';
                         if (target.parentElement) {
-                          target.parentElement.style.background = project.fallbackGradient;
+                           target.parentElement.style.background = project.fallbackGradient;
                         }
                       }}
                     />
@@ -66,7 +66,7 @@ export default function Projects() {
 
                     {/* Corner Project Index */}
                     <div className="absolute top-6 left-6 font-mono text-xs sm:text-sm font-bold px-3 py-1.5 rounded-lg bg-[#050505]/85 backdrop-blur-md border border-white/10 text-cyan-400 shadow-md">
-                      PEOJECT {project.number}
+                      PROJECT {project.number}
                     </div>
                     {/* Bottom Action Links & Index on the Left Image Area */}
                     <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 flex items-center justify-between z-20">

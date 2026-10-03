@@ -21,14 +21,14 @@ export default function TechStack() {
             </h2>
 
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-2xl">
-              A comprehensive full-stack ecosystem covering frontend interfaces, scalable Node/Express backends, MongoDB & SQL databases, system design, and cloud deployments.
+              Technologies and tools I use to build frontend interfaces, scalable Node/Express backends, MongoDB & SQL databases, system design, and cloud deployments.
             </p>
           </div>
 
           {/* Quick spin buttons on header right */}
           <div className="hidden md:flex items-center gap-2.5 pb-1">
             <button
-              onClick={() => galleryRef.current?.spin(-3.2)}
+              onClick={() => galleryRef.current?.spin(-7)}
               className="px-3 py-1.5 rounded-lg bg-slate-900/80 hover:bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 transition-all font-mono text-xs flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               aria-label="Spin 3D cylinder left"
             >
@@ -36,7 +36,7 @@ export default function TechStack() {
               <span>Spin Left</span>
             </button>
             <button
-              onClick={() => galleryRef.current?.spin(3.2)}
+              onClick={() => galleryRef.current?.spin(7)}
               className="px-3 py-1.5 rounded-lg bg-slate-900/80 hover:bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 transition-all font-mono text-xs flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               aria-label="Spin 3D cylinder right"
             >
@@ -83,7 +83,7 @@ export default function TechStack() {
       <div className="site-container relative z-10 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 font-mono">
         <div className="flex items-center gap-2">
           <MoveHorizontal className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-          <span>Interactive 3D Cylinder · Drag, scroll page, or click buttons to rotate (Auto-spinning)</span>
+          <span>Drag or scroll to rotate</span>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 sm:hidden">
@@ -102,7 +102,7 @@ export default function TechStack() {
           </div>
           <div className="flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span className="font-semibold text-slate-300">14+ Vibrant Full-Stack Technologies</span>
+            <span className="font-semibold text-slate-300">14+ Technologies</span>
           </div>
         </div>
       </div>

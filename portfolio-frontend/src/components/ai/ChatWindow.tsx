@@ -86,10 +86,10 @@ export default function ChatWindow({
                 SKY AI
               </span>
               <span className="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#67E8F9]/10 text-[#67E8F9] border border-[#67E8F9]/20">
-                RAG 2.0
+                Assistant
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400">Portfolio & Client Questions</p>
+            <p className="text-[11px] text-zinc-400">Ask about Akash's work</p>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ export default function ChatWindow({
                 Welcome to SKY AI
               </h3>
               <p className="text-xs text-zinc-400 mt-1 max-w-[280px]">
-                I’m trained on Akash’s verified projects, technical stack, services, and credentials.
+                Ask me anything about Akash's projects, tech stack, or availability.
               </p>
             </div>
 

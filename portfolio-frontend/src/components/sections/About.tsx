@@ -18,15 +18,12 @@ export default function About() {
               <TextScatter>Curious by default.</TextScatter>
             </h2>
 
-            <div className="space-y-5 text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+            <div className="space-y-4 text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
               <p>
-                I’m <strong className="text-white font-semibold">Akash Kumar</strong>, a full-stack engineer and creative developer who bridges the gap between interactive frontend craftsmanship and robust backend architecture.
+                I’m <strong className="text-white font-semibold">Akash Kumar</strong>, a full-stack engineer and creative developer based in India. I build web applications that combine clean architecture with interactive, motion-driven frontends.
               </p>
               <p>
-                With strong grounding in computer science fundamentals—data structures, algorithms, object-oriented design, and database systems—I construct end-to-end applications where intuitive user experiences are backed by resilient Node/Express APIs and scalable MongoDB/SQL databases.
-              </p>
-              <p>
-                I prioritize clean modular code, strict TypeScript typing, sub-second API response times, and accessible micro-interactions that make every application a delight to use.
+                Focused on React, TypeScript, Node.js, and WebGL—I construct end-to-end applications where intuitive user experiences are backed by resilient Node/Express APIs and scalable MongoDB/SQL databases.
               </p>
             </div>
 
@@ -35,32 +32,32 @@ export default function About() {
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-sm font-bold text-white">Full-Stack Engineering</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">React, Node.js, Express, TypeScript, and REST APIs.</p>
+                  <h3 className="text-sm font-bold text-white">Full-Stack</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">React, Node.js, Express, TypeScript, REST APIs.</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-sm font-bold text-white">Databases & Architecture</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">MongoDB Atlas, Mongoose, SQL schema design, and RBAC.</p>
+                  <h3 className="text-sm font-bold text-white">Databases</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">MongoDB Atlas, Mongoose, SQL schemas.</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-sm font-bold text-white">Creative Motion & 3D</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Three.js, WebGL shaders, OGL, and GSAP timelines.</p>
+                  <h3 className="text-sm font-bold text-white">Motion & 3D</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Three.js, WebGL, Rapier physics, GSAP.</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-amber-400 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-sm font-bold text-white">Cloud, Tools & CI/CD</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Git, GitHub Actions, Postman, Vercel, Render, and Cloudinary.</p>
+                  <h3 className="text-sm font-bold text-white">Tools & Cloud</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Git, GitHub, Vercel, Render, Cloudinary.</p>
                 </div>
               </div>
             </div>
@@ -73,14 +70,14 @@ export default function About() {
                 className="px-7 py-3.5 rounded-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(103,232,249,0.3)] transition-all hover:scale-105 active:scale-95"
               >
                 <Download className="w-4 h-4" />
-                <span>Download Resume (PDF)</span>
+                <span>Resume (PDF)</span>
               </a>
 
               <a
                 href="#contact"
                 className="px-6 py-3.5 rounded-full border border-white/10 hover:border-cyan-400/40 text-slate-200 hover:text-white text-sm font-medium transition-all flex items-center gap-1.5"
               >
-                <span>Let's collaborate</span>
+                <span>Get in touch</span>
                 <ArrowRight className="w-4 h-4 text-cyan-400" />
               </a>
             </div>

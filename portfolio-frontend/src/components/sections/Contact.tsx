@@ -211,13 +211,13 @@ export default function Contact() {
               {/* Status Badge */}
               <div className="mt-6 flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
-                <span>Available for selected full-stack projects</span>
+                <span>Available for new projects & roles</span>
               </div>
 
               {/* Direct email with quick-copy */}
               <div className="mt-6">
                 <label className="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-2 font-semibold">
-                  Direct Inbox
+                  Direct Email
                 </label>
                 <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.04] border border-white/[0.1] shadow-sm">
                   <div className="flex items-center gap-2.5 overflow-hidden">
@@ -248,31 +248,31 @@ export default function Contact() {
               <div className="mt-6 space-y-3.5 text-xs text-slate-300 font-medium">
                 <div className="flex items-center gap-2.5">
                   <Globe className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                  <span>Timezone: India (IST · UTC+5:30)</span>
+                  <span>Location: India (IST · UTC+5:30)</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                  <span>Turnaround: Response typically within 24 hours</span>
+                  <span>Response: within 24 hours</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  <span>Roles: Full-Stack Engineer, Frontend Lead, Creative Dev</span>
+                  <span>Open to: Full-time SDE & client work</span>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 pt-6 border-t border-white/[0.08] text-xs text-slate-400">
-              Your data is safe with me. All inquiries are <code className="text-cyan-300 bg-white/[0.06] px-1 py-0.5 rounded font-mono">kept strictly confidential.</code>
+              Messages go directly to my inbox.
             </div>
           </div>
 
           {/* Right Column: Enquiry Form */}
           <div className="lg:col-span-7 p-7 sm:p-9 rounded-2xl md:rounded-3xl bg-[#0c0c0e]/95 border border-white/[0.12] shadow-2xl backdrop-blur-xl">
             <h3 className="text-2xl font-bold text-white tracking-tight mb-2">
-              Send an Enquiry
+              Send a Message
             </h3>
             <p className="text-xs sm:text-sm text-slate-400 mb-6">
-              Fill in your details below to discuss your project scope, timeline, and goals.
+              Leave a note below and I'll get back to you shortly.
             </p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
